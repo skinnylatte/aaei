@@ -18,12 +18,6 @@ const evaluationPath = [
   ['05', 'Decisions', 'Test mitigations, rerun evaluations, and support a clear deployment decision.'],
 ];
 
-const regionalQuestions = [
-  ['Language', 'Does safety hold when people switch languages, scripts, dialects, or cultural frames?'],
-  ['Institutions', 'Does the system fit local law, public-service obligations, procurement rules, and accountability?'],
-  ['People', 'Who defines harmful behavior, and whose lived expertise is missing from the test plan?'],
-  ['Deployment', 'What changes when a model becomes an agent with tools, permissions, data, and real consequences?'],
-];
 ---
 
 <!doctype html>
@@ -44,59 +38,19 @@ const regionalQuestions = [
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header" data-nav>
+    <header class="site-header" id="top" data-nav>
       <a class="wordmark" href="#top" aria-label="Asian AI Evaluation Institute, home">
         <span class="mark" aria-hidden="true">A</span>
         <span>Asian AI<br />Evaluation Institute</span>
       </a>
       <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
       <nav id="site-nav" aria-label="Main navigation">
-        <a href="#why-asia">Why Asia</a><a href="#method">How we work</a><a href="#about">About</a>
+        <a href="#method">How we work</a><a href="#about">About</a>
         <a class="nav-action" href="#workshops">Workshops <span aria-hidden="true">↗</span></a>
       </nav>
     </header>
 
     <main id="main">
-      <section class="hero" id="top">
-        <div class="hero-grid" aria-hidden="true"></div>
-        <div class="hero-copy reveal">
-          <p class="eyebrow">Independent · Applied · Asia</p>
-          <h1>Test AI in context,<br /><span>before people depend on it.</span></h1>
-          <p class="hero-intro">We help the people who build, buy, govern, and deploy AI learn how to find consequential failures, turn them into repeatable evaluations, and make better deployment decisions.</p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="#workshops">Explore workshops <span aria-hidden="true">↓</span></a>
-            <a class="text-link" href="#why-asia">Why regional context matters <span aria-hidden="true">→</span></a>
-          </div>
-        </div>
-        <div class="hero-index reveal" aria-label="The institute's areas of focus">
-          <p>Field notes / 001</p>
-          <ol>
-            <li><span>01</span> AI evaluation</li><li><span>02</span> Red teaming</li><li><span>03</span> Agentic systems</li><li><span>04</span> Multilingual safety</li><li><span>05</span> Deployment evidence</li>
-          </ol>
-          <div class="coordinates">1.3521° N, 103.8198° E<br />SINGAPORE · ASIA</div>
-        </div>
-        <div class="hero-note reveal"><span class="note-pin" aria-hidden="true"></span><p><strong>Evaluation is not a score.</strong> It is a disciplined way to understand how an AI system behaves in the environment where it will actually be used.</p></div>
-      </section>
-
-      <section class="manifesto reveal" aria-labelledby="manifesto-title">
-        <p id="manifesto-title">Our premise</p><blockquote>AI systems cross borders easily. <em>Safety does not.</em></blockquote>
-      </section>
-
-      <section class="region section" id="why-asia" aria-labelledby="region-title">
-        <div class="section-heading reveal">
-          <p class="section-number">01 / Why Asia</p><h2 id="region-title">Context is part of the system.</h2>
-          <p>Asia is not one market, one language, or one model of governance. Evaluation needs to reflect the communities, institutions, and consequences surrounding each deployment.</p>
-        </div>
-        <div class="region-map" aria-hidden="true">
-          <div class="map-line line-one"></div><div class="map-line line-two"></div>
-          <span class="map-point p-singapore"><i></i>Singapore</span><span class="map-point p-india"><i></i>India</span><span class="map-point p-sea"><i></i>Southeast Asia</span><span class="map-point p-east"><i></i>East Asia</span>
-          <p>Many contexts.<br />No default user.</p>
-        </div>
-        <div class="question-list reveal">
-          {regionalQuestions.map(([title, text], index) => <article><span>{String(index + 1).padStart(2, '0')}</span><h3>{title}</h3><p>{text}</p></article>)}
-        </div>
-      </section>
-
       <section class="workshop section" id="workshops" aria-labelledby="workshop-title">
         <div class="workshop-ticket reveal">
           <div class="ticket-top"><p>Practical workshop / Singapore</p><span>AAEI–001</span></div>
@@ -147,7 +101,7 @@ const regionalQuestions = [
 
     <footer>
       <a class="wordmark footer-mark" href="#top"><span class="mark" aria-hidden="true">A</span><span>Asian AI<br />Evaluation Institute</span></a>
-      <p>Practical AI evaluation for the environments where systems meet people.</p><div><a href="#why-asia">Why Asia</a><a href="#workshops">Workshops</a><a href="#about">About</a></div><small>© 2026 Asian AI Evaluation Institute</small>
+      <p>Practical AI evaluation for the environments where systems meet people.</p><div><a href="#workshops">Workshops</a><a href="#method">How we work</a><a href="#about">About</a></div><small>© 2026 Asian AI Evaluation Institute</small>
     </footer>
 
     <script>
@@ -170,7 +124,7 @@ const regionalQuestions = [
   body::before { content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: .18; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E"); mix-blend-mode: multiply; }
   a { color: inherit; } button, a { -webkit-tap-highlight-color: transparent; } ::selection { background: var(--coral); color: var(--ink); }
   .skip-link { position: fixed; top: 8px; left: 8px; z-index: 2000; transform: translateY(-150%); background: var(--coral); padding: 10px 16px; font-weight: 700; } .skip-link:focus { transform: none; } :focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
-  .site-header { position: absolute; z-index: 20; top: 0; left: 50%; width: var(--page); transform: translateX(-50%); display: flex; align-items: center; justify-content: space-between; padding: 22px 0; color: var(--paper); border-bottom: 1px solid color-mix(in oklch, var(--paper) 28%, transparent); }
+  .site-header { position: relative; z-index: 20; width: var(--page); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 22px 0; color: var(--ink); border-bottom: 1px solid var(--line); }
   .wordmark { display: inline-flex; align-items: center; gap: 11px; font: 600 13px/1.08 var(--display); text-decoration: none; letter-spacing: -.02em; } .mark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid currentColor; border-radius: 50%; font-size: 18px; font-weight: 700; }
   .site-header nav { display: flex; align-items: center; gap: 30px; font: 600 13px/1 var(--display); } .site-header nav a { text-decoration: none; } .site-header nav > a:not(.nav-action) { position: relative; }
   .site-header nav > a:not(.nav-action)::after { content: ''; position: absolute; left: 0; right: 100%; bottom: -7px; height: 1px; background: currentColor; transition: right 180ms cubic-bezier(.25,1,.5,1); } .site-header nav > a:hover::after { right: 0; }
@@ -194,7 +148,7 @@ const regionalQuestions = [
   .region-map > p { position: absolute; left: 5%; bottom: 8%; margin: 0; font: 650 clamp(2rem, 4vw, 4.5rem)/.92 var(--display); letter-spacing: -.05em; } .map-line { position: absolute; height: 1px; background: var(--ink); transform-origin: left; opacity: .45; } .line-one { width: 72%; left: 18%; top: 28%; transform: rotate(13deg); } .line-two { width: 56%; left: 31%; top: 62%; transform: rotate(-18deg); }
   .map-point { position: absolute; display: inline-flex; align-items: center; gap: 9px; font: 650 11px/1 var(--display); letter-spacing: .03em; text-transform: uppercase; } .map-point i { display: block; width: 9px; height: 9px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 4px color-mix(in oklch, var(--coral) 25%, transparent); } .p-singapore { left: 63%; top: 68%; } .p-india { left: 35%; top: 44%; } .p-sea { left: 55%; top: 51%; } .p-east { left: 76%; top: 25%; }
   .question-list { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--ink); } .question-list article { display: grid; grid-template-rows: auto auto 1fr; gap: 19px; min-height: 260px; padding: 20px 24px 30px 0; border-bottom: 1px solid var(--ink); } .question-list article + article { padding-left: 24px; border-left: 1px solid var(--ink); } .question-list span { font: 650 11px var(--display); opacity: .55; } .question-list h3, .outcomes h3 { margin: 0; font: 650 24px/1.1 var(--display); letter-spacing: -.035em; } .question-list p, .outcomes p { align-self: end; margin: 0; font-size: 14px; line-height: 1.55; }
-  .workshop { padding-top: 0; } .workshop-ticket { padding: clamp(30px, 5vw, 70px); color: var(--ink); background: var(--coral); border: 1px solid var(--ink); } .ticket-top, .ticket-bottom { display: flex; align-items: center; justify-content: space-between; gap: 25px; } .ticket-top { padding-bottom: 25px; border-bottom: 1px solid var(--ink); font: 650 11px/1 var(--display); letter-spacing: .07em; text-transform: uppercase; } .ticket-top p, .ticket-bottom p { margin: 0; }
+  .workshop { padding-top: 22px; } .workshop-ticket { padding: clamp(30px, 5vw, 70px); color: var(--ink); background: var(--coral); border: 1px solid var(--ink); } .ticket-top, .ticket-bottom { display: flex; align-items: center; justify-content: space-between; gap: 25px; } .ticket-top { padding-bottom: 25px; border-bottom: 1px solid var(--ink); font: 650 11px/1 var(--display); letter-spacing: .07em; text-transform: uppercase; } .ticket-top p, .ticket-bottom p { margin: 0; }
   .workshop-ticket > h2 { margin: 70px 0 30px; font: 700 clamp(3.7rem, 9vw, 9.4rem)/.82 var(--display); letter-spacing: -.07em; } .workshop-lede { max-width: 780px; margin: 0; font-size: clamp(1.25rem, 2.1vw, 1.85rem); line-height: 1.35; }
   .workshop-body { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(45px, 10vw, 150px); margin: 80px 0 70px; padding-top: 28px; border-top: 1px solid var(--ink); } .workshop-body h3 { margin: 0 0 25px; font: 650 13px/1 var(--display); } .check-list { list-style: none; margin: 0; padding: 0; } .check-list li { position: relative; padding: 11px 0 11px 28px; border-bottom: 1px solid color-mix(in oklch, var(--ink) 28%, transparent); font-weight: 500; } .check-list li::before { content: '×'; position: absolute; left: 2px; top: 10px; font: 700 17px/1 var(--display); }
   .audience-list { display: flex; flex-wrap: wrap; gap: 8px; } .audience-list span { padding: 7px 10px; border: 1px solid var(--ink); border-radius: 999px; font: 600 13px/1 var(--display); } .access-note { max-width: 580px; margin: 30px 0 0; font-size: 14px; } .ticket-bottom { padding-top: 25px; border-top: 1px solid var(--ink); } .ticket-bottom p { font-size: 12px; } .ticket-bottom strong { font: 650 17px/1.3 var(--display); }
