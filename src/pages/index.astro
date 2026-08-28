@@ -1,0 +1,212 @@
+---
+const workshopTopics = [
+  'Identify consequential failure modes',
+  'Run structured adversarial tests',
+  'Test tools, permissions, and oversight',
+  'Turn findings into repeatable evaluations',
+  'Evaluate mitigations and regressions',
+  'Build evidence for deployment decisions',
+];
+
+const audiences = ['Public sector', 'Product & engineering', 'Legal & policy', 'Risk & compliance', 'Cybersecurity', 'Executive leadership'];
+
+const evaluationPath = [
+  ['01', 'Context', 'Define where the system will operate, who it will affect, and what failure would mean.'],
+  ['02', 'Failure modes', 'Prioritize harms that matter in the actual service, jurisdiction, language, and workflow.'],
+  ['03', 'Adversarial tests', 'Make the system fail through structured human testing and repeatable evaluation cases.'],
+  ['04', 'Evidence', 'Inspect behavior, tools, permissions, and traces. Record findings that others can verify.'],
+  ['05', 'Decisions', 'Test mitigations, rerun evaluations, and support a clear deployment decision.'],
+];
+
+const regionalQuestions = [
+  ['Language', 'Does safety hold when people switch languages, scripts, dialects, or cultural frames?'],
+  ['Institutions', 'Does the system fit local law, public-service obligations, procurement rules, and accountability?'],
+  ['People', 'Who defines harmful behavior, and whose lived expertise is missing from the test plan?'],
+  ['Deployment', 'What changes when a model becomes an agent with tools, permissions, data, and real consequences?'],
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Practical, multilingual AI evaluation and red-teaming workshops for public institutions and organizations across Asia." />
+    <meta name="theme-color" content="#195b45" />
+    <meta property="og:title" content="Asian AI Evaluation Institute" />
+    <meta property="og:description" content="Test AI in context, before people depend on it." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <title>Asian AI Evaluation Institute | Test AI in context</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" data-nav>
+      <a class="wordmark" href="#top" aria-label="Asian AI Evaluation Institute, home">
+        <span class="mark" aria-hidden="true">A</span>
+        <span>Asian AI<br />Evaluation Institute</span>
+      </a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+      <nav id="site-nav" aria-label="Main navigation">
+        <a href="#why-asia">Why Asia</a><a href="#method">How we work</a><a href="#about">About</a>
+        <a class="nav-action" href="#workshops">Workshops <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-grid" aria-hidden="true"></div>
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Independent · Applied · Asia</p>
+          <h1>Test AI in context,<br /><span>before people depend on it.</span></h1>
+          <p class="hero-intro">We help the people who build, buy, govern, and deploy AI learn how to find consequential failures, turn them into repeatable evaluations, and make better deployment decisions.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#workshops">Explore workshops <span aria-hidden="true">↓</span></a>
+            <a class="text-link" href="#why-asia">Why regional context matters <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+        <div class="hero-index reveal" aria-label="The institute's areas of focus">
+          <p>Field notes / 001</p>
+          <ol>
+            <li><span>01</span> AI evaluation</li><li><span>02</span> Red teaming</li><li><span>03</span> Agentic systems</li><li><span>04</span> Multilingual safety</li><li><span>05</span> Deployment evidence</li>
+          </ol>
+          <div class="coordinates">1.3521° N, 103.8198° E<br />SINGAPORE · ASIA</div>
+        </div>
+        <div class="hero-note reveal"><span class="note-pin" aria-hidden="true"></span><p><strong>Evaluation is not a score.</strong> It is a disciplined way to understand how an AI system behaves in the environment where it will actually be used.</p></div>
+      </section>
+
+      <section class="manifesto reveal" aria-labelledby="manifesto-title">
+        <p id="manifesto-title">Our premise</p><blockquote>AI systems cross borders easily. <em>Safety does not.</em></blockquote>
+      </section>
+
+      <section class="region section" id="why-asia" aria-labelledby="region-title">
+        <div class="section-heading reveal">
+          <p class="section-number">01 / Why Asia</p><h2 id="region-title">Context is part of the system.</h2>
+          <p>Asia is not one market, one language, or one model of governance. Evaluation needs to reflect the communities, institutions, and consequences surrounding each deployment.</p>
+        </div>
+        <div class="region-map" aria-hidden="true">
+          <div class="map-line line-one"></div><div class="map-line line-two"></div>
+          <span class="map-point p-singapore"><i></i>Singapore</span><span class="map-point p-india"><i></i>India</span><span class="map-point p-sea"><i></i>Southeast Asia</span><span class="map-point p-east"><i></i>East Asia</span>
+          <p>Many contexts.<br />No default user.</p>
+        </div>
+        <div class="question-list reveal">
+          {regionalQuestions.map(([title, text], index) => <article><span>{String(index + 1).padStart(2, '0')}</span><h3>{title}</h3><p>{text}</p></article>)}
+        </div>
+      </section>
+
+      <section class="workshop section" id="workshops" aria-labelledby="workshop-title">
+        <div class="workshop-ticket reveal">
+          <div class="ticket-top"><p>Practical workshop / Singapore</p><span>AAEI–001</span></div>
+          <h2 id="workshop-title">Break AI<br />Before Deploying AI</h2>
+          <p class="workshop-lede">A hands-on introduction to evaluating and red teaming generative and agentic AI systems before deployment.</p>
+          <div class="workshop-body">
+            <div><h3>Participants learn to</h3><ul class="check-list">{workshopTopics.map((topic) => <li>{topic}</li>)}</ul></div>
+            <div><h3>Designed for</h3><div class="audience-list">{audiences.map((audience) => <span>{audience}</span>)}</div><p class="access-note">No advanced coding experience required. Participants work in interdisciplinary groups because effective evaluation needs technical, policy, legal, and operational expertise.</p></div>
+          </div>
+          <div class="ticket-bottom"><div><p>Upcoming public workshop</p><strong>29 September 2026 · Singapore</strong></div><a class="button button-dark" href="https://peatix.com/search?q=Break%20AI%20Before%20Deploying%20AI" target="_blank" rel="noreferrer">Find the event <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <div class="corporate-callout reveal">
+          <p class="section-number">For organizations</p><h3>Bring the workshop to your team.</h3><p>We adapt the material to your systems, responsibilities, and deployment environment. Formats can support public agencies, regulated organizations, cross-functional product teams, and leadership groups.</p>
+          <a class="text-link light" href="#contact">Plan a private workshop <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="method section" id="method" aria-labelledby="method-title">
+        <div class="section-heading reveal"><p class="section-number">02 / How we work</p><h2 id="method-title">From a worrying failure to usable evidence.</h2><p>Evaluation is most useful when it connects technical behavior to a real decision. Our workshops teach a practical path teams can reuse.</p></div>
+        <ol class="method-path reveal">{evaluationPath.map(([num, title, text]) => <li><span>{num}</span><div><h3>{title}</h3><p>{text}</p></div></li>)}</ol>
+      </section>
+
+      <section class="practice section" aria-labelledby="practice-title">
+        <div class="practice-title reveal"><p class="section-number">03 / What good evaluation changes</p><h2 id="practice-title">Not a certificate.<br />A stronger decision.</h2></div>
+        <div class="outcomes reveal">
+          <article><span aria-hidden="true">A</span><h3>A shared language for failure</h3><p>Technical, policy, legal, security, and operational teams can reason about the same evidence.</p></article>
+          <article><span aria-hidden="true">B</span><h3>Tests that survive the workshop</h3><p>Important findings become evaluation cases that can be rerun after a model, prompt, tool, or safeguard changes.</p></article>
+          <article><span aria-hidden="true">C</span><h3>Better deployment boundaries</h3><p>Teams learn where automation is appropriate, where human oversight belongs, and what evidence is still missing.</p></article>
+        </div>
+      </section>
+
+      <section class="about section" id="about" aria-labelledby="about-title">
+        <div class="about-stamp reveal" aria-hidden="true"><span>AAEI</span><small>Practice<br />Evidence<br />Context</small></div>
+        <div class="about-copy reveal"><p class="section-number">About the institute</p><h2 id="about-title">Evaluation belongs in the hands of the people responsible for deployment.</h2><p>The Asian AI Evaluation Institute is an emerging practice and learning institute focused on practical AI evaluation across Asian contexts. We convene interdisciplinary groups, teach hands-on methods, and develop approaches to multilingual and multicultural testing.</p><p>Our work begins from a simple belief: no single profession, benchmark, or country has all the expertise needed to understand how AI fails.</p></div>
+      </section>
+
+      <section class="instructor section" aria-labelledby="instructor-title">
+        <div class="instructor-heading reveal"><p class="section-number">Workshop lead</p><h2 id="instructor-title">Adrianna Tan</h2><p>AI safety and evaluation practitioner working on how organizations test AI systems before deploying them in the real world.</p></div>
+        <div class="instructor-details reveal"><p>Adrianna has led AI red-teaming and evaluation work for the U.S. Department of Defense, Singapore’s IMDA, Fortune 500 companies, healthcare organizations, and governments. In 2026, she spoke on AI testing and evaluation at the United Nations’ AI for Good Global Summit.</p><p>Previously, she spent five years as a Director of Product for the City and County of San Francisco. Her work now focuses on practical AI evaluation, agentic AI, multilingual and multicultural testing, and credible evidence for high-stakes deployment.</p><a class="text-link" href="https://futureethics.ai/about/" target="_blank" rel="noreferrer">More about Adrianna <span aria-hidden="true">↗</span></a></div>
+      </section>
+
+      <section class="contact" id="contact" aria-labelledby="contact-title">
+        <div class="contact-grid" aria-hidden="true"></div>
+        <div class="contact-copy reveal"><p class="section-number">Start here</p><h2 id="contact-title">What does your team need to learn before deploying AI?</h2><p>Tell us about your organization, the systems you are considering, and the decisions your team is responsible for. We can shape a private workshop around that context.</p><a class="button button-primary" href="https://futureethics.ai/#contact" target="_blank" rel="noreferrer">Request a workshop <span aria-hidden="true">↗</span></a></div>
+        <div class="contact-note reveal"><p>Suitable for</p><ul><li>Public agencies and statutory bodies</li><li>Regulated and high-stakes organizations</li><li>Cross-functional product and governance teams</li><li>Leadership and procurement groups</li></ul></div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="wordmark footer-mark" href="#top"><span class="mark" aria-hidden="true">A</span><span>Asian AI<br />Evaluation Institute</span></a>
+      <p>Practical AI evaluation for the environments where systems meet people.</p><div><a href="#why-asia">Why Asia</a><a href="#workshops">Workshops</a><a href="#about">About</a></div><small>© 2026 Asian AI Evaluation Institute</small>
+    </footer>
+
+    <script>
+      const header = document.querySelector('[data-nav]');
+      const toggle = document.querySelector('.nav-toggle');
+      const nav = document.querySelector('#site-nav');
+      toggle?.addEventListener('click', () => { const open = toggle.getAttribute('aria-expanded') === 'true'; toggle.setAttribute('aria-expanded', String(!open)); header?.classList.toggle('nav-open', !open); });
+      nav?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => { toggle?.setAttribute('aria-expanded', 'false'); header?.classList.remove('nav-open'); }));
+      const observer = new IntersectionObserver((entries) => { entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } }); }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root { --ink: oklch(24% .025 160); --paper: oklch(95% .015 90); --green: oklch(42% .09 160); --green-dark: oklch(31% .06 160); --coral: oklch(66% .16 38); --rice: oklch(87% .02 90); --mist: oklch(76% .03 160); --line: color-mix(in oklch, var(--ink) 20%, transparent); --display: 'Manrope', Arial, sans-serif; --body: 'Noto Sans', Arial, sans-serif; --page: min(1480px, calc(100vw - 40px)); }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; background: var(--paper); }
+  body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  body::before { content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: .18; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E"); mix-blend-mode: multiply; }
+  a { color: inherit; } button, a { -webkit-tap-highlight-color: transparent; } ::selection { background: var(--coral); color: var(--ink); }
+  .skip-link { position: fixed; top: 8px; left: 8px; z-index: 2000; transform: translateY(-150%); background: var(--coral); padding: 10px 16px; font-weight: 700; } .skip-link:focus { transform: none; } :focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
+  .site-header { position: absolute; z-index: 20; top: 0; left: 50%; width: var(--page); transform: translateX(-50%); display: flex; align-items: center; justify-content: space-between; padding: 22px 0; color: var(--paper); border-bottom: 1px solid color-mix(in oklch, var(--paper) 28%, transparent); }
+  .wordmark { display: inline-flex; align-items: center; gap: 11px; font: 600 13px/1.08 var(--display); text-decoration: none; letter-spacing: -.02em; } .mark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid currentColor; border-radius: 50%; font-size: 18px; font-weight: 700; }
+  .site-header nav { display: flex; align-items: center; gap: 30px; font: 600 13px/1 var(--display); } .site-header nav a { text-decoration: none; } .site-header nav > a:not(.nav-action) { position: relative; }
+  .site-header nav > a:not(.nav-action)::after { content: ''; position: absolute; left: 0; right: 100%; bottom: -7px; height: 1px; background: currentColor; transition: right 180ms cubic-bezier(.25,1,.5,1); } .site-header nav > a:hover::after { right: 0; }
+  .nav-action { padding: 11px 14px; color: var(--ink); background: var(--coral); border: 1px solid var(--coral); border-radius: 2px; transition: transform 180ms cubic-bezier(.25,1,.5,1), background 180ms ease; } .nav-action:hover { transform: translateY(-2px); background: var(--paper); } .nav-toggle { display: none; border: 1px solid currentColor; background: transparent; color: inherit; font: 600 13px var(--display); padding: 9px 12px; }
+  .hero { position: relative; min-height: 920px; padding: 190px max(20px, calc((100vw - 1480px)/2)) 70px; overflow: hidden; color: var(--paper); background: var(--green); display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .45fr); grid-template-rows: 1fr auto; gap: 60px clamp(40px, 7vw, 120px); }
+  .hero-grid, .contact-grid { position: absolute; inset: 0; opacity: .19; pointer-events: none; background-image: linear-gradient(to right, transparent calc(100% - 1px), var(--paper) 1px), linear-gradient(to bottom, transparent calc(100% - 1px), var(--paper) 1px); background-size: 10vw 10vw; mask-image: linear-gradient(to bottom, black, transparent 88%); }
+  .hero::after { content: ''; position: absolute; width: clamp(330px, 45vw, 680px); aspect-ratio: 1; right: -9vw; bottom: -27%; border: 1px solid color-mix(in oklch, var(--paper) 45%, transparent); border-radius: 50%; box-shadow: 0 0 0 5vw color-mix(in oklch, var(--paper) 5%, transparent), 0 0 0 10vw color-mix(in oklch, var(--paper) 4%, transparent); }
+  .hero-copy, .hero-index, .hero-note { position: relative; z-index: 2; } .eyebrow, .section-number { margin: 0 0 28px; font: 650 11px/1 var(--display); letter-spacing: .09em; text-transform: uppercase; }
+  .hero h1 { margin: 0; max-width: 1020px; font: 700 clamp(3.55rem, 7.8vw, 8.7rem)/.88 var(--display); letter-spacing: -.062em; text-wrap: balance; } .hero h1 span { color: var(--coral); }
+  .hero-intro { max-width: 650px; margin: 38px 0 0; font-size: clamp(1.05rem, 1.5vw, 1.35rem); line-height: 1.55; } .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 26px; margin-top: 42px; }
+  .button { display: inline-flex; align-items: center; justify-content: space-between; gap: 34px; padding: 14px 18px; border: 1px solid currentColor; border-radius: 2px; font: 650 14px/1 var(--display); text-decoration: none; transition: transform 180ms cubic-bezier(.25,1,.5,1), background 180ms ease; } .button:hover { transform: translateY(-2px); }
+  .button-primary { min-width: 235px; color: var(--ink); background: var(--coral); border-color: var(--coral); } .button-primary:hover { background: var(--paper); border-color: var(--paper); } .button-dark { color: var(--paper); background: var(--ink); } .button-dark:hover { color: var(--ink); background: var(--paper); }
+  .text-link { display: inline-flex; gap: 14px; align-items: center; font: 650 14px/1.3 var(--display); text-underline-offset: 5px; text-decoration-thickness: 1px; } .text-link span { transition: transform 180ms cubic-bezier(.25,1,.5,1); } .text-link:hover span { transform: translateX(5px); }
+  .hero-index { align-self: start; margin-top: 8px; } .hero-index > p, .coordinates { font: 600 10px/1.4 var(--display); letter-spacing: .08em; text-transform: uppercase; opacity: .72; }
+  .hero-index ol { margin: 21px 0 44px; padding: 0; list-style: none; border-top: 1px solid color-mix(in oklch, var(--paper) 28%, transparent); } .hero-index li { display: grid; grid-template-columns: 34px 1fr; padding: 12px 0; border-bottom: 1px solid color-mix(in oklch, var(--paper) 28%, transparent); font: 500 13px/1.25 var(--display); } .hero-index li span { opacity: .5; }
+  .hero-note { grid-column: 1; align-self: end; display: grid; grid-template-columns: 18px minmax(0, 550px); gap: 18px; padding-top: 22px; border-top: 1px solid color-mix(in oklch, var(--paper) 28%, transparent); } .hero-note p { margin: 0; font-size: 14px; line-height: 1.5; } .note-pin { width: 10px; height: 10px; margin-top: 4px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 4px color-mix(in oklch, var(--coral) 25%, transparent); }
+  .manifesto { display: grid; grid-template-columns: minmax(120px, .35fr) 1.65fr; gap: 40px; width: var(--page); margin: 0 auto; padding: clamp(90px, 12vw, 180px) 0; border-bottom: 1px solid var(--line); } .manifesto > p { margin: 12px 0 0; font: 650 11px/1 var(--display); letter-spacing: .09em; text-transform: uppercase; } blockquote { margin: 0; max-width: 1050px; font: 650 clamp(2.4rem, 5.5vw, 5.8rem)/.98 var(--display); letter-spacing: -.05em; } blockquote em { color: var(--green); font-style: normal; }
+  .section { width: var(--page); margin: 0 auto; padding: clamp(95px, 12vw, 170px) 0; } .section-heading { display: grid; grid-template-columns: minmax(130px, .34fr) 1fr minmax(260px, .6fr); gap: clamp(28px, 5vw, 80px); align-items: start; margin-bottom: clamp(70px, 9vw, 125px); } .section-heading .section-number { margin-top: 9px; }
+  .section-heading h2, .practice h2, .about h2, .instructor h2, .contact h2 { margin: 0; font: 650 clamp(2.5rem, 5vw, 5.5rem)/.96 var(--display); letter-spacing: -.05em; text-wrap: balance; } .section-heading > p:last-child { margin: 7px 0 0; max-width: 520px; font-size: 17px; }
+  .region-map { position: relative; min-height: 440px; margin-bottom: 90px; overflow: hidden; border: 1px solid var(--ink); background: var(--rice); } .region-map::before, .region-map::after { content: ''; position: absolute; border: 1px solid color-mix(in oklch, var(--ink) 28%, transparent); border-radius: 50%; } .region-map::before { width: 620px; height: 620px; left: 12%; top: -52%; } .region-map::after { width: 360px; height: 360px; right: 8%; bottom: -50%; }
+  .region-map > p { position: absolute; left: 5%; bottom: 8%; margin: 0; font: 650 clamp(2rem, 4vw, 4.5rem)/.92 var(--display); letter-spacing: -.05em; } .map-line { position: absolute; height: 1px; background: var(--ink); transform-origin: left; opacity: .45; } .line-one { width: 72%; left: 18%; top: 28%; transform: rotate(13deg); } .line-two { width: 56%; left: 31%; top: 62%; transform: rotate(-18deg); }
+  .map-point { position: absolute; display: inline-flex; align-items: center; gap: 9px; font: 650 11px/1 var(--display); letter-spacing: .03em; text-transform: uppercase; } .map-point i { display: block; width: 9px; height: 9px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 4px color-mix(in oklch, var(--coral) 25%, transparent); } .p-singapore { left: 63%; top: 68%; } .p-india { left: 35%; top: 44%; } .p-sea { left: 55%; top: 51%; } .p-east { left: 76%; top: 25%; }
+  .question-list { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--ink); } .question-list article { display: grid; grid-template-rows: auto auto 1fr; gap: 19px; min-height: 260px; padding: 20px 24px 30px 0; border-bottom: 1px solid var(--ink); } .question-list article + article { padding-left: 24px; border-left: 1px solid var(--ink); } .question-list span { font: 650 11px var(--display); opacity: .55; } .question-list h3, .outcomes h3 { margin: 0; font: 650 24px/1.1 var(--display); letter-spacing: -.035em; } .question-list p, .outcomes p { align-self: end; margin: 0; font-size: 14px; line-height: 1.55; }
+  .workshop { padding-top: 0; } .workshop-ticket { padding: clamp(30px, 5vw, 70px); color: var(--ink); background: var(--coral); border: 1px solid var(--ink); } .ticket-top, .ticket-bottom { display: flex; align-items: center; justify-content: space-between; gap: 25px; } .ticket-top { padding-bottom: 25px; border-bottom: 1px solid var(--ink); font: 650 11px/1 var(--display); letter-spacing: .07em; text-transform: uppercase; } .ticket-top p, .ticket-bottom p { margin: 0; }
+  .workshop-ticket > h2 { margin: 70px 0 30px; font: 700 clamp(3.7rem, 9vw, 9.4rem)/.82 var(--display); letter-spacing: -.07em; } .workshop-lede { max-width: 780px; margin: 0; font-size: clamp(1.25rem, 2.1vw, 1.85rem); line-height: 1.35; }
+  .workshop-body { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(45px, 10vw, 150px); margin: 80px 0 70px; padding-top: 28px; border-top: 1px solid var(--ink); } .workshop-body h3 { margin: 0 0 25px; font: 650 13px/1 var(--display); } .check-list { list-style: none; margin: 0; padding: 0; } .check-list li { position: relative; padding: 11px 0 11px 28px; border-bottom: 1px solid color-mix(in oklch, var(--ink) 28%, transparent); font-weight: 500; } .check-list li::before { content: '×'; position: absolute; left: 2px; top: 10px; font: 700 17px/1 var(--display); }
+  .audience-list { display: flex; flex-wrap: wrap; gap: 8px; } .audience-list span { padding: 7px 10px; border: 1px solid var(--ink); border-radius: 999px; font: 600 13px/1 var(--display); } .access-note { max-width: 580px; margin: 30px 0 0; font-size: 14px; } .ticket-bottom { padding-top: 25px; border-top: 1px solid var(--ink); } .ticket-bottom p { font-size: 12px; } .ticket-bottom strong { font: 650 17px/1.3 var(--display); }
+  .corporate-callout { display: grid; grid-template-columns: minmax(130px, .34fr) 1fr .8fr; gap: clamp(28px, 5vw, 80px); align-items: start; margin-top: 18px; padding: 55px 50px; color: var(--paper); background: var(--green-dark); } .corporate-callout h3 { margin: 0; font: 650 clamp(2.2rem, 4vw, 4.3rem)/.97 var(--display); letter-spacing: -.05em; } .corporate-callout > p:nth-of-type(2) { margin: 5px 0 0; } .corporate-callout .text-link { grid-column: 3; margin-top: 30px; color: var(--coral); }
+  .method { border-top: 1px solid var(--ink); } .method-path { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); } .method-path li { display: grid; grid-template-columns: .34fr 1.66fr; padding: 30px 0; border-bottom: 1px solid var(--ink); } .method-path > li > span { font: 650 12px/1 var(--display); opacity: .6; } .method-path li div { display: grid; grid-template-columns: .8fr 1.2fr; gap: 50px; } .method-path h3 { margin: 0; font: 650 clamp(1.65rem, 2.6vw, 2.8rem)/1 var(--display); letter-spacing: -.04em; } .method-path p { max-width: 570px; margin: 0; }
+  .practice { display: grid; grid-template-columns: .9fr 1.1fr; gap: 8vw; color: var(--paper); background: var(--green); width: 100%; padding-left: max(20px, calc((100vw - 1480px)/2)); padding-right: max(20px, calc((100vw - 1480px)/2)); } .practice-title { position: sticky; top: 50px; align-self: start; } .practice h2 { color: var(--coral); } .outcomes { border-top: 1px solid color-mix(in oklch, var(--paper) 35%, transparent); } .outcomes article { display: grid; grid-template-columns: 45px 1fr; gap: 20px 28px; padding: 38px 0 45px; border-bottom: 1px solid color-mix(in oklch, var(--paper) 35%, transparent); } .outcomes article > span { grid-row: 1 / span 2; display: grid; place-items: center; width: 38px; height: 38px; color: var(--ink); background: var(--coral); border-radius: 50%; font: 700 13px var(--display); } .outcomes h3 { font-size: clamp(1.6rem, 2.6vw, 2.8rem); } .outcomes p { max-width: 590px; font-size: 16px; }
+  .about { display: grid; grid-template-columns: .6fr 1.4fr; gap: 10vw; align-items: start; } .about-stamp { position: relative; aspect-ratio: 1; max-width: 420px; display: grid; place-items: center; border: 1px solid var(--ink); border-radius: 50%; } .about-stamp::before, .about-stamp::after { content: ''; position: absolute; inset: 9%; border: 1px solid var(--line); border-radius: 50%; } .about-stamp::after { inset: 24%; } .about-stamp span { font: 700 clamp(3.5rem, 7vw, 7.5rem)/1 var(--display); letter-spacing: -.07em; } .about-stamp small { position: absolute; right: 7%; bottom: 18%; padding: 5px; background: var(--paper); font: 650 9px/1.4 var(--display); letter-spacing: .08em; text-transform: uppercase; } .about-copy > p:not(.section-number) { max-width: 760px; font-size: 17px; } .about-copy h2 { margin-bottom: 45px; }
+  .instructor { display: grid; grid-template-columns: .9fr 1.1fr; gap: 8vw; border-top: 1px solid var(--ink); } .instructor-heading > p:last-child { max-width: 500px; font-size: 18px; } .instructor-details { padding-top: 42px; border-top: 1px solid var(--ink); } .instructor-details p { max-width: 690px; margin: 0 0 24px; } .instructor-details .text-link { margin-top: 15px; }
+  .contact { position: relative; min-height: 690px; overflow: hidden; display: grid; grid-template-columns: 1.3fr .7fr; align-items: end; gap: 10vw; padding: clamp(100px, 13vw, 190px) max(20px, calc((100vw - 1480px)/2)); color: var(--paper); background: var(--green-dark); } .contact-grid { opacity: .1; } .contact::after { content: ''; position: absolute; width: 520px; height: 520px; right: -150px; top: -220px; border: 1px solid color-mix(in oklch, var(--paper) 26%, transparent); border-radius: 50%; box-shadow: 0 0 0 70px color-mix(in oklch, var(--paper) 3%, transparent), 0 0 0 140px color-mix(in oklch, var(--paper) 2%, transparent); } .contact-copy, .contact-note { position: relative; z-index: 2; } .contact h2 { max-width: 930px; color: var(--coral); } .contact-copy > p:not(.section-number) { max-width: 690px; margin: 30px 0 35px; font-size: 18px; } .contact-note { padding: 25px 0; border-top: 1px solid color-mix(in oklch, var(--paper) 35%, transparent); border-bottom: 1px solid color-mix(in oklch, var(--paper) 35%, transparent); } .contact-note p { margin: 0 0 14px; font: 650 11px var(--display); text-transform: uppercase; letter-spacing: .08em; } .contact-note ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  footer { display: grid; grid-template-columns: .8fr 1fr .5fr; gap: 50px; align-items: start; padding: 55px max(20px, calc((100vw - 1480px)/2)) 35px; color: var(--paper); background: var(--ink); } footer > p { max-width: 450px; margin: 0; font-size: 14px; } footer > div { display: flex; justify-content: flex-end; gap: 22px; font: 600 12px var(--display); } footer small { grid-column: 1 / -1; margin-top: 45px; padding-top: 18px; border-top: 1px solid color-mix(in oklch, var(--paper) 20%, transparent); opacity: .55; }
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 600ms cubic-bezier(.16,1,.3,1), transform 600ms cubic-bezier(.16,1,.3,1); } .reveal.is-visible { opacity: 1; transform: none; }
+  @media (max-width: 1000px) { .hero { min-height: 850px; grid-template-columns: 1fr; grid-template-rows: auto auto auto; } .hero-index { display: none; } .hero-note { grid-column: 1; } .section-heading { grid-template-columns: 140px 1fr; } .section-heading > p:last-child { grid-column: 2; } .question-list { grid-template-columns: 1fr 1fr; } .question-list article:nth-child(3) { border-left: 0; } .workshop-body, .practice, .about, .instructor, .contact { grid-template-columns: 1fr; } .corporate-callout { grid-template-columns: 140px 1fr; } .corporate-callout > p:nth-of-type(2), .corporate-callout .text-link { grid-column: 2; } .practice-title { position: static; } .about-stamp { max-width: 280px; } footer { grid-template-columns: 1fr 1fr; } footer > div { justify-content: flex-start; } }
+  @media (max-width: 760px) { :root { --page: calc(100vw - 28px); } .site-header { align-items: flex-start; padding: 15px 0; } .nav-toggle { display: block; } .site-header nav { position: absolute; top: 67px; left: 0; right: 0; display: none; flex-direction: column; align-items: stretch; gap: 0; padding: 10px; color: var(--ink); background: var(--paper); border: 1px solid var(--ink); } .site-header.nav-open nav { display: flex; } .site-header nav a { padding: 14px 10px; border-bottom: 1px solid var(--line); } .nav-action { margin-top: 8px; border-bottom: 1px solid var(--ink) !important; } .hero { min-height: 780px; padding: 145px 14px 38px; gap: 35px; } .hero h1 { font-size: clamp(3.3rem, 16vw, 5.2rem); } .hero h1 br { display: none; } .hero-intro { margin-top: 28px; } .hero-actions { align-items: flex-start; flex-direction: column; margin-top: 32px; } .hero-note { align-self: end; } .manifesto { grid-template-columns: 1fr; gap: 24px; padding: 85px 0; } .section { padding: 90px 0; } .section-heading { grid-template-columns: 1fr; gap: 24px; margin-bottom: 65px; } .section-heading > p:last-child { grid-column: 1; } .section-heading h2, .practice h2, .about h2, .instructor h2, .contact h2 { font-size: clamp(2.6rem, 12vw, 4.2rem); } .region-map { min-height: 500px; } .region-map::before { left: -45%; } .region-map > p { left: 24px; bottom: 25px; } .p-india { left: 18%; top: 32%; } .p-sea { left: 50%; top: 45%; } .p-singapore { left: 54%; top: 62%; } .p-east { left: 57%; top: 18%; } .question-list { grid-template-columns: 1fr; } .question-list article, .question-list article + article { min-height: 210px; padding: 22px 0; border-left: 0; } .workshop-ticket { padding: 28px 20px; } .workshop-ticket > h2 { margin-top: 52px; font-size: clamp(3.7rem, 16vw, 6rem); } .workshop-body { grid-template-columns: 1fr; gap: 55px; margin: 60px 0; } .ticket-bottom { align-items: flex-start; flex-direction: column; } .corporate-callout { grid-template-columns: 1fr; padding: 38px 24px; } .corporate-callout > p:nth-of-type(2), .corporate-callout .text-link { grid-column: 1; } .method-path li { grid-template-columns: 45px 1fr; } .method-path li div { grid-template-columns: 1fr; gap: 15px; } .practice { padding-left: 14px; padding-right: 14px; } .about-stamp { max-width: 230px; } .instructor { gap: 55px; } .contact { min-height: 750px; padding-left: 14px; padding-right: 14px; gap: 75px; } footer { grid-template-columns: 1fr; padding-left: 14px; padding-right: 14px; } footer > div { flex-wrap: wrap; } footer small { grid-column: 1; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } .reveal { opacity: 1; transform: none; } }
+</style>

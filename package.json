@@ -1,0 +1,23 @@
+{
+  "name": "website",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node scripts/sites-entry.mjs",
+    "preview": "astro preview",
+    "astro": "astro",
+    "generate-types": "wrangler types"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^14.2.5",
+    "astro": "^7.2.9",
+    "wrangler": "^4.127.0"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}
