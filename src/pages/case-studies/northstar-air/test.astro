@@ -21,7 +21,7 @@ const grouped = sections.flatMap((s) => s.subgroups.flatMap((g) => g.ids));
 if (grouped.length !== PRESETS.length || PRESETS.some((p) => !grouped.includes(p.id))) throw new Error('Every Northstar technique must appear in exactly one sidebar group.');
 
 const guide = [
-  { id: 'send', label: 'Send an attack', hint: '' },
+  { id: 'send', label: 'Send a technique', hint: '' },
   { id: 'mark', label: 'Mark it on your list', hint: '' },
 ];
 ---
@@ -66,7 +66,7 @@ const guide = [
           </button>
         ))}
       </div>
-      <div class="chat-body" id="messages" role="tabpanel" aria-labelledby="tab-weak" aria-live="polite"><p class="chat-empty">Welcome to Northstar Air. How can I help with your booking?</p><p class="chat-empty-hint"><span class="hint-arrow" aria-hidden="true"></span><span>Pick an attack from Techniques, then press Send. It goes to all three versions.</span></p></div>
+      <div class="chat-body" id="messages" role="tabpanel" aria-labelledby="tab-weak" aria-live="polite"><p class="chat-empty">Welcome to Northstar Air. How can I help with your booking?</p><p class="chat-empty-hint"><span class="hint-arrow" aria-hidden="true"></span><span>Pick a request or an attack from Techniques, then press Send. It goes to all three versions.</span></p></div>
       <form id="chat-form" class="compose">
         <textarea id="chat-input" aria-label="Customer message" aria-describedby="compose-note" placeholder="Pick a technique to fill this in" readonly></textarea>
         <p class="compose-note" id="compose-note" hidden>The agent asked for an email address. Type one, then press Send.</p>
@@ -115,7 +115,7 @@ const guide = [
   let lastTechnique = '';
   const done = new Set<string>();
 
-  const view = createChatView($('#messages'), () => ({ user: PRINCIPAL_NAMES[principal], assistant: `Northstar Air · ${VARIANT_LABELS[active]}` }), 'Welcome to Northstar Air. How can I help with your booking?', 'Pick an attack from Techniques, then press Send. It goes to all three versions.');
+  const view = createChatView($('#messages'), () => ({ user: PRINCIPAL_NAMES[principal], assistant: `Northstar Air · ${VARIANT_LABELS[active]}` }), 'Welcome to Northstar Air. How can I help with your booking?', 'Pick a request or an attack from Techniques, then press Send. It goes to all three versions.');
   const showError = (m = '') => { const e = $('#chat-error'); e.textContent = m; e.hidden = !m; };
 
   function startOver() {
@@ -284,7 +284,7 @@ const guide = [
   }
 
   function render() {
-    // Step 1 ticks once a reply to an attack is on screen, not when a technique is picked.
+    // Step 1 ticks once a reply is on screen, not when a technique is picked.
     if (!pending && sessions.weak.turns.some((t) => t.parsed.techniques.length || t.decision.kind === 'change' || t.decision.kind === 'lookup')) tick('send');
     renderTabs();
     renderTried();
