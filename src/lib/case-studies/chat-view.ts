@@ -3,7 +3,8 @@
 
 import { esc, type Message } from './runner';
 
-export function createChatView(container: HTMLElement, names: () => { user: string; assistant: string }, emptyText: string, emptyHint = '') {
+// `translationsOpen` shows English translations under replies straight away, instead of behind a button.
+export function createChatView(container: HTMLElement, names: () => { user: string; assistant: string }, emptyText: string, emptyHint = '', translationsOpen = false) {
   let shown = 0;
 
   const bubble = (m: Message) => {
@@ -13,7 +14,7 @@ export function createChatView(container: HTMLElement, names: () => { user: stri
     el.innerHTML = `<p class="role">${esc(who)}</p><p class="bubble"${m.lang && m.lang !== 'en' && m.lang !== 'mixed' ? ` lang="${m.lang === 'zh' ? 'zh' : m.lang}"` : ''}>${esc(m.content)}</p>`;
     if (m.translation) {
       const id = `tr-${Math.random().toString(36).slice(2, 8)}`;
-      el.insertAdjacentHTML('beforeend', `<button type="button" class="translate" aria-expanded="false" aria-controls="${id}">Show English translation</button><p class="translation" id="${id}" hidden>${esc(m.translation)}</p>`);
+      el.insertAdjacentHTML('beforeend', `<button type="button" class="translate" aria-expanded="${translationsOpen}" aria-controls="${id}">${translationsOpen ? 'Hide' : 'Show'} English translation</button><p class="translation" id="${id}"${translationsOpen ? '' : ' hidden'}>${esc(m.translation)}</p>`);
       const button = el.querySelector<HTMLButtonElement>('.translate')!;
       const text = el.querySelector<HTMLElement>('.translation')!;
       button.addEventListener('click', () => {
