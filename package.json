@@ -7,15 +7,12 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/sites-entry.mjs",
+    "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "generate-types": "wrangler types"
+    "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.2.5",
-    "astro": "^7.2.9",
-    "wrangler": "^4.127.0"
+    "astro": "^7.2.9"
   },
   "allowScripts": {
     "esbuild": true
