@@ -24,18 +24,42 @@ const studies = [
     tags: ['Multilingual', 'Misinformation', 'Fairness'],
   },
 ];
+
+const toc = [
+  { id: 'case-studies', label: 'Case Studies' },
+  { id: 'adversarial-testing', label: 'Adversarial Testing' },
+  { id: 'tools-and-resources', label: 'Tools and Resources' },
+];
 ---
 
 <CaseStudyLayout title="Case studies" description="Hands-on case studies that show how AI systems fail in practice, from the Asian AI Evaluation Institute.">
   <div class="intro"><h1 class="headline">Case studies</h1><p>Three synthetic AI systems to test the way you would before deployment. Each has a weak, a patched and a safe version. Everything runs in your browser and nothing real is sent.</p></div>
+  <nav class="page-toc" aria-labelledby="toc-title">
+    <h2 id="toc-title" class="visually-hidden">On this page</h2>
+    <ol>{toc.map((t) => <li><a href={`#${t.id}`}>{t.label}</a></li>)}</ol>
+  </nav>
+
+  <section id="case-studies" class="toc-section" aria-labelledby="case-studies-title">
+  <h2 id="case-studies-title" class="section-title">Case Studies</h2>
   <ul class="case-grid">
     {studies.map((s) => (
       <li class={`case-tile case-tile-${s.id}`}>
-        <h2><a href={s.href}>{s.title}</a></h2>
+        <h3><a href={s.href}>{s.title}</a></h3>
         <p class="case-tile-lede">{s.lede}</p>
         <div class="tag-list">{s.tags.map((t) => <span>{t}</span>)}</div>
         <div class="case-tile-bottom"><p>About 30 to 35 minutes</p><span class="button" aria-hidden="true">Open <span>→</span></span></div>
       </li>
     ))}
   </ul>
+  </section>
+
+  <section id="adversarial-testing" class="toc-section" aria-labelledby="adversarial-testing-title">
+    <h2 id="adversarial-testing-title" class="section-title">Adversarial Testing</h2>
+    <p class="section-soon">Coming soon.</p>
+  </section>
+
+  <section id="tools-and-resources" class="toc-section" aria-labelledby="tools-and-resources-title">
+    <h2 id="tools-and-resources-title" class="section-title">Tools and Resources</h2>
+    <p class="section-soon">Coming soon.</p>
+  </section>
 </CaseStudyLayout>
