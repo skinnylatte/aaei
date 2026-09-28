@@ -59,3 +59,15 @@ a.wordmark { text-decoration: none; }
   .message { max-width: 92%; }
   .compose { flex-direction: column; align-items: stretch; }
 }
+
+/* Sign-in */
+.header-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0 var(--space-md); }
+.signin { max-width: 480px; margin-top: var(--space-md); padding: clamp(24px, 4vw, 44px); background: var(--rice); border: 1px solid var(--ink); border-radius: var(--radius-panel); }
+.signin form { display: grid; gap: var(--space-sm); }
+.signin .button { justify-self: start; margin-top: var(--space-xs); } .signin .button-primary:hover { border-color: var(--ink); }
+.field input { width: 100%; min-height: 48px; padding: 12px 14px; color: var(--ink); background: oklch(98.5% .01 70); border: 1px solid color-mix(in oklch, var(--ink) 45%, transparent); border-radius: var(--radius-control); font: 400 16px/1.4 var(--body); transition: border-color 180ms ease; }
+.field input:hover { border-color: var(--ink); }
+.field input:focus-visible { outline: 3px solid var(--coral); outline-offset: 1px; border-color: var(--ink); }
+.field input[aria-invalid="true"] { border-color: oklch(50% .18 28); border-width: 2px; padding: 11px 13px; }
+.signin .form-error { margin: 0; }
+.form-note { margin: 0; padding: 12px 14px; background: var(--paper); border-radius: var(--radius-control); font-size: 15px; }
