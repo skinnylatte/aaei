@@ -1,9 +1,11 @@
 ---
 import '../styles/site.css';
 import '../styles/case-studies.css';
+import StepNav from '../components/case-studies/StepNav.astro';
 
-interface Props { title: string; description: string; backLink?: { href: string; label: string }; showSignOut?: boolean }
-const { title, description, backLink = { href: '/', label: 'Home' }, showSignOut = true } = Astro.props;
+// `steps` puts a case study's three steps in the header, which then stays pinned to the top.
+interface Props { title: string; description: string; backLink?: { href: string; label: string }; showSignOut?: boolean; steps?: { slug: string; page: 1 | 2 | 3 } }
+const { title, description, backLink = { href: '/', label: 'Home' }, showSignOut = true, steps } = Astro.props;
 ---
 
 <!doctype html>
@@ -20,8 +22,9 @@ const { title, description, backLink = { href: '/', label: 'Home' }, showSignOut
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header">
+    <header class:list={["site-header", { "site-header--steps": steps }]}>
       <a class="wordmark" href="/"><span class="mark" aria-hidden="true">A</span><span>Asian AI<br />Evaluation Institute</span></a>
+      {steps && <StepNav slug={steps.slug} page={steps.page} />}
       <div class="header-links">
         <a class="text-link back-link" href={backLink.href}><span aria-hidden="true">←</span> {backLink.label}</a>
         {showSignOut && <a class="text-link" href="/case-studies/logout">Sign out</a>}

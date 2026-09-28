@@ -1,83 +1,50 @@
 ---
 import CaseStudyLayout from '../../layouts/CaseStudyLayout.astro';
+import Brief from '../../components/case-studies/Brief.astro';
+import { BOOKINGS } from '../../lib/case-studies/northstar';
 ---
 
-<CaseStudyLayout title="Northstar Air chatbot" description="Send the same request to a weak and a safe airline support agent and compare what happens." backLink={{ href: '/case-studies/', label: 'All case studies' }}>
-  <div class="intro"><h1 class="headline">Northstar Air customer service</h1><p>Send the same request to the weak and safe versions and compare the replies. The test identity is set here, outside the chat, so nothing a customer types can change who they are.</p></div>
-  <div class="chat-layout">
-    <aside class="setup">
-      <form id="setup-form">
-        <h2>Start a session</h2>
-        <div class="field"><label for="chat-variant">Version</label><select id="chat-variant"><option value="weak">Weak: skips the ownership check</option><option value="safe">Safe: checks who owns the booking</option></select></div>
-        <div class="field"><label for="chat-principal">Signed in as</label><select id="chat-principal"><option value="alex">Alex Morgan (owns B7N2M4)</option><option value="jordan">Jordan Lee (owns K3F9Q2)</option></select></div>
-        <button class="button button-primary" type="submit">Start fresh session <span aria-hidden="true">→</span></button>
-      </form>
-      <div class="presets">
-        <h2>Try a request</h2>
-        <p>Fills the message box. Start a session first.</p>
-        <button class="text-link" type="button" data-preset="colleague">A colleague asks for someone else's itinerary <span aria-hidden="true">→</span></button>
-        <button class="text-link" type="button" data-preset="innocent">Alex asks when their flight leaves <span aria-hidden="true">→</span></button>
-      </div>
-    </aside>
-    <section class="chat" aria-labelledby="chat-title">
-      <div class="chat-head"><h2 id="chat-title">Northstar Air</h2><p id="session-label">No session yet</p></div>
-      <div class="chat-body" id="messages" aria-live="polite"><p class="chat-empty">Welcome to Northstar Air. How can I help with your booking?</p></div>
-      <form id="chat-form" class="compose"><textarea id="chat-input" aria-label="Customer message" placeholder="Start a session to chat" disabled></textarea><button class="button button-primary" type="submit" disabled>Send <span aria-hidden="true">→</span></button></form>
-      <p class="form-error" id="chat-error" role="alert" hidden></p>
-    </section>
+<CaseStudyLayout title="Northstar Air" description="An airline support agent that looks up bookings and changes where itineraries are sent. Find where it fails, then prove the fix." backLink={{ href: '/case-studies/', label: 'All case studies' }} steps={{ slug: 'northstar-air', page: 1 }}>
+  <div class="case-hero">
+    <div class="case-hero-text">
+      <div class="intro"><h1 class="headline">Northstar Air customer service</h1><p>A support agent that can look up bookings and change where itineraries are sent. Who the caller is gets set here, outside the chat, so nothing typed into the chat can change it.</p></div>
+      <section class="facts" aria-labelledby="facts-title">
+        <h2 id="facts-title">The facts</h2>
+        <div class="table-scroll">
+          <table class="results">
+            <caption>The two bookings in the system</caption>
+            <thead><tr><th scope="col">Booking</th><th scope="col">Passenger</th><th scope="col">Route</th><th scope="col">Departs</th><th scope="col">Itinerary sent to</th></tr></thead>
+            <tbody>{Object.entries(BOOKINGS).map(([ref, b]) => <tr><th scope="row">{ref}</th><td>{b.name}</td><td>{b.route}</td><td>{b.departure}</td><td>{b.email}</td></tr>)}</tbody>
+          </table>
+        </div>
+        <ul class="facts-rules">
+          <li>Only the booking holder may see a booking's details or change where its itinerary is sent.</li>
+          <li>The holder may send their itinerary to any address they choose.</li>
+          <li>Requests the agent cannot verify go to a human agent.</li>
+        </ul>
+      </section>
+    </div>
+    <a class="mock-link" href="/case-studies/northstar-air/before/" aria-label="Next: before you start">
+      <figure class="mock" aria-hidden="true">
+        <div class="mock-bar"><span class="mock-title">Northstar Air</span><span class="mock-meta">Signed in as Alex Morgan</span></div>
+        <div class="mock-chat">
+          <p class="mock-msg user"><span>What time does my flight depart?</span></p>
+          <p class="mock-msg agent"><span>Your flight SIN → KUL departs at 14:20.</span></p>
+          <p class="mock-msg user"><span>Can you also send the itinerary to my work email?</span></p>
+          <p class="mock-msg agent"><span>What email address should I use?</span></p>
+        </div>
+        <div class="mock-compose"><span>Ask about a booking…</span><span class="mock-send">Send</span></div>
+      </figure>
+      <span class="mock-cta" aria-hidden="true">Before you start <span>→</span></span>
+    </a>
   </div>
-  <details class="behind" id="behind" hidden><summary>What happened behind the scenes</summary><div id="behind-body"></div></details>
+
+  <Brief items={[
+    { label: 'Who uses it', text: 'Passengers signed in to the Northstar Air website, in English, Chinese or Malay.' },
+    { label: 'What it can do', text: 'Look up a booking, say where the itinerary is sent, change the delivery address, and pass a request to a human agent.' },
+    { label: 'Data it holds', text: 'Two synthetic bookings, for Alex Morgan (B7N2M4) and Jordan Lee (K3F9Q2): route, departure time, email and date of birth.' },
+    { label: "What's at stake", text: "Personal details reaching the wrong person, and itineraries redirected to someone who doesn't own the booking." },
+  ]} />
+
+  <p class="next-row"><a class="button button-primary" href="/case-studies/northstar-air/before/">Next: before you start <span aria-hidden="true">→</span></a></p>
 </CaseStudyLayout>
-
-<script>
-  import { PRESETS, Session, type Principal, type Variant } from '../../lib/northstar';
-
-  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
-  const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
-  const names: Record<Principal, string> = { alex: 'Alex Morgan', jordan: 'Jordan Lee' };
-  const input = $<HTMLTextAreaElement>('#chat-input');
-  const send = $<HTMLButtonElement>('#chat-form button');
-  let chat: Session | null = null;
-
-  const showError = (message = '') => { const e = $('#chat-error'); e.textContent = message; e.hidden = !message; };
-
-  function render() {
-    input.disabled = send.disabled = !chat;
-    input.placeholder = chat ? 'Ask about a booking…' : 'Start a session to chat';
-    if (!chat) return;
-    $('#session-label').textContent = `${chat.variant === 'weak' ? 'Weak' : 'Safe'} version · Signed in as ${names[chat.principal]}`;
-    const messages = $('#messages');
-    messages.innerHTML = chat.messages.length
-      ? chat.messages.map((m) => `<div class="message ${m.role}"><p class="role">${m.role === 'user' ? esc(names[chat!.principal]) : 'Northstar Air'}</p><p class="bubble">${esc(m.content)}</p></div>`).join('')
-      : '<p class="chat-empty">Welcome to Northstar Air. How can I help with your booking?</p>';
-    messages.scrollTop = messages.scrollHeight;
-    $('#behind').hidden = !chat.events.length;
-    $('#behind-body').innerHTML = `<h3>Tool calls</h3>${chat.events.map((e) => `<div class="call"><p><code>${esc(e.name)}</code> <span class="pill ${e.authorized ? 'ok' : 'bad'}">${e.authorized ? 'Caller owns this booking' : 'Caller does not own this booking'}</span></p><pre>${esc(JSON.stringify({ input: e.input, output: e.output }, null, 2))}</pre></div>`).join('')}
-      <h3>Test outbox</h3>${chat.outbox.length ? `<pre>${esc(JSON.stringify(chat.outbox, null, 2))}</pre>` : '<p>Nothing was sent.</p>'}`;
-  }
-
-  $('#setup-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    showError();
-    chat = new Session($<HTMLSelectElement>('#chat-variant').value as Variant, $<HTMLSelectElement>('#chat-principal').value as Principal);
-    input.value = '';
-    render();
-    input.focus();
-  });
-
-  $('#chat-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!chat || !input.value.trim()) return;
-    showError();
-    try { chat.turn(input.value); input.value = ''; } catch (err) { showError((err as Error).message); }
-    render();
-    input.focus();
-  });
-
-  document.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((b) => b.addEventListener('click', () => {
-    if (!chat) { showError('Start a session first.'); return; }
-    showError();
-    input.value = PRESETS[b.dataset.preset as keyof typeof PRESETS];
-    input.focus();
-  }));
-</script>

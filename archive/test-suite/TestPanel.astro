@@ -1,0 +1,37 @@
+---
+// Built-in test suite and evidence summary, shared by every case study.
+interface Props { caseId: string }
+const { caseId } = Astro.props;
+---
+
+<section class="tests" data-tests={caseId} aria-labelledby={`tests-title-${caseId}`}>
+  <h2 id={`tests-title-${caseId}`}>Test suite</h2>
+  <p>A ready-made set of tests. Running a test replays it against the weak, patched and safe versions and applies the same checks to each. Then select any result to replay that version in the case study above and see exactly what happened.</p>
+  <div class="tests-buttons">
+    <button class="button button-primary" type="button" data-tests-run>Run all tests <span aria-hidden="true">→</span></button>
+  </div>
+  <p class="tests-status" data-tests-status role="status"></p>
+  <ul class="tests-list" data-tests-list></ul>
+  <div data-tests-grid></div>
+
+  <h3>Evidence for a deployment decision</h3>
+  <div data-evidence></div>
+  <form data-decision class="decision">
+    <fieldset>
+      <legend>Which version are you assessing?</legend>
+      <label><input type="radio" name="version" value="weak" /> Weak</label>
+      <label><input type="radio" name="version" value="patched" /> Patched</label>
+      <label><input type="radio" name="version" value="safe" /> Safe</label>
+    </fieldset>
+    <fieldset>
+      <legend>Your decision</legend>
+      <label><input type="radio" name="decision" value="Deploy" /> Deploy</label>
+      <label><input type="radio" name="decision" value="Deploy with conditions" /> Deploy with conditions</label>
+      <label><input type="radio" name="decision" value="Do not deploy" /> Do not deploy</label>
+    </fieldset>
+    <div class="field"><label for={`conditions-${caseId}`}>Conditions, or evidence still needed</label><textarea id={`conditions-${caseId}`} name="conditions" rows="3" maxlength="2000"></textarea></div>
+    <button class="button button-primary" type="submit">Copy summary <span aria-hidden="true">→</span></button>
+    <p data-decision-status role="status"></p>
+    <pre data-decision-fallback></pre>
+  </form>
+</section>

@@ -1,0 +1,50 @@
+---
+import CaseStudyLayout from '../../layouts/CaseStudyLayout.astro';
+import Brief from '../../components/case-studies/Brief.astro';
+import { FACTS } from '../../lib/case-studies/harbour-city';
+---
+
+<CaseStudyLayout title="Harbour City Services" description="A multilingual public services assistant. Ask the same question in five ways and compare the answers." backLink={{ href: '/case-studies/', label: 'All case studies' }} steps={{ slug: 'harbour-city', page: 1 }}>
+  <div class="case-hero">
+    <div class="case-hero-text">
+      <div class="intro"><h1 class="headline">Harbour City Services grant assistant</h1><p>A city agency's assistant answers residents' questions about the Household Support Grant, in English, Chinese, Malay, Tamil, and the mix of languages people actually use. Every reply in another language has an English translation.</p></div>
+      <section class="facts" aria-labelledby="facts-title">
+        <h2 id="facts-title">The facts</h2>
+        <div class="table-scroll">
+          <table class="results">
+            <caption>From the official policy page</caption>
+            <tbody>
+              <tr><th scope="row">Deadline</th><td>{FACTS.deadline}</td></tr>
+              <tr><th scope="row">Household income limit</th><td>SGD {FACTS.incomeLimit.toLocaleString('en-SG')} a month (fictional)</td></tr>
+              <tr><th scope="row">Renters</th><td>Eligible</td></tr>
+              <tr><th scope="row">Documents</th><td>{FACTS.documents}</td></tr>
+              <tr><th scope="row">Case status</th><td>Only shown to the applicant, after sign-in</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <a class="mock-link" href="/case-studies/harbour-city/before/" aria-label="Next: before you start">
+      <figure class="mock" aria-hidden="true">
+        <div class="mock-bar"><span class="mock-title">Harbour City Services</span><span class="mock-meta">Household Support Grant</span></div>
+        <div class="mock-chat">
+          <p class="mock-msg user"><span lang="ms">Bilakah tarikh akhir untuk memohon geran ini?</span></p>
+          <p class="mock-msg agent"><span lang="ms">Permohonan ditutup pada 31 Disember 2026.</span><em class="mock-translate">Show English translation</em></p>
+          <p class="mock-msg user"><span>Can apply or not if I'm renting ah?</span></p>
+          <p class="mock-msg agent"><span>Yes, can. Renters are eligible if they meet the income limit.</span></p>
+        </div>
+        <div class="mock-compose"><span>Ask a question…</span><span class="mock-send">Send</span></div>
+      </figure>
+      <span class="mock-cta" aria-hidden="true">Before you start <span>→</span></span>
+    </a>
+  </div>
+
+  <Brief items={[
+    { label: 'Who uses it', text: 'Residents of Harbour City asking about the Household Support Grant, in English, Chinese, Malay, Tamil or a mix.' },
+    { label: 'What it can do', text: 'Answer questions on eligibility, documents and the deadline, and show a signed-in resident the status of their own case.' },
+    { label: 'Data it holds', text: 'The official policy page, and the case status of three synthetic applicants.' },
+    { label: "What's at stake", text: 'Missed deadlines, wrong eligibility decisions, one resident seeing another\'s case, and residents turned away because of the language they use.' },
+  ]} />
+
+  <p class="next-row"><a class="button button-primary" href="/case-studies/harbour-city/before/">Next: before you start <span aria-hidden="true">→</span></a></p>
+</CaseStudyLayout>

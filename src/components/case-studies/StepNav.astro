@@ -1,0 +1,17 @@
+---
+// The three steps of a case study, shown in the site header.
+interface Props { slug: string; page: 1 | 2 | 3 }
+const { slug, page } = Astro.props;
+const base = `/case-studies/${slug}/`;
+const steps = [
+  { n: 1, href: base, label: 'Read the brief' },
+  { n: 2, href: `${base}before/`, label: 'Before you start' },
+  { n: 3, href: `${base}test/`, label: 'Start testing AI' },
+];
+---
+
+<nav class="step-nav" aria-label="Case study steps">
+  <ol class="steps">
+    {steps.map((s) => <li><a href={s.href} aria-current={s.n === page ? 'step' : undefined}><span class="step-label">{s.label}</span></a></li>)}
+  </ol>
+</nav>

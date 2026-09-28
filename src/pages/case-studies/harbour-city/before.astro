@@ -1,0 +1,19 @@
+---
+import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
+import Worksheet from '../../../components/case-studies/Worksheet.astro';
+---
+
+<CaseStudyLayout title="Harbour City Services: before you start" description="Decide what could go wrong before testing Harbour City Services." backLink={{ href: '/case-studies/', label: 'All case studies' }} steps={{ slug: 'harbour-city', page: 2 }}>
+  <div class="intro test-intro"><h1 class="headline">Before you start</h1><p>What could go wrong with Harbour City Services, who would be harmed, and how badly? Rank it here. Your list goes with you to the testing page, where you mark what you find. The facts are on the <a class="text-link" href="/case-studies/harbour-city/">brief</a>.</p></div>
+
+  <Worksheet caseId="harbour-city" example={{ mode: "Tells an eligible resident they do not qualify", harmed: "Low-income households" }} />
+
+  <p class="next-row"><a class="button button-primary" href="/case-studies/harbour-city/test/">Next: start testing AI <span aria-hidden="true">→</span></a></p>
+</CaseStudyLayout>
+
+<script>
+  import { DEFAULT_FAILURE_MODES } from '../../../lib/case-studies/harbour-city';
+  import { mountWorksheet } from '../../../lib/case-studies/panels';
+
+  mountWorksheet(document.querySelector('[data-worksheet]')!, 'harbour-city', DEFAULT_FAILURE_MODES);
+</script>

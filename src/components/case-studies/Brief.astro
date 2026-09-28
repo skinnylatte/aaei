@@ -1,0 +1,12 @@
+---
+// The scenario brief shown at the top of every case study.
+interface Props { items: { label: string; text: string }[] }
+const { items } = Astro.props;
+---
+
+<section class="brief" aria-labelledby="brief-title">
+  <h2 id="brief-title">The brief</h2>
+  <dl>
+    {items.map((item) => <div><dt>{item.label}</dt><dd>{item.text}</dd></div>)}
+  </dl>
+</section>

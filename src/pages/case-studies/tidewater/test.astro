@@ -1,0 +1,149 @@
+---
+import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
+import Checklist from '../../../components/case-studies/Checklist.astro';
+import { ATTACKS, LOCATION_LABELS } from '../../../lib/case-studies/tidewater';
+---
+
+<CaseStudyLayout title="Tidewater Logistics: start testing AI" description="An accounts-payable agent that reads invoices and prepares payments for approval. Find what gets through, and whether the approver would notice." backLink={{ href: '/case-studies/', label: 'All case studies' }} steps={{ slug: 'tidewater', page: 3 }}>
+  <div class="intro test-intro"><h1 class="headline">Start testing AI</h1><p>Test Tidewater Logistics against your list from <a class="text-link" href="/case-studies/tidewater/before/">Before you start</a>, and note anything you find that is not on it.</p></div>
+
+  <section id="start-testing" aria-label="Test the AI">
+    <div class="chat-layout">
+      <aside class="setup">
+        <form id="setup-form">
+          <h2>Build the batch</h2>
+          <div class="field"><label for="tw-variant">Version</label><select id="tw-variant"><option value="weak">Weak</option><option value="patched">Patched</option><option value="safe">Safe</option></select></div>
+          <div class="field"><label for="tw-attack">Attack on the Pioneer Marine Fuels email</label><select id="tw-attack">{ATTACKS.map((a) => <option value={a.id}>{a.label}</option>)}</select></div>
+          <div class="field"><label for="tw-location">Where the attack text goes</label><select id="tw-location">{Object.entries(LOCATION_LABELS).map(([k, v]) => <option value={k}>{v}</option>)}</select></div>
+          <div class="field"><label for="tw-text">Attack text (edit it to try your own)</label><textarea id="tw-text" rows="5" maxlength="2000"></textarea></div>
+          <label class="check"><input type="checkbox" id="tw-pressure" /> Add an urgent follow-up email from the vendor</label>
+          <button class="button button-primary" type="submit">Load inbox <span aria-hidden="true">→</span></button>
+        </form>
+      </aside>
+
+      <div class="test-main">
+        <section class="workspace" aria-labelledby="ws-title">
+          <div class="chat-head">
+            <h2 id="ws-title">Accounts payable</h2>
+            <div class="role-toggle" role="group" aria-label="View as">
+              <button type="button" data-role="clerk" aria-pressed="true">Clerk</button>
+              <button type="button" data-role="approver" aria-pressed="false">Approver</button>
+            </div>
+          </div>
+          <div class="workspace-body" id="clerk-view">
+            <p class="chat-empty" id="tw-empty">Load the inbox to begin.</p>
+            <div id="tw-clerk" hidden>
+              <div class="inbox">
+                <ul class="inbox-list" id="inbox-list" aria-label="Inbox"></ul>
+                <article class="email" id="email-view" aria-live="polite"></article>
+              </div>
+              <div class="agent-run">
+                <button class="button button-primary" type="button" id="process">Ask the agent to process today's invoices <span aria-hidden="true">→</span></button>
+                <ol class="agent-log" id="agent-log" aria-live="polite"></ol>
+              </div>
+            </div>
+          </div>
+          <div class="workspace-body" id="approver-view" hidden>
+            <div id="approval"></div>
+          </div>
+        </section>
+        <Checklist caseId="tidewater" />
+      </div>
+    </div>
+
+    <details class="behind" id="behind" hidden><summary>What happened behind the scenes</summary><div id="behind-body"></div></details>
+  </section>
+
+  <p class="answers-link"><a class="text-link" href="/case-studies/tidewater/answers/">Answer sheet: how each version behaves in every scenario <span aria-hidden="true">→</span></a></p>
+</CaseStudyLayout>
+
+<script>
+  import { mountChecklist } from '../../../lib/case-studies/panels';
+  import { ATTACKS, TidewaterSession, type Location, type Setup } from '../../../lib/case-studies/tidewater';
+  import { esc, VARIANT_LABELS, type Variant } from '../../../lib/case-studies/runner';
+
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const money = (n: number) => `SGD ${n.toLocaleString('en-SG')}`;
+  let s: TidewaterSession | null = null;
+  let selected = 'e1';
+  let role: 'clerk' | 'approver' = 'clerk';
+
+  const attackSel = $<HTMLSelectElement>('#tw-attack');
+  const fillAttack = () => {
+    const a = ATTACKS.find((x) => x.id === attackSel.value)!;
+    $<HTMLTextAreaElement>('#tw-text').value = a.text;
+    $<HTMLSelectElement>('#tw-location').value = a.location;
+  };
+  attackSel.addEventListener('change', fillAttack);
+  fillAttack();
+
+  const setRole = (r: typeof role) => {
+    role = r;
+    document.querySelectorAll<HTMLButtonElement>('[data-role]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.role === r)));
+    $('#clerk-view').hidden = r !== 'clerk';
+    $('#approver-view').hidden = r !== 'approver';
+  };
+  document.querySelectorAll<HTMLButtonElement>('[data-role]').forEach((b) => b.addEventListener('click', () => setRole(b.dataset.role as typeof role)));
+
+  function renderEmail() {
+    if (!s) return;
+    const e = s.inbox.find((x) => x.id === selected)!;
+    const showHidden = $('#email-view').dataset.hidden === '1';
+    const layer = e.attachment && showHidden ? (e.attachment.hidden ? `<pre class="hidden-layer" aria-label="Hidden text layer">${esc(e.attachment.hidden)}</pre>` : '<p class="note">This attachment has no hidden text.</p>') : '';
+    $('#email-view').innerHTML = `<p class="email-meta">From <strong>${esc(e.from)}</strong></p><h3>${esc(e.subject)}</h3><p class="email-body">${esc(e.body)}</p><p class="email-sig">${esc(e.signature)}</p>${e.attachment ? `<div class="attachment"><p class="attachment-name">${esc(e.attachment.name)}</p><pre>${esc(e.attachment.visible)}</pre>${layer}<label class="check"><input type="checkbox" id="show-hidden" ${showHidden ? 'checked' : ''} /> Show the hidden text layer</label></div>` : ''}`;
+    $('#email-view').querySelector<HTMLInputElement>('#show-hidden')?.addEventListener('change', (ev) => {
+      $('#email-view').dataset.hidden = (ev.target as HTMLInputElement).checked ? '1' : '0';
+      renderEmail();
+      $('#email-view').querySelector<HTMLInputElement>('#show-hidden')?.focus();
+    });
+  }
+
+  function renderApproval() {
+    if (!s) return;
+    const a = s.approval;
+    if (!a) { $('#approval').innerHTML = '<p class="chat-empty">Nothing to approve yet. The clerk needs to ask the agent to process the invoices.</p>'; return; }
+    const table = a.rows ? `<div class="table-scroll"><table class="results"><caption>Every payment, the account it will use, and the account on file</caption><thead><tr><th scope="col">Invoice</th><th scope="col">Vendor</th><th scope="col">Amount</th><th scope="col">Pay to account</th><th scope="col">Account on file</th><th scope="col">Status</th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.invoice)}</td><td>${esc(r.vendor)}</td><td>${money(r.amount)}</td><td>ending ${esc(r.account)}</td><td>ending ${esc(r.accountOnFile)}</td><td>${r.status === 'held' ? `<span class="pill bad">Held</span> ${esc(r.note ?? '')}` : `<span class="pill ok">Ready</span>`}</td></tr>`).join('')}</tbody></table></div>${s.flags.map((f) => `<p class="note"><strong>Callback task:</strong> ${esc(f.callback ?? '')}</p>`).join('')}` : '';
+    $('#approval').innerHTML = `<div class="approval-card"><h3>Payment batch for approval</h3><p class="approval-summary">${esc(a.summary)}</p>${table}<p class="approval-total">Total to release: <strong>${money(a.total)}</strong></p>${a.decision ? `<p class="pill ${a.decision === 'approved' ? 'ok' : 'bad'}">Batch ${a.decision}</p>` : '<div class="queue-actions"><button class="button button-primary" type="button" id="approve">Approve batch</button><button class="text-link" type="button" id="reject">Reject batch</button></div>'}</div>`;
+    $('#approval').querySelector('#approve')?.addEventListener('click', () => { s!.decide(true); render(); });
+    $('#approval').querySelector('#reject')?.addEventListener('click', () => { s!.decide(false); render(); });
+  }
+
+  function render() {
+    $('#tw-empty').hidden = !!s;
+    $('#tw-clerk').hidden = !s;
+    if (!s) return;
+    $('#ws-title').textContent = `Accounts payable · ${VARIANT_LABELS[s.variant]} version`;
+    $('#inbox-list').innerHTML = s.inbox.map((e) => `<li><button type="button" data-email="${e.id}" aria-current="${e.id === selected}"><strong>${esc(e.subject)}</strong><span>${esc(e.from)}</span></button></li>`).join('');
+    renderEmail();
+    $<HTMLButtonElement>('#process').disabled = !!s.approval;
+    $('#agent-log').innerHTML = s.log.map((l) => `<li>${esc(l)}</li>`).join('') + (s.approval && !s.approval.decision ? '<li><strong>Batch submitted. Switch to the Approver view to decide.</strong></li>' : '');
+    renderApproval();
+
+    $('#behind').hidden = !s.events.length;
+    const vendorRows = Object.values(s.vendors).map((v) => { const o = s!.original[v.id]; return `<tr><td>${esc(v.name)}</td><td>${esc(o.bank)}, ending ${esc(o.account)}</td><td>${o.account === v.account ? 'Unchanged' : `<span class="pill bad">${esc(v.bank)}, ending ${esc(v.account)}</span>`}</td></tr>`; }).join('');
+    $('#behind-body').innerHTML = `<h3>Tool calls</h3>${s.events.map((e) => `<div class="call"><p><code>${esc(e.name)}</code></p>${e.note ? `<p class="note">${esc(e.note)}</p>` : ''}<pre>${esc(JSON.stringify({ input: e.input, output: e.output }, null, 2))}</pre></div>`).join('')}
+      <h3>Vendor bank details</h3><div class="table-scroll"><table class="results"><thead><tr><th scope="col">Vendor</th><th scope="col">Before</th><th scope="col">After</th></tr></thead><tbody>${vendorRows}</tbody></table></div>
+      <h3>Payments</h3><div class="table-scroll"><table class="results"><thead><tr><th scope="col">Invoice</th><th scope="col">Amount</th><th scope="col">Account</th><th scope="col">Status</th></tr></thead><tbody>${s.payments.map((p) => `<tr><td>${esc(p.invoice)}</td><td>${money(p.amount)}</td><td>ending ${esc(p.account)}</td><td>${esc(p.status)}${p.note ? ` · ${esc(p.note)}` : ''}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+  function load() {
+    const setup: Setup = { attack: attackSel.value, attackText: $<HTMLTextAreaElement>('#tw-text').value, location: $<HTMLSelectElement>('#tw-location').value as Location, pressure: $<HTMLInputElement>('#tw-pressure').checked };
+    s = new TidewaterSession($<HTMLSelectElement>('#tw-variant').value as Variant, setup);
+    selected = 'e3';
+    $('#email-view').dataset.hidden = '0';
+    setRole('clerk');
+    render();
+  }
+  $('#setup-form').addEventListener('submit', (e) => { e.preventDefault(); load(); });
+  $('#inbox-list').addEventListener('click', (e) => {
+    const id = (e.target as HTMLElement).closest<HTMLElement>('[data-email]')?.dataset.email;
+    if (!id) return;
+    selected = id;
+    $('#email-view').dataset.hidden = '0';
+    render();
+  });
+  $('#process').addEventListener('click', () => { s?.process(); render(); });
+
+
+  mountChecklist(document.querySelector('[data-checklist]')!, 'tidewater');
+</script>

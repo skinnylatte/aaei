@@ -1,0 +1,33 @@
+/* ARCHIVED: styles for the test suite panel. Append to src/styles/case-studies.css to restore. */
+
+/* Tests and evidence */
+.tests { padding: var(--panel-pad); background: var(--rice); border: 1px solid var(--ink); border-radius: var(--radius-panel); }
+.tests h3 { margin: var(--space-lg) 0 var(--space-sm); font: 650 clamp(1.3rem, 2.2vw, 1.75rem)/1.1 var(--display); letter-spacing: -.03em; }
+.tests-actions { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-md); }
+.tests-save { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-sm); } .tests-save .field { min-width: min(320px, 100%); }
+.tests-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-md); }
+.file-link { position: relative; cursor: pointer; text-decoration: underline; } .file-link input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.file-link:focus-within { outline: 3px solid var(--coral); outline-offset: 4px; }
+.tests-status { min-height: 1.6em; margin: var(--space-sm) 0; font-size: 15px; }
+.tests-list { list-style: none; margin: 0 0 var(--space-md); padding: 0; }
+.tests-list li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); padding: 10px 0; border-bottom: 1px solid var(--line); }
+.tests-list .test-info { display: grid; gap: 2px; } .tests-list span { font-size: 14px; color: color-mix(in oklch, var(--ink) 75%, transparent); }
+.decision { display: grid; gap: var(--space-md); max-width: 720px; margin-top: var(--space-md); }
+.decision fieldset { display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-md); margin: 0; padding: 0; border: 0; }
+.decision legend { margin-bottom: var(--space-xs); font: 600 14px/1.3 var(--display); }
+.decision label:not(.field label) { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; } .decision input[type="radio"] { width: 18px; height: 18px; accent-color: var(--green); }
+.decision .button { justify-self: start; }
+.decision pre:empty { display: none; } .decision pre { padding: 12px 14px; background: oklch(98.5% .01 70); border-radius: var(--radius-control); white-space: pre-wrap; font-size: 13px; }
+
+/* Built-in test suite */
+.tests-list li { align-items: flex-start; padding: var(--space-sm) 0; }
+.test-info { display: grid; gap: 4px; max-width: 64ch; }
+.test-verdict { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
+.pill-button { min-height: 36px; padding: 8px 12px; background: transparent; cursor: pointer; transition: background-color 180ms ease; }
+.pill-button:hover { background: var(--paper); }
+.verdict-hint { margin: 2px 0 0; font-size: 13px; color: color-mix(in oklch, var(--ink) 70%, transparent); }
+.test-run { flex: none; min-width: 0; padding: 10px 18px; }
+.tests h2 { margin: 0 0 var(--space-sm); font: 650 clamp(1.6rem, 2.8vw, 2.4rem)/1 var(--display); letter-spacing: -.04em; }
+.tests > p { max-width: 64ch; margin: 0 0 var(--space-md); }
+.tests .button-primary:hover { border-color: var(--ink); }
+@media (max-width: 760px) { .tests-list li { flex-direction: column; } }

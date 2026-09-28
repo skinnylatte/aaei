@@ -1,0 +1,56 @@
+---
+// Failure-mode ranking worksheet. Rows are kept in this browser only, and carried to the testing page.
+// The placeholder example should fit the case study without giving away one of its planted failures.
+interface Props { caseId: string; example: { mode: string; harmed: string } }
+const { caseId, example } = Astro.props;
+
+const severity = ['A minor inconvenience, easily put right', 'Real harm to one person, but recoverable', 'Serious harm, or harm to many people', 'Severe or lasting harm: money, safety, privacy or rights'];
+const likelihood = ['Unlikely, even when someone tries', 'Possible, with some effort', 'Likely, if someone tries', 'Likely, even when nobody is trying'];
+---
+
+<section class="worksheet" data-worksheet={caseId} aria-labelledby={`ws-title-${caseId}`}>
+  <div class="ws-layout">
+    <div class="ws-main">
+      <div class="ws-head">
+        <h2 id={`ws-title-${caseId}`}>Your failure modes</h2>
+        <div class="ws-tools">
+          <button class="button button-secondary" type="button" data-ws-defaults>Fill with defaults</button>
+          <button class="text-link" type="button" data-ws-clear>Clear</button>
+        </div>
+      </div>
+      <p class="ws-status" data-ws-status role="status"></p>
+
+      <table class="results ws-table">
+        <caption class="visually-hidden">Your failure modes, highest risk first. Edit any field in place.</caption>
+        <thead><tr><th scope="col">Rank</th><th scope="col">Failure mode</th><th scope="col">Who is harmed</th><th scope="col">Severity</th><th scope="col">Likelihood</th><th scope="col">Risk</th><th scope="col"><span class="visually-hidden">Remove</span></th></tr></thead>
+        <tbody data-ws-rows></tbody>
+      </table>
+
+      <form data-ws-form class="ws-add" aria-labelledby={`ws-add-title-${caseId}`}>
+        <h3 id={`ws-add-title-${caseId}`}>Add a failure mode</h3>
+        <div class="ws-add-fields">
+          <div class="field ws-field-mode"><label for={`ws-mode-${caseId}`}>Failure mode</label><input id={`ws-mode-${caseId}`} name="mode" required maxlength="200" placeholder={`e.g. ${example.mode}`} /></div>
+          <div class="field ws-field-harmed"><label for={`ws-harmed-${caseId}`}>Who is harmed</label><input id={`ws-harmed-${caseId}`} name="harmed" maxlength="120" placeholder={`e.g. ${example.harmed}`} /></div>
+          <div class="field"><label for={`ws-sev-${caseId}`}>Severity</label><select id={`ws-sev-${caseId}`} name="severity"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></div>
+          <div class="field"><label for={`ws-like-${caseId}`}>Likelihood</label><select id={`ws-like-${caseId}`} name="likelihood"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+          <button class="button button-primary" type="submit">Add <span aria-hidden="true">+</span></button>
+        </div>
+      </form>
+    </div>
+
+    <details class="ws-guide" data-ws-guide open>
+      <summary>How to rate</summary>
+      <h3>Severity: how bad is it?</h3>
+      <ol class="scale">{severity.map((text, i) => <li><span class="scale-n">{i + 1}</span>{text}</li>)}</ol>
+      <h3>Likelihood: how likely is it?</h3>
+      <ol class="scale">{likelihood.map((text, i) => <li><span class="scale-n">{i + 1}</span>{text}</li>)}</ol>
+      <h3>Risk</h3>
+      <p>Severity multiplied by likelihood.</p>
+      <ul class="risk-legend">
+        <li><span class="risk risk-high">High</span> 9 to 16</li>
+        <li><span class="risk risk-medium">Medium</span> 4 to 8</li>
+        <li><span class="risk risk-low">Low</span> 1 to 3</li>
+      </ul>
+    </details>
+  </div>
+</section>

@@ -1,0 +1,12 @@
+---
+// The trainee's failure-mode list from "Before you start", shown while testing.
+interface Props { caseId: string }
+const { caseId } = Astro.props;
+---
+
+<section class="checklist" data-checklist={caseId} aria-labelledby={`checklist-title-${caseId}`}>
+  <h2 id={`checklist-title-${caseId}`}>Your failure modes</h2>
+  <p class="checklist-summary" data-checklist-summary role="status" hidden></p>
+  <ul class="checklist-items" data-checklist-items></ul>
+  <p class="checklist-empty" data-checklist-empty>You haven't listed any failure modes yet. <a class="text-link" href={`/case-studies/${caseId}/before/`}>Go to Before you start</a> to make a list, then mark each one here as you test.</p>
+</section>
