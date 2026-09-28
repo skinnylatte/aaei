@@ -1,11 +1,12 @@
-// Password-protects the training demos behind the branded sign-in page at /signin/.
-// Runs on Netlify's servers before any demo page is sent, so it cannot be bypassed in the browser.
+// Password-protects the case studies behind the branded sign-in page at /signin/.
+// Runs on Netlify's servers before any case study page is sent, so it cannot be bypassed in the browser.
 //
 // Required environment variable (Netlify > Site configuration > Environment variables):
 //   DEMOS_PASSWORD  Password trainees enter. Changing it signs everyone out.
-// If it is missing, the demos stay locked for everyone.
+// If it is missing, the case studies stay locked for everyone.
+// (The variable keeps its original DEMOS_ name so existing Netlify settings keep working.)
 
-const COOKIE = 'aaei_demos';
+const COOKIE = 'aaei_case_studies';
 const SESSION_SECONDS = 8 * 60 * 60;
 const SIGN_IN = '/signin/';
 const encoder = new TextEncoder();
@@ -23,7 +24,7 @@ const safeEqual = async (a, b) => {
 
 // Session tokens are "expiry.signature", signed with a key derived from the password.
 const sign = async (password, message) => {
-  const key = await crypto.subtle.importKey('raw', encoder.encode(`aaei-demos-session:${password}`), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const key = await crypto.subtle.importKey('raw', encoder.encode(`aaei-case-studies-session:${password}`), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   return toHex(await crypto.subtle.sign('HMAC', key, encoder.encode(message)));
 };
 const createToken = async (password) => {
@@ -43,13 +44,13 @@ const readCookie = (request, name) => {
   }
   return null;
 };
-const sessionCookie = (value, maxAge) => `${COOKIE}=${value}; Path=/demos; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
+const sessionCookie = (value, maxAge) => `${COOKIE}=${value}; Path=/case-studies; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
 
-// Only ever send people back to a demo page, never to another site.
+// Only ever send people back to a case study page, never to another site.
 const safeNext = (value) => {
   const next = String(value ?? '');
-  const isDemoPath = /^\/demos(\/|$)/.test(next) && !next.startsWith('//') && !next.includes('\\');
-  return isDemoPath && !/^\/demos\/(login|logout)\b/.test(next) ? next : '/demos/';
+  const isCaseStudyPath = /^\/case-studies(\/|$)/.test(next) && !next.startsWith('//') && !next.includes('\\');
+  return isCaseStudyPath && !/^\/case-studies\/(login|logout)\b/.test(next) ? next : '/case-studies/';
 };
 
 const redirect = (location, cookie) => {
@@ -61,13 +62,13 @@ const redirect = (location, cookie) => {
 export default async (request, context) => {
   const password = Netlify.env.get('DEMOS_PASSWORD');
   if (!password) {
-    console.error('Training demos locked: DEMOS_PASSWORD is not set.');
-    return new Response('The training demos are not available right now.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' } });
+    console.error('Case studies locked: DEMOS_PASSWORD is not set.');
+    return new Response('The case studies are not available right now.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' } });
   }
 
   const url = new URL(request.url);
 
-  if (url.pathname === '/demos/login') {
+  if (url.pathname === '/case-studies/login') {
     if (request.method !== 'POST') return redirect(SIGN_IN);
     const form = await request.formData().catch(() => new FormData());
     const next = safeNext(form.get('next'));
@@ -78,7 +79,7 @@ export default async (request, context) => {
     return redirect(`${SIGN_IN}?error=1&next=${encodeURIComponent(next)}`);
   }
 
-  if (url.pathname === '/demos/logout') return redirect(`${SIGN_IN}?signedout=1`, sessionCookie('', 0));
+  if (url.pathname === '/case-studies/logout') return redirect(`${SIGN_IN}?signedout=1`, sessionCookie('', 0));
 
   const token = readCookie(request, COOKIE);
   if (token && (await isValidToken(token, password))) {
@@ -90,4 +91,4 @@ export default async (request, context) => {
   return redirect(`${SIGN_IN}?next=${encodeURIComponent(safeNext(url.pathname + url.search))}`);
 };
 
-export const config = { path: ['/demos', '/demos/*'] };
+export const config = { path: ['/case-studies', '/case-studies/*'] };

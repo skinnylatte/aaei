@@ -1,19 +1,19 @@
 ---
-import DemoLayout from '../layouts/DemoLayout.astro';
+import CaseStudyLayout from '../layouts/CaseStudyLayout.astro';
 ---
 
-<DemoLayout title="Sign in" description="Sign in to the Asian AI Evaluation Institute training demos." showSignOut={false}>
-  <div class="intro"><h1 class="headline">Training demos</h1><p>These demos are for workshop participants. Enter the password your facilitator shared with you.</p></div>
+<CaseStudyLayout title="Sign in" description="Sign in to the Asian AI Evaluation Institute case studies." showSignOut={false}>
+  <div class="intro"><h1 class="headline">Case studies</h1><p>These case studies are for workshop participants. Enter the password your facilitator shared with you.</p></div>
   <div class="signin">
-    <form method="POST" action="/demos/login">
+    <form method="POST" action="/case-studies/login">
       <p class="form-note" id="signed-out" role="status" hidden>You have signed out.</p>
-      <input type="hidden" name="next" value="/demos/" />
+      <input type="hidden" name="next" value="/case-studies/" />
       <div class="field"><label for="signin-password">Password</label><input id="signin-password" name="password" type="password" autocomplete="current-password" required aria-describedby="signin-error" /></div>
       <p class="form-error" id="signin-error" role="alert" hidden>That password did not work. Check it with your facilitator and try again.</p>
       <button class="button button-primary" type="submit">Sign in <span aria-hidden="true">→</span></button>
     </form>
   </div>
-</DemoLayout>
+</CaseStudyLayout>
 
 <script>
   const params = new URLSearchParams(location.search);

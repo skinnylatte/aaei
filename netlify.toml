@@ -7,3 +7,14 @@
 
 [functions]
   directory = "netlify/functions"
+
+# Old addresses from when the case studies were called demos.
+[[redirects]]
+  from = "/demos"
+  to = "/case-studies/"
+  status = 301
+
+[[redirects]]
+  from = "/demos/*"
+  to = "/case-studies/:splat"
+  status = 301

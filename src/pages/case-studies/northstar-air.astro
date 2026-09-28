@@ -1,8 +1,8 @@
 ---
-import DemoLayout from '../../layouts/DemoLayout.astro';
+import CaseStudyLayout from '../../layouts/CaseStudyLayout.astro';
 ---
 
-<DemoLayout title="Northstar Air chatbot" description="Send the same request to a weak and a safe airline support agent and compare what happens." backLink={{ href: '/demos/', label: 'All demos' }}>
+<CaseStudyLayout title="Northstar Air chatbot" description="Send the same request to a weak and a safe airline support agent and compare what happens." backLink={{ href: '/case-studies/', label: 'All case studies' }}>
   <div class="intro"><h1 class="headline">Northstar Air customer service</h1><p>Send the same request to the weak and safe versions and compare the replies. The test identity is set here, outside the chat, so nothing a customer types can change who they are.</p></div>
   <div class="chat-layout">
     <aside class="setup">
@@ -27,7 +27,7 @@ import DemoLayout from '../../layouts/DemoLayout.astro';
     </section>
   </div>
   <details class="behind" id="behind" hidden><summary>What happened behind the scenes</summary><div id="behind-body"></div></details>
-</DemoLayout>
+</CaseStudyLayout>
 
 <script>
   import { PRESETS, Session, type Principal, type Variant } from '../../lib/northstar';

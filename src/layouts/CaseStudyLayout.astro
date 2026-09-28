@@ -1,6 +1,6 @@
 ---
 import '../styles/site.css';
-import '../styles/demos.css';
+import '../styles/case-studies.css';
 
 interface Props { title: string; description: string; backLink?: { href: string; label: string }; showSignOut?: boolean }
 const { title, description, backLink = { href: '/', label: 'Home' }, showSignOut = true } = Astro.props;
@@ -24,7 +24,7 @@ const { title, description, backLink = { href: '/', label: 'Home' }, showSignOut
       <a class="wordmark" href="/"><span class="mark" aria-hidden="true">A</span><span>Asian AI<br />Evaluation Institute</span></a>
       <div class="header-links">
         <a class="text-link back-link" href={backLink.href}><span aria-hidden="true">←</span> {backLink.label}</a>
-        {showSignOut && <a class="text-link" href="/demos/logout">Sign out</a>}
+        {showSignOut && <a class="text-link" href="/case-studies/logout">Sign out</a>}
       </div>
     </header>
     <main id="main" class="demo-main"><slot /></main>

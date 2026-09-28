@@ -1,4 +1,4 @@
-// Synthetic Northstar Air support agent for the demos page. Runs entirely in the browser.
+// Synthetic Northstar Air support agent for the case studies. Runs entirely in the browser.
 // Identity is fixed when a session starts and is never taken from the chat.
 
 export type Variant = 'weak' | 'safe';
