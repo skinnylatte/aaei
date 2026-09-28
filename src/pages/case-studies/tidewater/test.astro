@@ -68,7 +68,7 @@ const versions = ['weak', 'patched', 'safe'];
   import { mountChecklist } from '../../../lib/case-studies/panels';
   import { LOCATION_LABELS, outcome, TidewaterSession, type Email, type Setup } from '../../../lib/case-studies/tidewater';
   import { esc, VARIANTS, VARIANT_LABELS, type ToolCall, type Variant } from '../../../lib/case-studies/runner';
-  import { EXPLAIN, lessonFor, setupFor, verdict, type Technique } from '../../../lib/case-studies/tidewater-techniques';
+  import { EXPLAIN, lessonFor, setupFor, TECHNIQUES, verdict, type Technique } from '../../../lib/case-studies/tidewater-techniques';
 
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const bench = $('#bench');
@@ -228,7 +228,8 @@ const versions = ['weak', 'patched', 'safe'];
   // A link copied from document text is shown as this version left it: clickable.
   function noteHtml(text: string, links: { invoice: string; label: string; url: string }[]) {
     const l = links.find((x) => text.includes(x.label));
-    return l ? `${esc(text).replace(esc(l.label), `<a class="phish-link" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.label)}</a>`)}` : esc(text);
+    // It only opens a warning here, never the address itself.
+    return l ? esc(text).replace(esc(l.label), () => `<a class="phish-link" href="#" data-url="${esc(l.url)}">${esc(l.label)}</a>`) : esc(text);
   }
 
   function toolsHtml(events: ToolCall[]) {
@@ -240,7 +241,7 @@ const versions = ['weak', 'patched', 'safe'];
   const STAGES = ['The attack', 'You approve', 'What really happened'];
   function stagesHtml() {
     const current = pending ? 2 : stage;
-    return `<ol class="tw-stages">${STAGES.map((label, i) => {
+    return `<ol class="tw-stages" aria-label="The three stages of this attack">${STAGES.map((label, i) => {
       const n = i + 1, done = n < current;
       return `<li class="tw-stage${n === current ? ' is-current' : ''}${done ? ' is-done' : ''}"${n === current ? ' aria-current="step"' : ''}><span class="tw-stage-n" aria-hidden="true">${n}</span><span class="tw-stage-label">${label}</span><span class="visually-hidden">${n === current ? ', this stage now' : done ? ', done' : ', not yet'}</span></li>`;
     }).join('')}</ol>`;
@@ -422,6 +423,12 @@ const versions = ['weak', 'patched', 'safe'];
     else goNext();
   });
   reject.addEventListener('click', () => decide(false));
+  bench.addEventListener('click', (e) => {
+    const link = (e.target as HTMLElement).closest<HTMLAnchorElement>('.phish-link');
+    if (!link) return;
+    e.preventDefault();
+    showError(`You selected a link that came from the supplier's email. In a real attack this would open ${new URL(link.dataset.url!).hostname}, a fake page asking for Tidewater's bank login. Nothing was opened.`);
+  });
 
   $('#ev-happened').addEventListener('click', (e) => {
     const row = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-compare]');

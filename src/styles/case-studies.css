@@ -321,7 +321,6 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 /* Tidewater: vendor text on the approval screen */
 .approval-note { margin: 0; padding: 12px 14px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-control); font-size: 15px; overflow-wrap: anywhere; }
 .phish-link { color: oklch(40% .15 250); text-decoration: underline; }
-.phish-warning { margin: 0; padding: 12px 14px; color: oklch(38% .15 28); background: oklch(94% .04 28); border-radius: var(--radius-control); font-size: 15px; }
 
 /* OWASP tags on answer sheets */
 .owasp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 var(--space-sm); }
@@ -649,7 +648,6 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 }
 
 /* Case studies page: workshop intro, outcomes and method */
-.eyebrow { margin: 0 0 var(--space-xs); font: 650 13px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--green); }
 .intro .intro-small { max-width: 64ch; margin-top: var(--space-sm); font-size: 16px; }
 .outcome-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--space-lg); margin: 0; padding: 0; list-style: none; }
 .outcome-list li { padding: 20px 0 22px; border-top: 1px solid var(--line); }
@@ -676,7 +674,6 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .audience-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .audience-chips li { padding: 6px 10px; background: oklch(99% .006 70); border: 1px solid var(--ink); border-radius: 999px; font: 600 13px/1 var(--display); }
 @media (max-width: 900px) { .intro-split { grid-template-columns: 1fr; } }
-.intro .eyebrow { margin-top: 0; }
 
 /* Harbour City workbench */
 .q-list { gap: 6px !important; }
