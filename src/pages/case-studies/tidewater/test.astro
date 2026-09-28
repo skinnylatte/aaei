@@ -98,12 +98,32 @@ import { ATTACKS, LOCATION_LABELS } from '../../../lib/case-studies/tidewater';
     });
   }
 
+  // Vendor text on the approval screen. Weak and patched leave links live; here a "live" link only opens a warning.
+  // Everything is escaped first, so edited attack text can never inject real HTML into this page.
+  function noteHtml(text: string, live: { label: string; url: string }[]) {
+    const pattern = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|(https?:\/\/[^\s)\]]+)/g;
+    let html = '', last = 0;
+    for (const m of text.matchAll(pattern)) {
+      const label = m[1] ?? m[3], url = m[2] ?? m[3];
+      html += esc(text.slice(last, m.index));
+      html += live.some((l) => l.url === url) ? `<a href="#" class="phish-link" data-url="${esc(url)}">${esc(label)}</a>` : esc(m[0]);
+      last = m.index! + m[0].length;
+    }
+    return html + esc(text.slice(last));
+  }
+
   function renderApproval() {
     if (!s) return;
     const a = s.approval;
     if (!a) { $('#approval').innerHTML = '<p class="chat-empty">Nothing to approve yet. The clerk needs to ask the agent to process the invoices.</p>'; return; }
-    const table = a.rows ? `<div class="table-scroll"><table class="results"><caption>Every payment, the account it will use, and the account on file</caption><thead><tr><th scope="col">Invoice</th><th scope="col">Vendor</th><th scope="col">Amount</th><th scope="col">Pay to account</th><th scope="col">Account on file</th><th scope="col">Status</th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.invoice)}</td><td>${esc(r.vendor)}</td><td>${money(r.amount)}</td><td>ending ${esc(r.account)}</td><td>ending ${esc(r.accountOnFile)}</td><td>${r.status === 'held' ? `<span class="pill bad">Held</span> ${esc(r.note ?? '')}` : `<span class="pill ok">Ready</span>`}</td></tr>`).join('')}</tbody></table></div>${s.flags.map((f) => `<p class="note"><strong>Callback task:</strong> ${esc(f.callback ?? '')}</p>`).join('')}` : '';
-    $('#approval').innerHTML = `<div class="approval-card"><h3>Payment batch for approval</h3><p class="approval-summary">${esc(a.summary)}</p>${table}<p class="approval-total">Total to release: <strong>${money(a.total)}</strong></p>${a.decision ? `<p class="pill ${a.decision === 'approved' ? 'ok' : 'bad'}">Batch ${a.decision}</p>` : '<div class="queue-actions"><button class="button button-primary" type="button" id="approve">Approve batch</button><button class="text-link" type="button" id="reject">Reject batch</button></div>'}</div>`;
+    const table = a.rows ? `<div class="table-scroll"><table class="results"><caption>Every payment, the account it will use, and the account on file</caption><thead><tr><th scope="col">Invoice</th><th scope="col">Vendor</th><th scope="col">Amount</th><th scope="col">Pay to account</th><th scope="col">Account on file</th><th scope="col">Status</th></tr></thead><tbody>${a.rows.map((r) => `<tr><td class="nowrap">${esc(r.invoice)}</td><td>${esc(r.vendor)}</td><td class="nowrap">${money(r.amount)}</td><td class="nowrap">ending ${esc(r.account)}</td><td class="nowrap">ending ${esc(r.accountOnFile)}</td><td>${r.status === 'held' ? `<span class="pill bad">Held</span> ${esc(r.note ?? '')}` : r.status === 'duplicate' ? `<span class="pill">Skipped</span> ${esc(r.note ?? '')}` : `<span class="pill ok">Ready</span>${r.note ? ` ${esc(r.note)}` : ''}`}</td></tr>`).join('')}</tbody></table></div>${s.flags.filter((f) => f.callback).map((f) => `<p class="note"><strong>Callback task:</strong> ${esc(f.callback!)}</p>`).join('')}` : '';
+    $('#approval').innerHTML = `<div class="approval-card"><h3>Payment batch for approval</h3><p class="approval-summary">${esc(a.summary)}</p>${a.notes.map((n) => `<p class="approval-note"><strong>${a.rows ? 'Flag' : 'Vendor note'}, ${esc(n.invoice)}:</strong> ${noteHtml(n.text, a.links)}</p>`).join('')}<p class="phish-warning" role="alert" hidden></p>${table}<p class="approval-total">Total to release: <strong>${money(a.total)}</strong></p>${a.decision ? `<p class="pill ${a.decision === 'approved' ? 'ok' : 'bad'}">Batch ${a.decision}</p>` : '<div class="queue-actions"><button class="button button-primary" type="button" id="approve">Approve batch</button><button class="text-link" type="button" id="reject">Reject batch</button></div>'}</div>`;
+    $('#approval').querySelectorAll<HTMLAnchorElement>('.phish-link').forEach((link) => link.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const warning = $('#approval').querySelector<HTMLElement>('.phish-warning')!;
+      warning.textContent = `You selected a link that came from the vendor's email. In a real attack this would open ${new URL(link.dataset.url!).hostname}, a fake page asking for Tidewater's bank login. Nothing was opened.`;
+      warning.hidden = false;
+    }));
     $('#approval').querySelector('#approve')?.addEventListener('click', () => { s!.decide(true); render(); });
     $('#approval').querySelector('#reject')?.addEventListener('click', () => { s!.decide(false); render(); });
   }

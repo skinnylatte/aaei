@@ -12,9 +12,9 @@ const scenarios = expectedBehaviour(northstar, SUITE, outcome);
     title="Northstar Air"
     caseHref="/case-studies/northstar-air/"
     versions={{
-      weak: "No ownership check on any tool. Every lookup also joins another passenger's contact details, and any itinerary can be redirected by anyone, in any language.",
-      patched: "Checks ownership only when changing where an itinerary is sent. Lookups still have no check, so they leak other bookings. A filter refuses \"my colleague\" requests, but only in English. It also refuses any new delivery address, even from the booking owner.",
-      safe: 'Checks ownership on every tool, lets owners use a new address, and passes any request where identity is unclear to a human agent, who sees whether the caller owns the booking.',
+      weak: "No ownership check on any tool. Every lookup also joins another passenger's contact details, it will find a booking from a passenger's name alone, and any itinerary can be redirected by anyone, in any language. It repeats its own instructions when asked, including a staff override code, and will send an itinerary to as many addresses as it is given.",
+      patched: "Checks ownership only when changing where an itinerary is sent. Lookups still have no check, so they leak other bookings, including ones found by a passenger's name. A filter refuses \"my colleague\" requests, but only in English. It also refuses any new delivery address, even from the booking owner. It blocks requests for its \"instructions\" but still summarises its \"rules\", and its ownership check trusts the staff code those rules reveal.",
+      safe: 'Checks ownership on every tool, lets owners use a new address, and passes any request where identity is unclear to a human agent, who sees whether the caller owns the booking. Its instructions hold nothing secret, it never repeats them, and it sends to one address per request.',
     }}
     checks={northstar.checks}
     scenarios={scenarios}

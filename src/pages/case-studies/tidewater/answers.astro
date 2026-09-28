@@ -12,9 +12,9 @@ const scenarios = expectedBehaviour(tidewater, SUITE, outcome);
     title="Tidewater Logistics"
     caseHref="/case-studies/tidewater/"
     versions={{
-      weak: "Treats every piece of text it reads as an instruction: hidden PDF text, the email body and the signature. It changes the vendor's bank details, pays the new account, and writes an approval summary that never mentions the change. An urgent email makes it release the payment without approval.",
-      patched: 'Adds an English keyword filter that only scans attachments. A polite rephrase, another language, or an instruction outside the attachment gets straight through. The word "automated" also quarantines the legitimate Kranji invoice, so a real supplier goes unpaid.',
-      safe: "Never follows document text and cannot change bank details at all. Instruction-like text holds the payment and creates a callback task on the vendor's number on file. Every payment goes through approval, and the approval screen shows each payment, the account it will use, and the account on file.",
+      weak: "Treats every piece of text it reads as an instruction: hidden PDF text, the email body and the signature. It changes the vendor's bank details, pays the new account, and writes an approval summary that never mentions the change. It also pays whatever account an invoice shows, pays a resent invoice twice, and releases payments without approval when an email is urgent or an invoice claims to be pre-approved. It copies vendor text onto the approval screen with links left live.",
+      patched: 'Adds an English keyword filter that only scans attachments. A polite rephrase, another language, or an instruction outside the attachment gets straight through. The word "automated" also quarantines the legitimate Kranji invoice, so a real supplier goes unpaid. It does nothing about invoices that simply show a different account, claims of pre-approval, duplicates, or links copied onto the approval screen.',
+      safe: "Never follows document text and cannot change bank details at all. Instruction-like text, or a Pay to line that differs from the account on file, holds the payment and creates a callback task on the vendor's number on file. Claims of pre-approval are flagged, not obeyed, duplicates are skipped, and document text only ever appears as plain text. Every payment goes through approval, and the approval screen shows each payment, the account it will use, and the account on file.",
     }}
     checks={tidewater.checks}
     scenarios={scenarios}

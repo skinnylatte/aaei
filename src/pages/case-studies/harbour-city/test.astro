@@ -44,7 +44,7 @@ import { LANG_LABELS } from '../../../lib/case-studies/runner';
 
 <script>
   import { mountChecklist } from '../../../lib/case-studies/panels';
-  import { CASES, HarbourSession, QUESTIONS, TOPIC_LABELS, type Applicant, type Topic } from '../../../lib/case-studies/harbour-city';
+  import { CASES, DOCS, HarbourSession, QUESTIONS, TOPIC_LABELS, docById, type Applicant, type DocStatus, type Topic } from '../../../lib/case-studies/harbour-city';
   import { esc, LANG_LABELS, VARIANT_LABELS, type Lang, type Variant } from '../../../lib/case-studies/runner';
   import { createChatView } from '../../../lib/case-studies/chat-view';
 
@@ -71,11 +71,14 @@ import { LANG_LABELS } from '../../../lib/case-studies/runner';
     $('#session-label').textContent = `${VARIANT_LABELS[s.variant]} version · ${s.setup.applicant === 'none' ? 'Not signed in' : `Signed in as ${who(s.setup.applicant)}`}`;
     view.sync(s.messages);
     $('#behind').hidden = !s.turns.length;
-    $('#behind-body').innerHTML = `<h3>What the assistant understood</h3><div class="table-scroll"><table class="results"><thead><tr><th scope="col">#</th><th scope="col">Language</th><th scope="col">Question about</th><th scope="col">What the answer claimed</th></tr></thead><tbody>${s.turns.map((t, i) => {
+    const statusPill = (st: DocStatus) => `<span class="pill ${st === 'official' ? 'ok' : st === 'restricted' ? '' : 'bad'}">${st === 'official' ? 'Official' : st === 'outdated' ? 'Outdated' : st === 'unreviewed' ? 'Unreviewed' : st === 'tampered' ? 'Tampered' : 'Restricted'}</span>`;
+    $('#behind-body').innerHTML = `<h3>What the assistant understood, and where it looked</h3><div class="table-scroll"><table class="results"><thead><tr><th scope="col">#</th><th scope="col">Language</th><th scope="col">Question about</th><th scope="col">What the answer claimed</th><th scope="col">Retrieved from</th></tr></thead><tbody>${s.turns.map((t, i) => {
       const c = t.claims;
-      const claims = [c.deadline && `Deadline ${c.deadline}`, c.incomeLimit && `Income limit SGD ${c.incomeLimit.toLocaleString('en-SG')}`, c.caseShown && `Showed case ${c.caseShown}`, c.refused && 'Refused', c.unsure && 'Said it was unsure', c.fabricated && 'Invented an answer'].filter(Boolean).join(' · ') || 'General answer';
-      return `<tr><td>${i + 1}</td><td>${esc(LANG_LABELS[t.lang])}</td><td>${esc(TOPIC_LABELS[t.topic])}${t.caseId ? ` (${esc(t.caseId)})` : ''}</td><td>${esc(claims)}</td></tr>`;
-    }).join('')}</tbody></table></div>`;
+      const claims = [c.deadline && `Deadline ${c.deadline}`, c.incomeLimit && `Income limit SGD ${c.incomeLimit.toLocaleString('en-SG')}`, c.amount && `Grant amount SGD ${c.amount.toLocaleString('en-SG')}`, c.caseShown && `Showed case ${c.caseShown}`, c.refused && 'Refused', c.unsure && 'Said it was unsure', c.fabricated && 'Invented an answer'].filter(Boolean).join(' · ') || 'General answer';
+      const src = c.source ? `${esc(docById(c.source).title)} ${statusPill(docById(c.source).status)}` : c.fabricated ? 'Nothing: the answer was invented' : 'None';
+      return `<tr><td>${i + 1}</td><td>${esc(LANG_LABELS[t.lang])}</td><td>${esc(TOPIC_LABELS[t.topic])}${t.caseId ? ` (${esc(t.caseId)})` : ''}</td><td>${esc(claims)}</td><td>${src}</td></tr>`;
+    }).join('')}</tbody></table></div>
+      <h3>What is in the knowledge base</h3><div class="table-scroll"><table class="results"><thead><tr><th scope="col">Page</th><th scope="col">Status</th><th scope="col">Details</th></tr></thead><tbody>${DOCS.map((d) => `<tr><td>${esc(d.title)}</td><td>${statusPill(d.status)}</td><td>${esc(d.detail)}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
   $('#setup-form').addEventListener('submit', (e) => { e.preventDefault(); start(); input.focus(); });

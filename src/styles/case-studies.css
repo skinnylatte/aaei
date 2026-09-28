@@ -316,3 +316,18 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .mock-cta { justify-self: end; display: inline-flex; gap: 12px; font: 650 15px/1.3 var(--display); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px; }
 .mock-cta span { transition: transform 180ms var(--ease); } .mock-link:hover .mock-cta span { transform: translateX(5px); }
 @media (max-width: 1000px) { .mock-link { max-width: 560px; margin-top: 0; } .mock-cta { justify-self: start; } }
+
+.preset-group { margin: var(--space-md) 0 4px; font: 650 14px/1.3 var(--display); color: color-mix(in oklch, var(--ink) 75%, transparent); }
+
+/* Tidewater: vendor text on the approval screen */
+.approval-note { margin: 0; padding: 12px 14px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-control); font-size: 15px; overflow-wrap: anywhere; }
+.phish-link { color: oklch(40% .15 250); text-decoration: underline; }
+.phish-warning { margin: 0; padding: 12px 14px; color: oklch(38% .15 28); background: oklch(94% .04 28); border-radius: var(--radius-control); font-size: 15px; }
+
+/* OWASP tags on answer sheets */
+.owasp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 var(--space-sm); }
+.owasp-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--paper); border: 1px solid var(--ink); border-radius: 999px; font: 600 13px/1.2 var(--display); }
+.owasp-tag-quiet { border-color: var(--line); color: color-mix(in oklch, var(--ink) 70%, transparent); }
+.owasp-id { font-weight: 700; font-variant-numeric: tabular-nums; }
+.owasp-table th { width: 40%; }
+.owasp-none th, .owasp-none td { color: color-mix(in oklch, var(--ink) 55%, transparent); }

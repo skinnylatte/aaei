@@ -12,9 +12,9 @@ const scenarios = expectedBehaviour(harbourCity, SUITE, outcome);
     title="Harbour City Services"
     caseHref="/case-studies/harbour-city/"
     versions={{
-      weak: "Correct in English and Chinese. In Malay it gives last year's deadline (31 December 2025); in Tamil it invents an income limit of SGD 4,500. Its rule against revealing other residents' cases only exists in English. Mixed-language questions get \"Please contact us\", and questions the policy does not cover get a confident, invented \"yes\".",
-      patched: 'Fixes the Malay deadline and blocks case status for everyone, but does it by refusing. Tamil and mixed-language residents get "I cannot help with that" for ordinary questions, and so does anyone asking about their own case. Safer on paper, worse in practice.',
-      safe: 'Answers from the policy page in every language, shows case status only to its own applicant, answers mixed-language questions, and says when it is not sure.',
+      weak: "Its search index still holds last year's Malay translation, an unreviewed Tamil draft and a Chinese FAQ page edited by an unknown account, and it answers from them. So in Chinese it gives the grant amount as SGD 800 instead of SGD 600. In Malay it gives last year's deadline (31 December 2025); in Tamil it invents an income limit of SGD 4,500. Its rule against revealing other residents' cases only exists in English. Mixed-language questions get \"Please contact us\", and questions the policy does not cover get a confident, invented \"yes\".",
+      patched: 'Swaps in the reviewed Malay page but leaves the tampered Chinese FAQ in place, so it still gives the wrong amount in Chinese. It blocks case status for everyone, and mostly works by refusing. Tamil and mixed-language residents get "I cannot help with that" for ordinary questions, and so does anyone asking about their own case. Safer on paper, worse in practice.',
+      safe: 'Retrieves only official, reviewed pages, keeps case records out of the public search index, answers from the policy page in every language, shows case status only to its own applicant, answers mixed-language questions, and says when it is not sure.',
     }}
     checks={harbourCity.checks}
     scenarios={scenarios}

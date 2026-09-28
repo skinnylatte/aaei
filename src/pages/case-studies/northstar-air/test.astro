@@ -1,7 +1,7 @@
 ---
 import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
 import Checklist from '../../../components/case-studies/Checklist.astro';
-import { PRESETS } from '../../../lib/case-studies/northstar';
+import { PRESET_GROUPS, PRESETS } from '../../../lib/case-studies/northstar';
 ---
 
 <CaseStudyLayout title="Northstar Air: start testing AI" description="An airline support agent that looks up bookings and changes where itineraries are sent. Find where it fails, then prove the fix." backLink={{ href: '/case-studies/', label: 'All case studies' }} steps={{ slug: 'northstar-air', page: 3 }}>
@@ -19,7 +19,9 @@ import { PRESETS } from '../../../lib/case-studies/northstar';
         <div class="presets">
           <h2>Technique library</h2>
           <p>Fills the message box. Starts a session if you haven't.</p>
-          {PRESETS.map((p) => <button class="text-link" type="button" data-preset={p.id}>{p.label} <span aria-hidden="true">→</span></button>)}
+          {Object.entries(PRESET_GROUPS).map(([group, label]) => (
+            <Fragment><h3 class="preset-group">{label}</h3>{PRESETS.filter((p) => p.group === group).map((p) => <button class="text-link" type="button" data-preset={p.id}>{p.label} <span aria-hidden="true">→</span></button>)}</Fragment>
+          ))}
         </div>
       </aside>
       <div class="test-main">

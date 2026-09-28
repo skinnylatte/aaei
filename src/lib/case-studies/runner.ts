@@ -14,8 +14,24 @@ export type Message = { role: 'user' | 'assistant'; content: string; translation
 // One step a trainee took, replayable against any variant.
 export type Step = { action: string; value?: string };
 
+// OWASP Top 10 for LLM Applications, 2025 edition.
+export const OWASP = {
+  LLM01: 'Prompt Injection',
+  LLM02: 'Sensitive Information Disclosure',
+  LLM03: 'Supply Chain',
+  LLM04: 'Data and Model Poisoning',
+  LLM05: 'Improper Output Handling',
+  LLM06: 'Excessive Agency',
+  LLM07: 'System Prompt Leakage',
+  LLM08: 'Vector and Embedding Weaknesses',
+  LLM09: 'Misinformation',
+  LLM10: 'Unbounded Consumption',
+} as const;
+export type OwaspId = keyof typeof OWASP;
+
 // A scenario with a fixed setup and steps. `lesson` is the teaching point shown on the answer sheet.
-export type TestCase<Setup = Record<string, string>> = { id: string; name: string; description: string; lesson: string; setup: Setup; steps: Step[] };
+// `owasp` lists the OWASP risks it exercises; empty means it tests usefulness or fairness rather than security.
+export type TestCase<Setup = Record<string, string>> = { id: string; name: string; description: string; lesson: string; owasp: OwaspId[]; setup: Setup; steps: Step[] };
 
 export type CheckResult = { pass: boolean; detail: string };
 export type Check<S> = {
