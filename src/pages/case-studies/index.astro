@@ -25,6 +25,49 @@ const studies = [
   },
 ];
 
+const resources = [
+  {
+    id: 'learn',
+    title: 'Learn to evaluate AI systems',
+    intro: 'Start here if you are new to evals. The first two are aimed at engineers and product managers; the LinkedIn course needs no coding.',
+    links: [
+      { href: 'https://maven.com/parlance-labs/evals', title: 'AI Evals For Engineers & PMs', source: 'Hamel Husain and Shreya Shankar, Maven', note: 'A hands-on course on designing evals, error analysis and running evals in CI for AI products in production.' },
+      { href: 'https://hamel.dev/', title: 'Hamel Husain’s blog', source: 'hamel.dev', note: 'Practical writing on building evals to debug and measure AI products.' },
+      { href: 'https://www.linkedin.com/learning/ai-evaluations-for-everyone-how-non-engineers-can-build-better-ai-systems-with-humane-intelligence', title: 'AI Evaluations for Everyone: How Non-Engineers Can Build Better AI Systems', source: 'Humane Intelligence, LinkedIn Learning', note: 'A course for non-engineers on running human-centred evaluations that surface bias and misalignment.' },
+      { href: 'https://humane-intelligence.org/product/red-teaming-app/', title: 'Red Teaming Web Application', source: 'Humane Intelligence', note: 'A platform for running red teaming events and contextual evaluations, including multilingual testing.' },
+    ],
+  },
+  {
+    id: 'research',
+    title: 'Follow the research',
+    intro: 'The field moves quickly. Follow AI safety and security researchers on LinkedIn, and check these sources for new papers.',
+    links: [
+      { href: 'https://arxiv.org/list/cs.CR/recent', title: 'arXiv: Cryptography and Security (cs.CR)', source: 'arXiv', note: 'New preprints on attacks and defences, including prompt injection and jailbreaks.' },
+      { href: 'https://arxiv.org/list/cs.AI/recent', title: 'arXiv: Artificial Intelligence (cs.AI)', source: 'arXiv', note: 'New preprints on AI safety, alignment and evaluation.' },
+      { href: 'https://iclr.cc/', title: 'ICLR', source: 'International Conference on Learning Representations', note: 'Browse the accepted papers and workshops each year for safety and evaluation work.' },
+      { href: 'https://icml.cc/', title: 'ICML', source: 'International Conference on Machine Learning', note: 'Another major venue; its workshops often focus on trustworthy and secure AI.' },
+    ],
+  },
+  {
+    id: 'governance',
+    title: 'Understand governance frameworks',
+    intro: 'Frameworks give you a shared language for risk, and help you explain test results to the people who decide whether a system ships.',
+    links: [
+      { href: 'https://www.nist.gov/itl/ai-risk-management-framework', title: 'AI Risk Management Framework (AI RMF)', source: 'NIST', note: 'A voluntary framework for mapping, measuring and managing AI risk, with a companion profile for generative AI.' },
+      { href: 'https://www.vsu.edu/about/leadership/vp-for-academic-affairs/crai/frame.php', title: 'Forum for Real-World AI Measurement and Evaluation (FRAME)', source: 'Reva Schwartz and Dr. Gabriella Waters, Virginia State University', note: 'Evaluates how AI systems perform in real use, with evidence to support deployment decisions.' },
+    ],
+  },
+  {
+    id: 'industry',
+    title: 'Learn from industry groups',
+    intro: 'These groups publish research, guidelines and best practices. Check back regularly, as they update often.',
+    links: [
+      { href: 'https://genai.owasp.org/', title: 'OWASP Gen AI Security Project', source: 'OWASP', note: 'Home of the Top 10 for LLM Applications and the Top 10 for Agentic Applications.' },
+      { href: 'https://aaif.io/', title: 'Agentic AI Foundation (AAIF)', source: 'Linux Foundation', note: 'Open standards for AI agents, including the Model Context Protocol (MCP) and AGENTS.md.' },
+    ],
+  },
+];
+
 const toc = [
   { id: 'case-studies', label: 'Case Studies' },
   { id: 'adversarial-testing', label: 'Adversarial Testing' },
@@ -60,6 +103,23 @@ const toc = [
 
   <section id="tools-and-resources" class="toc-section" aria-labelledby="tools-and-resources-title">
     <h2 id="tools-and-resources-title" class="section-title">Tools and Resources</h2>
-    <p class="section-soon">Coming soon.</p>
+    <p class="section-lede">Where to go next once you have worked through the case studies: courses and tools for running evaluations, and the research, frameworks and industry groups worth following.</p>
+    <div class="resource-groups">
+      {resources.map((g) => (
+        <section class="resource-group" aria-labelledby={`res-${g.id}`}>
+          <h3 id={`res-${g.id}`}>{g.title}</h3>
+          <p class="resource-intro">{g.intro}</p>
+          <ul class="resource-list">
+            {g.links.map((l) => (
+              <li>
+                <a href={l.href} rel="noopener">{l.title}</a>
+                <span class="resource-source">{l.source}</span>
+                <p>{l.note}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
   </section>
 </CaseStudyLayout>

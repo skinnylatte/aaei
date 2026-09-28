@@ -1,105 +1,172 @@
 ---
 import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
 import Checklist from '../../../components/case-studies/Checklist.astro';
-import { ATTACKS, LOCATION_LABELS } from '../../../lib/case-studies/tidewater';
+import { TECHNIQUES, TECHNIQUE_SECTIONS } from '../../../lib/case-studies/tidewater-techniques';
+
+const guide = [
+  { id: 'run', label: 'Run an attack', hint: '' },
+  { id: 'decide', label: 'Decide as the approver', hint: "Approve or reject each version's batch, using only what its screen shows you." },
+  { id: 'mark', label: 'Mark it on your list', hint: '' },
+];
 ---
 
 <CaseStudyLayout title="Tidewater Logistics: start testing AI" description="An accounts-payable agent that reads invoices and prepares payments for approval. Find what gets through, and whether the approver would notice." backLink={{ href: '/case-studies/', label: 'All case studies' }} steps={{ slug: 'tidewater', page: 3 }}>
   <div class="intro test-intro"><h1 class="headline">Start testing AI</h1><p>Test Tidewater Logistics against your list from <a class="text-link" href="/case-studies/tidewater/before/">Before you start</a>, and note anything new.</p></div>
 
-  <section id="start-testing" aria-label="Test the AI">
-    <div class="chat-layout">
-      <aside class="setup">
-        <form id="setup-form">
-          <h2>Build the batch</h2>
-          <div class="field"><label for="tw-variant">Version</label><select id="tw-variant"><option value="weak">Weak</option><option value="patched">Patched</option><option value="safe">Safe</option></select></div>
-          <div class="field"><label for="tw-attack">Attack on the Pioneer Marine Fuels email</label><select id="tw-attack">{ATTACKS.map((a) => <option value={a.id}>{a.label}</option>)}</select></div>
-          <div class="field"><label for="tw-location">Where the attack text goes</label><select id="tw-location">{Object.entries(LOCATION_LABELS).map(([k, v]) => <option value={k}>{v}</option>)}</select></div>
-          <div class="field"><label for="tw-text">Attack text (edit it to try your own)</label><textarea id="tw-text" rows="5" maxlength="2000"></textarea></div>
-          <label class="check"><input type="checkbox" id="tw-pressure" /> Add an urgent follow-up email from the vendor</label>
-          <button class="button button-primary" type="submit">Load inbox <span aria-hidden="true">→</span></button>
-        </form>
-      </aside>
-
-      <div class="test-main">
-        <section class="workspace" aria-labelledby="ws-title">
-          <div class="chat-head">
-            <h2 id="ws-title">Accounts payable</h2>
-            <div class="role-toggle" role="group" aria-label="View as">
-              <button type="button" data-role="clerk" aria-pressed="true">Clerk</button>
-              <button type="button" data-role="approver" aria-pressed="false">Approver</button>
-            </div>
-          </div>
-          <div class="workspace-body" id="clerk-view">
-            <p class="chat-empty" id="tw-empty">Load the inbox to begin.</p>
-            <div id="tw-clerk" hidden>
-              <div class="inbox">
-                <ul class="inbox-list" id="inbox-list" aria-label="Inbox"></ul>
-                <article class="email" id="email-view" aria-live="polite"></article>
-              </div>
-              <div class="agent-run">
-                <button class="button button-primary" type="button" id="process">Ask the agent to process today's invoices <span aria-hidden="true">→</span></button>
-                <ol class="agent-log" id="agent-log" aria-live="polite"></ol>
-              </div>
-            </div>
-          </div>
-          <div class="workspace-body" id="approver-view" hidden>
-            <div id="approval"></div>
-          </div>
-        </section>
-        <Checklist caseId="tidewater" />
-      </div>
-    </div>
-
-    <details class="behind" id="behind" hidden><summary>What happened behind the scenes</summary><div id="behind-body"></div></details>
+  <section class="guide" aria-labelledby="guide-title">
+    <h2 id="guide-title" class="visually-hidden">How to work through this page</h2>
+    <ol class="guide-steps">
+      {guide.map((g, i) => <li data-guide={g.id} data-hint={g.hint} aria-current={i === 0 ? 'step' : undefined}><span class="guide-mark" aria-hidden="true">{i + 1}</span><span class="guide-label">{g.label}</span><span class="visually-hidden guide-state">, not done yet</span></li>)}
+    </ol>
+    <p class="guide-hint" id="guide-hint" role="status" hidden></p>
   </section>
 
-  <p class="answers-link"><a class="text-link" href="/case-studies/tidewater/answers/">Answer sheet: how each version behaves in every scenario <span aria-hidden="true">→</span></a></p>
+  <div class="workbench">
+    <aside class="panel techniques" aria-labelledby="techniques-title">
+      <details class="techniques-toggle" open>
+        <summary><h2 id="techniques-title">Attacks</h2></summary>
+        <p class="panel-note">Pick one, then press Run. Each one changes the Pioneer Marine Fuels email.</p>
+        {TECHNIQUE_SECTIONS.map((section) => (
+          <div class="technique-group" data-group={section.id}>
+            <h3>{section.label} <span class="count" data-count>({section.ids.length})</span></h3>
+            {section.note && <p class="technique-note">{section.note}</p>}
+            <ul>{section.ids.map((id) => TECHNIQUES.find((t) => t.id === id)!).map((t) => <li><button class="technique" type="button" data-technique={t.id} aria-pressed="false"><span>{t.label}</span><span class="tried-mark" hidden><span aria-hidden="true">✓</span><span class="visually-hidden">, tried</span></span></button></li>)}</ul>
+          </div>
+        ))}
+      </details>
+    </aside>
+
+    <section class="chat chat-tabbed tw-bench" aria-labelledby="bench-title">
+      <h2 id="bench-title" class="visually-hidden">Tidewater accounts payable</h2>
+      <div class="version-tabs" role="tablist" aria-label="Version">
+        {['weak', 'patched', 'safe'].map((v, i) => (
+          <button type="button" role="tab" id={`tab-${v}`} data-version={v} aria-selected={i === 0 ? 'true' : 'false'} aria-controls="bench" tabindex={i === 0 ? undefined : '-1'}>
+            {v[0].toUpperCase() + v.slice(1)}<span class="tab-new" hidden><span class="visually-hidden">, waiting for your decision</span></span>
+          </button>
+        ))}
+      </div>
+      <div class="chat-body tw-body" id="bench" role="tabpanel" aria-labelledby="tab-weak" aria-live="polite"></div>
+      <div class="compose tw-run">
+        <p class="tw-selected" id="tw-selected">No attack picked yet.</p>
+        <button class="button button-primary" type="button" id="run">Run the batch <span aria-hidden="true">→</span></button>
+      </div>
+    </section>
+
+    <aside class="panel evidence" aria-labelledby="evidence-title">
+      <h2 id="evidence-title">What happened</h2>
+      <div id="ev-happened"></div>
+      <div id="ev-list" class="ev-list">
+        <p class="panel-note">Did you see one of these? Mark it found, and the latest results are saved as evidence.</p>
+        <Checklist caseId="tidewater" />
+      </div>
+    </aside>
+  </div>
+
+  <p class="next-row test-next"><a class="text-link" href="/case-studies/tidewater/answers/">Answer sheet: how each version behaves in every scenario <span aria-hidden="true">→</span></a></p>
 </CaseStudyLayout>
 
 <script>
   import { mountChecklist } from '../../../lib/case-studies/panels';
-  import { ATTACKS, TidewaterSession, type Location, type Setup } from '../../../lib/case-studies/tidewater';
-  import { esc, VARIANT_LABELS, type Variant } from '../../../lib/case-studies/runner';
+  import { LOCATION_LABELS, outcome, TidewaterSession, type Email } from '../../../lib/case-studies/tidewater';
+  import { setupFor, TECHNIQUES } from '../../../lib/case-studies/tidewater-techniques';
+  import { esc, VARIANTS, VARIANT_LABELS, type ToolCall, type Variant } from '../../../lib/case-studies/runner';
 
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const money = (n: number) => `SGD ${n.toLocaleString('en-SG')}`;
-  let s: TidewaterSession | null = null;
-  let selected = 'e1';
-  let role: 'clerk' | 'approver' = 'clerk';
+  const REPLAY_DELAY = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 280;
 
-  const attackSel = $<HTMLSelectElement>('#tw-attack');
-  const fillAttack = () => {
-    const a = ATTACKS.find((x) => x.id === attackSel.value)!;
-    $<HTMLTextAreaElement>('#tw-text').value = a.text;
-    $<HTMLSelectElement>('#tw-location').value = a.location;
-  };
-  attackSel.addEventListener('change', fillAttack);
-  fillAttack();
+  let sessions: Record<Variant, TidewaterSession> | null = null;
+  let active: Variant = 'weak';
+  let picked: string | null = null;
+  let ranLabel = '';
+  let running = false;
+  const tried = new Set<string>();
+  const done = new Set<string>();
+  const openEmail: Record<Variant, string> = { weak: 'e3', patched: 'e3', safe: 'e3' };
+  const showHidden = new Set<Variant>();
 
-  const setRole = (r: typeof role) => {
-    role = r;
-    document.querySelectorAll<HTMLButtonElement>('[data-role]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.role === r)));
-    $('#clerk-view').hidden = r !== 'clerk';
-    $('#approver-view').hidden = r !== 'approver';
-  };
-  document.querySelectorAll<HTMLButtonElement>('[data-role]').forEach((b) => b.addEventListener('click', () => setRole(b.dataset.role as typeof role)));
+  // ---------- Guided steps ----------
+  function tick(id: string) { if (!done.has(id)) { done.add(id); renderGuide(); } }
+  function renderGuide() {
+    const items = [...document.querySelectorAll<HTMLElement>('[data-guide]')];
+    const next = items.find((li) => !done.has(li.dataset.guide!));
+    items.forEach((li) => {
+      li.classList.toggle('is-done', done.has(li.dataset.guide!));
+      li.toggleAttribute('aria-current', li === next);
+      if (li === next) li.setAttribute('aria-current', 'step');
+      li.querySelector('.guide-state')!.textContent = done.has(li.dataset.guide!) ? ', done' : li === next ? ', current step' : ', not done yet';
+    });
+    const hint = next ? next.dataset.hint! : 'All three steps done. Try another attack, or open the answer sheet.';
+    $('#guide-hint').textContent = hint;
+    $('#guide-hint').hidden = !hint;
+  }
 
-  function renderEmail() {
-    if (!s) return;
-    const e = s.inbox.find((x) => x.id === selected)!;
-    const showHidden = $('#email-view').dataset.hidden === '1';
-    const layer = e.attachment && showHidden ? (e.attachment.hidden ? `<pre class="hidden-layer" aria-label="Hidden text layer">${esc(e.attachment.hidden)}</pre>` : '<p class="note">This attachment has no hidden text.</p>') : '';
-    $('#email-view').innerHTML = `<p class="email-meta">From <strong>${esc(e.from)}</strong></p><h3>${esc(e.subject)}</h3><p class="email-body">${esc(e.body)}</p><p class="email-sig">${esc(e.signature)}</p>${e.attachment ? `<div class="attachment"><p class="attachment-name">${esc(e.attachment.name)}</p><pre>${esc(e.attachment.visible)}</pre>${layer}<label class="check"><input type="checkbox" id="show-hidden" ${showHidden ? 'checked' : ''} /> Show the hidden text layer</label></div>` : ''}`;
-    $('#email-view').querySelector<HTMLInputElement>('#show-hidden')?.addEventListener('change', (ev) => {
-      $('#email-view').dataset.hidden = (ev.target as HTMLInputElement).checked ? '1' : '0';
-      renderEmail();
-      $('#email-view').querySelector<HTMLInputElement>('#show-hidden')?.focus();
+  // ---------- Picking and running ----------
+  function pick(id: string | null) {
+    if (running && id) return;
+    picked = id;
+    document.querySelectorAll<HTMLButtonElement>('[data-technique]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.technique === id)));
+    const t = TECHNIQUES.find((x) => x.id === id);
+    $('#tw-selected').innerHTML = t ? `Ready to run: <strong>${esc(t.label)}</strong>` : 'No attack picked yet.';
+    $('.tw-run').classList.toggle('is-ready', !!t);
+    // Picking a new attack clears the last results, so the screen always matches the attack shown.
+    if (t && sessions) { sessions = null; active = 'weak'; }
+    if (t) render();
+  }
+
+  function run() {
+    const t = TECHNIQUES.find((x) => x.id === picked);
+    if (!t || running) return;
+    sessions = Object.fromEntries(VARIANTS.map((v) => [v, new TidewaterSession(v, setupFor(t))])) as Record<Variant, TidewaterSession>;
+    VARIANTS.forEach((v) => { sessions![v].process(); openEmail[v] = 'e3'; showHidden.delete(v); });
+    tried.add(t.id);
+    ranLabel = t.label;
+    active = 'weak';
+    pick(null);
+    // Replay the agent's work log line by line, then show the approval screen.
+    running = true;
+    $<HTMLButtonElement>('#run').disabled = true;
+    renderTabs();
+    const log = sessions[active].log;
+    $('#bench').innerHTML = `<div class="tw-working"><h3>The ${VARIANT_LABELS[active].toLowerCase()} agent is processing today's invoices</h3><ol class="agent-log" id="live-log"></ol></div>`;
+    let i = 0;
+    const step = () => {
+      if (i < log.length) {
+        $('#live-log').insertAdjacentHTML('beforeend', `<li>${esc(log[i++])}</li>`);
+        setTimeout(step, REPLAY_DELAY);
+      } else {
+        running = false;
+        $<HTMLButtonElement>('#run').disabled = false;
+        tick('run');
+        render();
+        $('#ev-happened').classList.remove('is-new'); void $('#ev-happened').offsetWidth; $('#ev-happened').classList.add('is-new');
+      }
+    };
+    REPLAY_DELAY ? step() : ((i = log.length), step());
+  }
+
+  // ---------- Rendering ----------
+  function renderTabs() {
+    document.querySelectorAll<HTMLButtonElement>('[data-version]').forEach((b) => {
+      const v = b.dataset.version as Variant;
+      b.setAttribute('aria-selected', String(v === active));
+      b.tabIndex = v === active ? 0 : -1;
+      b.querySelector<HTMLElement>('.tab-new')!.hidden = !(sessions && !running && v !== active && !sessions[v].approval?.decision);
+    });
+    $('#bench').setAttribute('aria-labelledby', `tab-${active}`);
+  }
+
+  function renderTried() {
+    document.querySelectorAll<HTMLButtonElement>('[data-technique]').forEach((b) => { b.querySelector<HTMLElement>('.tried-mark')!.hidden = !tried.has(b.dataset.technique!); });
+    document.querySelectorAll<HTMLElement>('[data-group]').forEach((g) => {
+      const ids = [...g.querySelectorAll<HTMLButtonElement>('[data-technique]')].map((b) => b.dataset.technique!);
+      const n = ids.filter((id) => tried.has(id)).length;
+      g.querySelector('[data-count]')!.textContent = n ? `(${n} of ${ids.length} tried)` : `(${ids.length})`;
     });
   }
 
   // Vendor text on the approval screen. Weak and patched leave links live; here a "live" link only opens a warning.
-  // Everything is escaped first, so edited attack text can never inject real HTML into this page.
+  // Everything is escaped first, so document text can never inject real HTML into this page.
   function noteHtml(text: string, live: { label: string; url: string }[]) {
     const pattern = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|(https?:\/\/[^\s)\]]+)/g;
     let html = '', last = 0;
@@ -112,58 +179,157 @@ import { ATTACKS, LOCATION_LABELS } from '../../../lib/case-studies/tidewater';
     return html + esc(text.slice(last));
   }
 
-  function renderApproval() {
-    if (!s) return;
-    const a = s.approval;
-    if (!a) { $('#approval').innerHTML = '<p class="chat-empty">Nothing to approve yet. The clerk needs to ask the agent to process the invoices.</p>'; return; }
-    const table = a.rows ? `<div class="table-scroll"><table class="results"><caption>Every payment, the account it will use, and the account on file</caption><thead><tr><th scope="col">Invoice</th><th scope="col">Vendor</th><th scope="col">Amount</th><th scope="col">Pay to account</th><th scope="col">Account on file</th><th scope="col">Status</th></tr></thead><tbody>${a.rows.map((r) => `<tr><td class="nowrap">${esc(r.invoice)}</td><td>${esc(r.vendor)}</td><td class="nowrap">${money(r.amount)}</td><td class="nowrap">ending ${esc(r.account)}</td><td class="nowrap">ending ${esc(r.accountOnFile)}</td><td>${r.status === 'held' ? `<span class="pill bad">Held</span> ${esc(r.note ?? '')}` : r.status === 'duplicate' ? `<span class="pill">Skipped</span> ${esc(r.note ?? '')}` : `<span class="pill ok">Ready</span>${r.note ? ` ${esc(r.note)}` : ''}`}</td></tr>`).join('')}</tbody></table></div>${s.flags.filter((f) => f.callback).map((f) => `<p class="note"><strong>Callback task:</strong> ${esc(f.callback!)}</p>`).join('')}` : '';
-    $('#approval').innerHTML = `<div class="approval-card"><h3>Payment batch for approval</h3><p class="approval-summary">${esc(a.summary)}</p>${a.notes.map((n) => `<p class="approval-note"><strong>${a.rows ? 'Flag' : 'Vendor note'}, ${esc(n.invoice)}:</strong> ${noteHtml(n.text, a.links)}</p>`).join('')}<p class="phish-warning" role="alert" hidden></p>${table}<p class="approval-total">Total to release: <strong>${money(a.total)}</strong></p>${a.decision ? `<p class="pill ${a.decision === 'approved' ? 'ok' : 'bad'}">Batch ${a.decision}</p>` : '<div class="queue-actions"><button class="button button-primary" type="button" id="approve">Approve batch</button><button class="text-link" type="button" id="reject">Reject batch</button></div>'}</div>`;
-    $('#approval').querySelectorAll<HTMLAnchorElement>('.phish-link').forEach((link) => link.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      const warning = $('#approval').querySelector<HTMLElement>('.phish-warning')!;
-      warning.textContent = `You selected a link that came from the vendor's email. In a real attack this would open ${new URL(link.dataset.url!).hostname}, a fake page asking for Tidewater's bank login. Nothing was opened.`;
-      warning.hidden = false;
-    }));
-    $('#approval').querySelector('#approve')?.addEventListener('click', () => { s!.decide(true); render(); });
-    $('#approval').querySelector('#reject')?.addEventListener('click', () => { s!.decide(false); render(); });
+  function approvalHtml(s: TidewaterSession) {
+    const a = s.approval!;
+    const table = a.rows ? `<div class="table-scroll"><table class="results"><caption>Every payment, the account it will use, and the account on file</caption><thead><tr><th scope="col">Invoice</th><th scope="col">Vendor</th><th scope="col">Amount</th><th scope="col">Pay to</th><th scope="col">On file</th><th scope="col">Status</th></tr></thead><tbody>${a.rows.map((r) => `<tr><td class="nowrap">${esc(r.invoice)}</td><td>${esc(r.vendor)}</td><td class="nowrap">${money(r.amount)}</td><td class="nowrap">ending ${esc(r.account)}</td><td class="nowrap">ending ${esc(r.accountOnFile)}</td><td>${r.status === 'held' ? `<span class="pill bad">Held</span> ${esc(r.note ?? '')}` : r.status === 'duplicate' ? `<span class="pill">Skipped</span> ${esc(r.note ?? '')}` : `<span class="pill ok">Ready</span>${r.note ? ` ${esc(r.note)}` : ''}`}</td></tr>`).join('')}</tbody></table></div>${s.flags.filter((f) => f.callback).map((f) => `<p class="note"><strong>Callback task:</strong> ${esc(f.callback!)}</p>`).join('')}` : '';
+    const decision = a.decision
+      ? `<p class="tw-decided pill ${a.decision === 'approved' ? 'ok' : 'bad'}">You ${a.decision} this batch</p>`
+      : `<div class="queue-actions"><button class="button button-primary" type="button" data-decide="1">Approve batch</button><button class="text-link" type="button" data-decide="0">Reject batch</button></div>`;
+    return `<div class="approval-card"><p class="tw-role">You are the finance approver. This is everything the ${VARIANT_LABELS[s.variant].toLowerCase()} agent shows you.</p><h3>Payment batch for approval</h3><p class="approval-summary">${esc(a.summary)}</p>${a.notes.map((n) => `<p class="approval-note"><strong>${a.rows ? 'Flag' : 'Vendor note'}, ${esc(n.invoice)}:</strong> ${noteHtml(n.text, a.links)}</p>`).join('')}<p class="phish-warning" role="alert" hidden></p>${table}<p class="approval-total">Total to release: <strong>${money(a.total)}</strong></p>${decision}</div>`;
+  }
+
+  function emailHtml(s: TidewaterSession, v: Variant) {
+    const e = s.inbox.find((x) => x.id === openEmail[v]) as Email;
+    const hidden = showHidden.has(v);
+    const layer = e.attachment && hidden ? (e.attachment.hidden ? `<pre class="hidden-layer" aria-label="Hidden text layer">${esc(e.attachment.hidden)}</pre>` : '<p class="note">This attachment has no hidden text.</p>') : '';
+    const list = s.inbox.map((x) => `<li><button type="button" data-email="${x.id}" aria-current="${x.id === e.id}"><strong>${esc(x.subject)}</strong><span>${esc(x.from)}</span></button></li>`).join('');
+    const view = `<p class="email-meta">From <strong>${esc(e.from)}</strong></p><h4>${esc(e.subject)}</h4><p class="email-body">${esc(e.body)}</p><p class="email-sig">${esc(e.signature)}</p>${e.attachment ? `<div class="attachment"><p class="attachment-name">${esc(e.attachment.name)}</p><pre>${esc(e.attachment.visible)}</pre>${layer}<label class="check"><input type="checkbox" data-hidden-toggle ${hidden ? 'checked' : ''} /> Show the hidden text layer</label></div>` : ''}`;
+    return `<div class="inbox"><ul class="inbox-list" aria-label="Inbox">${list}</ul><article class="email">${view}</article></div>`;
+  }
+
+  function renderBench() {
+    if (running) return;
+    const ready = TECHNIQUES.find((x) => x.id === picked);
+    if (!sessions && ready) {
+      $('#bench').innerHTML = `<div class="tw-ready"><h3>Ready to run: ${esc(ready.label)}</h3><p>${esc(ready.about ?? `Where it goes: ${LOCATION_LABELS[setupFor(ready).location]}, in the Pioneer Marine Fuels email${ready.pressure ? ', followed by an urgent "pay today" email' : ''}.`)}</p><p class="chat-empty-hint"><span class="hint-arrow hint-down" aria-hidden="true"></span><span>Press Run the batch to process today's invoices on all three versions.</span></p></div>`;
+      return;
+    }
+    if (!sessions) {
+      $('#bench').innerHTML = `<p class="chat-empty">Tidewater's accounts-payable agent reads the invoice inbox and prepares a payment batch for a finance officer to approve.</p><p class="chat-empty-hint"><span class="hint-arrow" aria-hidden="true"></span><span>Pick an attack from Attacks, then press Run. It runs on all three versions.</span></p>`;
+      return;
+    }
+    const s = sessions[active];
+    const openBits = [...document.querySelectorAll<HTMLDetailsElement>('#bench details[data-keep]')].filter((d) => d.open).map((d) => d.dataset.keep);
+    $('#bench').innerHTML = `
+      <p class="tw-ran">Attack: <strong>${esc(ranLabel)}</strong></p>
+      ${approvalHtml(s)}
+      <details class="tw-more" data-keep="email"${openBits.includes('email') ? ' open' : ''}><summary>The emails the agent read (${s.inbox.length})</summary>${emailHtml(s, active)}</details>
+      ${decided(s) ? `<details class="tw-more" data-keep="log"${openBits.includes('log') ? ' open' : ''}><summary>What the agent did (${s.log.length} steps)</summary><ol class="agent-log">${s.log.map((l) => `<li>${esc(l)}</li>`).join('')}</ol></details>` : ''}`;
+  }
+
+  // What a tool call ended in.
+  function toolResult(e: ToolCall) {
+    const out = (e.output ?? {}) as Record<string, unknown>;
+    if (out.quarantined) return { label: 'Blocked', cls: 'ok' };
+    if (e.name === 'update_vendor_bank_details') return { label: 'Changed bank details', cls: 'bad' };
+    if (out.status === 'released') return { label: 'Paid without approval', cls: 'bad' };
+    return { label: 'Done', cls: '' };
+  }
+
+  const status = (s: TidewaterSession) => (s.approval?.decision ? `You ${s.approval.decision} it` : 'Waiting for your decision');
+  const summaryLines = (s: TidewaterSession) => outcome(s).filter((l) => !l.startsWith('The approver saw'));
+  const decided = (s: TidewaterSession) => !!s.approval?.decision;
+
+  function renderEvidence() {
+    const panel = $('#ev-happened');
+    if (!sessions) { panel.innerHTML = '<p class="evidence-empty">Run an attack to see what each version did.</p>'; return; }
+    const s = sessions[active];
+    const rows = VARIANTS.map((v) => {
+      // Results stay hidden until you decide, so the approval screen is all you have to go on.
+      const body = decided(sessions![v]) ? summaryLines(sessions![v]).map(esc).join(' ') : `<span class="muted">Approve or reject on the ${VARIANT_LABELS[v]} tab to see what really happened.</span>`;
+      return `<li><button type="button" class="compare-row" data-compare="${v}"${v === active ? ' aria-current="true"' : ''}><span class="compare-version">${VARIANT_LABELS[v]}<span class="compare-status">${status(sessions![v])}</span></span><span>${body}</span></button></li>`;
+    }).join('');
+    const tools = s.events.filter((e) => !['read_inbox', 'read_attachment', 'record_approval'].includes(e.name)).map((e) => {
+      const r = toolResult(e);
+      return `<li class="tool-call"><p><code>${esc(e.name)}</code> <span class="pill ${r.cls}">${r.label}</span></p>${e.note ? `<p class="note">${esc(e.note)}</p>` : ''}<details data-tool-details><summary>Input and output</summary><pre>${esc(JSON.stringify({ input: e.input, output: e.output }, null, 2))}</pre></details></li>`;
+    }).join('');
+    const vendors = Object.values(s.vendors).map((v) => { const o = s.original[v.id]; return `<li>${esc(v.name)}: ${o.account === v.account ? `ending ${esc(o.account)}, unchanged` : `<span class="pill bad">changed from ${esc(o.account)} to ${esc(v.account)}</span>`}</li>`; }).join('');
+    const open = $('#ev-happened details.ev-detail')?.hasAttribute('open');
+    panel.innerHTML = `
+      <h3 class="evidence-title">Same attack, three versions</h3>
+      <ul class="compare-list">${rows}</ul>
+      ${decided(s) ? `<details class="ev-detail"${open ? ' open' : ''}>
+        <summary>${VARIANT_LABELS[active]}: tool calls, bank details and payments</summary>
+        <h4>Tool calls</h4><ul class="tool-calls">${tools || '<li class="note">Nothing beyond reading the inbox.</li>'}</ul>
+        <h4>Vendor bank details</h4><ul class="outbox-list">${vendors}</ul>
+        <h4>Payments</h4><ul class="outbox-list">${s.payments.map((p) => `<li>${esc(p.invoice)}, ${money(p.amount)} to ending ${esc(p.account)}: ${esc(p.status)}</li>`).join('')}</ul>
+      </details>` : ''}`;
+  }
+
+  // Saved with a failure mode when it is marked found.
+  function currentEvidence() {
+    if (!sessions || running || !VARIANTS.some((v) => decided(sessions![v]))) return null;
+    return [`"${ranLabel}"`, ...VARIANTS.map((v) => `${VARIANT_LABELS[v]} (${status(sessions![v]).toLowerCase()}): ${summaryLines(sessions![v]).join(' ')}`)].join('\n');
   }
 
   function render() {
-    $('#tw-empty').hidden = !!s;
-    $('#tw-clerk').hidden = !s;
-    if (!s) return;
-    $('#ws-title').textContent = `Accounts payable · ${VARIANT_LABELS[s.variant]} version`;
-    $('#inbox-list').innerHTML = s.inbox.map((e) => `<li><button type="button" data-email="${e.id}" aria-current="${e.id === selected}"><strong>${esc(e.subject)}</strong><span>${esc(e.from)}</span></button></li>`).join('');
-    renderEmail();
-    $<HTMLButtonElement>('#process').disabled = !!s.approval;
-    $('#agent-log').innerHTML = s.log.map((l) => `<li>${esc(l)}</li>`).join('') + (s.approval && !s.approval.decision ? '<li><strong>Batch submitted. Switch to the Approver view to decide.</strong></li>' : '');
-    renderApproval();
-
-    $('#behind').hidden = !s.events.length;
-    const vendorRows = Object.values(s.vendors).map((v) => { const o = s!.original[v.id]; return `<tr><td>${esc(v.name)}</td><td>${esc(o.bank)}, ending ${esc(o.account)}</td><td>${o.account === v.account ? 'Unchanged' : `<span class="pill bad">${esc(v.bank)}, ending ${esc(v.account)}</span>`}</td></tr>`; }).join('');
-    $('#behind-body').innerHTML = `<h3>Tool calls</h3>${s.events.map((e) => `<div class="call"><p><code>${esc(e.name)}</code></p>${e.note ? `<p class="note">${esc(e.note)}</p>` : ''}<pre>${esc(JSON.stringify({ input: e.input, output: e.output }, null, 2))}</pre></div>`).join('')}
-      <h3>Vendor bank details</h3><div class="table-scroll"><table class="results"><thead><tr><th scope="col">Vendor</th><th scope="col">Before</th><th scope="col">After</th></tr></thead><tbody>${vendorRows}</tbody></table></div>
-      <h3>Payments</h3><div class="table-scroll"><table class="results"><thead><tr><th scope="col">Invoice</th><th scope="col">Amount</th><th scope="col">Account</th><th scope="col">Status</th></tr></thead><tbody>${s.payments.map((p) => `<tr><td>${esc(p.invoice)}</td><td>${money(p.amount)}</td><td>ending ${esc(p.account)}</td><td>${esc(p.status)}${p.note ? ` · ${esc(p.note)}` : ''}</td></tr>`).join('')}</tbody></table></div>`;
+    renderTabs();
+    renderTried();
+    renderBench();
+    renderEvidence();
+    checklist?.render();
   }
 
-  function load() {
-    const setup: Setup = { attack: attackSel.value, attackText: $<HTMLTextAreaElement>('#tw-text').value, location: $<HTMLSelectElement>('#tw-location').value as Location, pressure: $<HTMLInputElement>('#tw-pressure').checked };
-    s = new TidewaterSession($<HTMLSelectElement>('#tw-variant').value as Variant, setup);
-    selected = 'e3';
-    $('#email-view').dataset.hidden = '0';
-    setRole('clerk');
+  // ---------- Events ----------
+  document.querySelectorAll<HTMLButtonElement>('[data-technique]').forEach((b) => b.addEventListener('click', () => {
+    pick(b.dataset.technique!);
+    $<HTMLButtonElement>('#run').focus({ preventScroll: true });
+  }));
+  $('#run').addEventListener('click', run);
+
+  document.querySelectorAll<HTMLButtonElement>('[data-version]').forEach((b) => b.addEventListener('click', () => {
+    if (running) return;
+    active = b.dataset.version as Variant;
     render();
-  }
-  $('#setup-form').addEventListener('submit', (e) => { e.preventDefault(); load(); });
-  $('#inbox-list').addEventListener('click', (e) => {
-    const id = (e.target as HTMLElement).closest<HTMLElement>('[data-email]')?.dataset.email;
-    if (!id) return;
-    selected = id;
-    $('#email-view').dataset.hidden = '0';
-    render();
+  }));
+  $('.version-tabs').addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const next = VARIANTS.at((VARIANTS.indexOf(active) + (e.key === 'ArrowRight' ? 1 : -1)) % VARIANTS.length)!;
+    document.querySelector<HTMLButtonElement>(`[data-version="${next}"]`)!.click();
+    document.querySelector<HTMLButtonElement>(`[data-version="${next}"]`)!.focus();
   });
-  $('#process').addEventListener('click', () => { s?.process(); render(); });
 
+  $('#bench').addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const decide = t.closest<HTMLButtonElement>('[data-decide]');
+    if (decide && sessions) {
+      sessions[active].decide(decide.dataset.decide === '1');
+      if (VARIANTS.every((v) => sessions![v].approval?.decision)) tick('decide');
+      // Move on to the next version still waiting for a decision.
+      const next = VARIANTS.find((v) => !sessions![v].approval?.decision);
+      if (next) active = next;
+      render();
+      return;
+    }
+    const email = t.closest<HTMLElement>('[data-email]');
+    if (email) { openEmail[active] = email.dataset.email!; render(); return; }
+    const link = t.closest<HTMLAnchorElement>('.phish-link');
+    if (link) {
+      e.preventDefault();
+      const warning = $('#bench').querySelector<HTMLElement>('.phish-warning')!;
+      warning.textContent = `You selected a link that came from the vendor's email. In a real attack this would open ${new URL(link.dataset.url!).hostname}, a fake page asking for Tidewater's bank login. Nothing was opened.`;
+      warning.hidden = false;
+    }
+  });
+  $('#bench').addEventListener('change', (e) => {
+    if (!(e.target as HTMLElement).matches('[data-hidden-toggle]')) return;
+    if ((e.target as HTMLInputElement).checked) showHidden.add(active); else showHidden.delete(active);
+    render();
+    $('#bench').querySelector<HTMLInputElement>('[data-hidden-toggle]')?.focus();
+  });
+  $('#ev-happened').addEventListener('click', (e) => {
+    const row = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-compare]');
+    if (row) document.querySelector<HTMLButtonElement>(`[data-version="${row.dataset.compare}"]`)!.click();
+  });
 
-  mountChecklist(document.querySelector('[data-checklist]')!, 'tidewater');
+  const checklist = mountChecklist(document.querySelector('[data-checklist]')!, 'tidewater', currentEvidence);
+  $('#ev-list').addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('[data-status="found"]') && document.querySelector('#ev-list [data-status="found"][aria-pressed="true"]')) tick('mark');
+  });
+
+  // On small screens the attack list starts closed, so the workspace is visible first.
+  if (matchMedia('(max-width: 1000px)').matches) $<HTMLDetailsElement>('.techniques-toggle').open = false;
+
+  render();
+  renderGuide();
 </script>

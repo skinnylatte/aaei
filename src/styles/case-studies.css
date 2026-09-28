@@ -561,3 +561,47 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .toc-section { scroll-margin-top: 96px; margin-block: 0 var(--space-lg); }
 .section-title { margin: 0 0 var(--space-sm); font: 700 clamp(1.5rem, 2.4vw, 2rem)/1.1 var(--display); letter-spacing: -.03em; }
 .section-soon { margin: 0; color: color-mix(in oklch, var(--ink) 65%, transparent); }
+.section-lede { max-width: 64ch; margin: 0 0 var(--space-md); }
+.resource-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm); }
+.resource-group { padding: clamp(20px, 2.5vw, 32px); background: var(--rice); border: 1px solid var(--ink); border-radius: var(--radius-panel); }
+.resource-group h3 { margin: 0 0 var(--space-xs); font: 650 clamp(1.15rem, 1.6vw, 1.35rem)/1.2 var(--display); letter-spacing: -.02em; }
+.resource-intro { margin: 0 0 var(--space-sm); font-size: 15px; color: color-mix(in oklch, var(--ink) 80%, transparent); }
+.resource-list { display: grid; gap: var(--space-sm); margin: 0; padding: 0; list-style: none; }
+.resource-list li { padding-top: var(--space-sm); border-top: 1px solid var(--line); }
+.resource-list a { font: 650 16px/1.3 var(--display); color: var(--ink); text-decoration-color: var(--coral); text-underline-offset: 3px; }
+.resource-list a:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.resource-source { display: block; margin-top: 2px; font-size: 13px; color: color-mix(in oklch, var(--ink) 65%, transparent); }
+.resource-list p { margin: 6px 0 0; font-size: 15px; }
+@media (max-width: 760px) { .resource-groups { grid-template-columns: 1fr; } }
+
+/* Tidewater workbench */
+.tw-body { display: block; }
+.tw-body > * + * { margin-top: var(--space-sm); }
+.tw-working h3 { margin: 0 0 8px; font: 650 17px/1.3 var(--display); }
+.tw-working .agent-log li { animation: arrive-line 300ms cubic-bezier(.16, 1, .3, 1); }
+@keyframes arrive-line { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .tw-working .agent-log li { animation: none; } }
+.tw-ran { margin: 0; font-size: 14px; color: color-mix(in oklch, var(--ink) 75%, transparent); }
+.tw-role { margin: 0; font: 600 14px/1.35 var(--display); color: var(--teal); }
+.tw-bench .approval-card { padding: 16px 18px; background: oklch(99.5% .004 70); border: 1px solid var(--line); border-radius: var(--radius-panel); }
+.tw-bench .approval-card h3 { font-size: clamp(1.2rem, 1.8vw, 1.5rem); }
+.tw-decided { justify-self: start; }
+.tw-more { border-top: 1px solid var(--line); padding-top: 8px; }
+.tw-more > summary { min-height: 40px; display: flex; align-items: center; gap: 8px; font: 650 14.5px/1.3 var(--display); cursor: pointer; list-style: none; }
+.tw-more > summary::-webkit-details-marker { display: none; }
+.tw-more > summary::before { content: '▸'; transition: transform 150ms ease; } .tw-more[open] > summary::before { transform: rotate(90deg); }
+.tw-more .inbox { margin-top: 8px; grid-template-columns: minmax(180px, .7fr) 1.6fr; }
+.tw-more .email h4 { margin: 4px 0 8px; font: 650 16px/1.25 var(--display); }
+.tw-run { flex-wrap: nowrap; align-items: center; justify-content: space-between; }
+.tw-selected { margin: 0; font-size: 15px; }
+.tw-run.is-ready { box-shadow: inset 0 3px 0 var(--coral); }
+.compare-status { display: block; margin-top: 2px; font: 500 12px/1.2 var(--display); color: color-mix(in oklch, var(--ink) 65%, transparent); }
+.tw-bench .compare-row { grid-template-columns: 96px 1fr; }
+.evidence .compare-row { grid-template-columns: 96px 1fr; }
+@media (max-width: 1250px) { .tw-more .inbox { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .tw-run { flex-wrap: wrap; } .tw-run .button { width: 100%; } }
+.tw-ready h3 { margin: 2px 0 6px; font: 650 clamp(1.3rem, 2vw, 1.6rem)/1.2 var(--display); letter-spacing: -.02em; }
+.tw-ready > p { margin: 0 0 var(--space-sm); }
+.hint-down::before { content: '↓'; }
+.hint-down { animation-name: nudge-down; }
+@keyframes nudge-down { 0%, 60%, 100% { transform: none; } 30% { transform: translateY(4px); } }
