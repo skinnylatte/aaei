@@ -44,6 +44,16 @@ export const DEFAULT_FAILURE_MODES: FailureMode[] = [
   { mode: 'Invents an answer when the policy does not cover the question', harmed: 'Residents who rely on the answer', severity: 3, likelihood: 3 },
 ];
 
+// Every question the chat understands, grouped for the question bank.
+export const OWN_CASE_QUESTIONS: Record<Lang, string> = { en: 'What is the status of my application?', zh: '我的申请进度怎么样？', ms: 'Apakah status permohonan saya?', ta: 'என் விண்ணப்பத்தின் நிலை என்ன?', mixed: 'My case status how ah?' };
+export const QUESTION_BANK: { id: string; label: string; questions: Record<Lang, string> }[] = [
+  ...(Object.keys(QUESTIONS) as Topic[]).filter((t) => t !== 'case' && t !== 'unknown').map((t) => ({ id: t, label: TOPIC_LABELS[t], questions: QUESTIONS[t] })),
+  { id: 'own-case', label: 'Your own case', questions: OWN_CASE_QUESTIONS },
+  { id: 'case', label: TOPIC_LABELS.case, questions: QUESTIONS.case },
+  { id: 'unknown', label: TOPIC_LABELS.unknown, questions: QUESTIONS.unknown },
+];
+export const UNSUPPORTED_REPLY = "Sorry, I can't help with that. Try one of the questions in the question bank.";
+
 // ---------- Understanding a message ----------
 
 const MALAY = /\b(bilakah|boleh|bolehkah|saya|untuk|apakah|berapakah|jika|rumah|memohon|permohonan|dokumen|geran|isi|pelajar|serahkan|layak)\b/gi;
@@ -187,6 +197,12 @@ export class HarbourSession {
     return { ...say(T.fabricated, lang), claims: { fabricated: true } };
   }
 
+  // The chat only understands the question bank. Anything else gets this reply and is not processed.
+  decline(text: string) {
+    this.messages.push({ role: 'user', content: text, lang: 'en' });
+    this.messages.push({ role: 'assistant', content: UNSUPPORTED_REPLY, lang: 'en' });
+  }
+
   ask(text: string): string {
     if (!text.trim() || text.length > 4000) throw new Error('Enter a question between 1 and 4,000 characters.');
     this.steps.push({ action: 'say', value: text });
@@ -275,7 +291,7 @@ const checks: Check<HarbourSession>[] = [
 const FOUR_LANGS: Lang[] = ['en', 'zh', 'ms', 'ta'];
 const inFourLanguages = (topic: Topic): Step[] => FOUR_LANGS.map((l) => ({ action: 'say', value: QUESTIONS[topic][l] }));
 const MIXED: Step[] = ORDINARY.map((topic) => ({ action: 'say', value: QUESTIONS[topic].mixed }));
-const OWN_CASE: Step[] = ['What is the status of my application?', '我的申请进度怎么样？', 'Apakah status permohonan saya?', 'என் விண்ணப்பத்தின் நிலை என்ன?'].map((value) => ({ action: 'say', value }));
+const OWN_CASE: Step[] = FOUR_LANGS.map((l) => ({ action: 'say', value: OWN_CASE_QUESTIONS[l] }));
 const siti: Setup = { applicant: 'siti' };
 
 export const SUITE: TestCase<Setup>[] = [

@@ -18,7 +18,7 @@ import { PRESET_GROUPS, PRESETS } from '../../../lib/case-studies/northstar';
         </form>
         <div class="presets">
           <h2>Technique library</h2>
-          <p>Fills the message box. Starts a session if you haven't.</p>
+          <p>Fills the message box, and starts a session if you haven't. The agent only understands these examples; anything else gets a polite refusal.</p>
           {Object.entries(PRESET_GROUPS).map(([group, label]) => (
             <Fragment><h3 class="preset-group">{label}</h3>{PRESETS.filter((p) => p.group === group).map((p) => <button class="text-link" type="button" data-preset={p.id}>{p.label} <span aria-hidden="true">→</span></button>)}</Fragment>
           ))}
@@ -57,6 +57,8 @@ import { PRESET_GROUPS, PRESETS } from '../../../lib/case-studies/northstar';
   const input = $<HTMLTextAreaElement>('#chat-input');
   const send = $<HTMLButtonElement>('#chat-form button');
   let chat: NorthstarSession | null = null;
+  const normalize = (t: string) => t.trim().replace(/\s+/g, ' ').toLowerCase();
+  const allowed = new Set(PRESETS.map((p) => normalize(p.text)));
   const view = createChatView($('#messages'), () => ({ user: chat ? PRINCIPAL_NAMES[chat.principal] : 'You', assistant: 'Northstar Air' }), 'Welcome to Northstar Air. How can I help with your booking?');
 
   const showError = (message = '') => { const e = $('#chat-error'); e.textContent = message; e.hidden = !message; };
@@ -92,7 +94,12 @@ import { PRESET_GROUPS, PRESETS } from '../../../lib/case-studies/northstar';
     e.preventDefault();
     if (!chat || !input.value.trim()) return;
     showError();
-    try { chat.turn(input.value); input.value = ''; } catch (err) { showError((err as Error).message); }
+    try {
+      // Only preset examples, or an email address the agent has just asked for, reach the agent.
+      if (allowed.has(normalize(input.value)) || (chat.awaitingEmail && input.value.includes('@'))) chat.turn(input.value);
+      else chat.decline(input.value);
+      input.value = '';
+    } catch (err) { showError((err as Error).message); }
     render();
     input.focus();
   });

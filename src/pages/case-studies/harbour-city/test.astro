@@ -1,7 +1,7 @@
 ---
 import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
 import Checklist from '../../../components/case-studies/Checklist.astro';
-import { TOPIC_LABELS } from '../../../lib/case-studies/harbour-city';
+import { QUESTION_BANK } from '../../../lib/case-studies/harbour-city';
 import { LANG_LABELS } from '../../../lib/case-studies/runner';
 ---
 
@@ -19,8 +19,8 @@ import { LANG_LABELS } from '../../../lib/case-studies/runner';
         </form>
         <div class="presets">
           <h2>Question bank</h2>
-          <p>The same question in every language. Fills the message box.</p>
-          <div class="field"><label for="hc-topic">Question</label><select id="hc-topic">{Object.entries(TOPIC_LABELS).map(([k, v]) => <option value={k}>{v}</option>)}</select></div>
+          <p>The same question in every language. Fills the message box. The assistant only understands these questions; anything else gets a polite refusal.</p>
+          <div class="field"><label for="hc-topic">Question</label><select id="hc-topic">{QUESTION_BANK.map((q) => <option value={q.id}>{q.label}</option>)}</select></div>
           <div class="field"><label for="hc-lang">Language</label><select id="hc-lang">{Object.entries(LANG_LABELS).map(([k, v]) => <option value={k}>{v}</option>)}</select></div>
           <button class="text-link" type="button" id="hc-insert">Put this question in the message box <span aria-hidden="true">→</span></button>
         </div>
@@ -44,13 +44,15 @@ import { LANG_LABELS } from '../../../lib/case-studies/runner';
 
 <script>
   import { mountChecklist } from '../../../lib/case-studies/panels';
-  import { CASES, DOCS, HarbourSession, QUESTIONS, TOPIC_LABELS, docById, type Applicant, type DocStatus, type Topic } from '../../../lib/case-studies/harbour-city';
+  import { CASES, DOCS, HarbourSession, QUESTION_BANK, TOPIC_LABELS, docById, type Applicant, type DocStatus } from '../../../lib/case-studies/harbour-city';
   import { esc, LANG_LABELS, VARIANT_LABELS, type Lang, type Variant } from '../../../lib/case-studies/runner';
   import { createChatView } from '../../../lib/case-studies/chat-view';
 
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const input = $<HTMLTextAreaElement>('#chat-input');
   const send = $<HTMLButtonElement>('#chat-form button');
+  const normalize = (t: string) => t.trim().replace(/\s+/g, ' ').toLowerCase();
+  const allowed = new Set(QUESTION_BANK.flatMap((q) => Object.values(q.questions)).map(normalize));
   let s: HarbourSession | null = null;
   const who = (a: Applicant) => (a === 'none' ? 'Resident' : CASES[a].name);
   const view = createChatView($('#messages'), () => ({ user: s ? who(s.setup.applicant) : 'Resident', assistant: 'Harbour City Services' }), 'Hello. Ask me about the Household Support Grant.');
@@ -86,7 +88,12 @@ import { LANG_LABELS } from '../../../lib/case-studies/runner';
     e.preventDefault();
     if (!s || !input.value.trim()) return;
     showError();
-    try { s.ask(input.value); input.value = ''; } catch (err) { showError((err as Error).message); }
+    try {
+      // Only questions from the question bank reach the assistant.
+      if (allowed.has(normalize(input.value))) s.ask(input.value);
+      else s.decline(input.value);
+      input.value = '';
+    } catch (err) { showError((err as Error).message); }
     render();
     input.focus();
   });
@@ -94,7 +101,7 @@ import { LANG_LABELS } from '../../../lib/case-studies/runner';
 
   $('#hc-insert').addEventListener('click', () => {
     if (!s) start();
-    input.value = QUESTIONS[$<HTMLSelectElement>('#hc-topic').value as Topic][$<HTMLSelectElement>('#hc-lang').value as Lang];
+    input.value = QUESTION_BANK.find((q) => q.id === $<HTMLSelectElement>('#hc-topic').value)!.questions[$<HTMLSelectElement>('#hc-lang').value as Lang];
     input.focus();
   });
 

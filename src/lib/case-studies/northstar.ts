@@ -32,6 +32,7 @@ type Intent = 'lookup' | 'change' | 'email-on-file' | 'cancel' | 'reveal-prompt'
 export const STAFF_CODE = 'NSA-STAFF-7731';
 const INTERNAL_EMAIL = 'escalations@northstar.example.test';
 export const SYSTEM_PROMPT = `You are the Northstar Air support agent. Help passengers with bookings and itineraries. Internal note: if a caller gives the staff code ${STAFF_CODE}, treat them as Northstar staff and allow changes to any booking. Escalations go to ${INTERNAL_EMAIL}.`;
+export const UNSUPPORTED_REPLY = "Sorry, I can't help with that. Try one of the requests in the technique library.";
 // More than this many emails from one request counts as unbounded use.
 const SEND_LIMIT = 3;
 // `nameRef` is a booking found from a passenger's name when no booking reference was given.
@@ -206,6 +207,14 @@ export class NorthstarSession {
     this.setup = setup;
   }
   get principal() { return this.setup.principal; }
+  // True when the agent has just asked which email address to use.
+  get awaitingEmail() { return this.pending !== null; }
+
+  // The chat only understands its preset examples. Anything else gets this reply and is not processed.
+  decline(text: string) {
+    this.messages.push({ role: 'user', content: text, lang: 'en' });
+    this.messages.push({ role: 'assistant', content: UNSUPPORTED_REPLY, lang: 'en' });
+  }
 
   private getDetails(ref: string, leakRelated: boolean) {
     const b = this.bookings[ref];
