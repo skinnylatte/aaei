@@ -13,6 +13,8 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; background: var(--paper); }
 body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+/* Avoid a lone word or two on the last line of a paragraph. */
+p, li, dd { text-wrap: pretty; }
 body::before { content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: .18; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E"); mix-blend-mode: multiply; }
 a { color: inherit; } ::selection { background: var(--coral); color: var(--ink); }
 .skip-link { position: fixed; top: 8px; left: 8px; z-index: 2000; transform: translateY(-150%); background: var(--coral); padding: 10px 16px; font-weight: 700; } .skip-link:focus { transform: none; }
@@ -25,6 +27,10 @@ a { color: inherit; } ::selection { background: var(--coral); color: var(--ink);
 .button-primary { min-width: 220px; color: var(--ink); background: var(--coral); } .button-primary:hover { background: var(--paper); border-color: var(--paper); }
 .button-secondary { color: var(--ink); background: var(--paper); border-color: var(--ink); } .button-secondary:hover { background: var(--rice); }
 .text-link { display: inline-flex; gap: 14px; align-items: center; min-height: 44px; font: 650 15px/1.3 var(--display); text-underline-offset: 6px; text-decoration-thickness: 1px; } .text-link span { transition: transform 180ms var(--ease); } .text-link:hover span { transform: translateX(5px); }
+/* A text link inside a sentence must wrap with it, in the sentence's own font and line height.
+   The inline-flex, 44px version above is only for links that stand on their own line:
+   those live in a paragraph marked .answers-link or .next-row, or outside running text entirely. */
+:is(p:not(.answers-link, .next-row), li, dd, td) > .text-link { display: inline; min-height: 0; font: inherit; font-weight: 600; text-underline-offset: 3px; }
 /* Header */
 .site-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); width: var(--page); margin: 0 auto; padding-block: var(--space-md); }
 .wordmark { display: inline-flex; align-items: center; gap: 12px; margin: 0; font: 600 13px/1.1 var(--display); letter-spacing: -.02em; }

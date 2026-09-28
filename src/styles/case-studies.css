@@ -224,8 +224,8 @@ a.wordmark { text-decoration: none; }
 .steps a:hover { color: var(--ink); } .steps a:hover .step-label { text-decoration: underline; text-underline-offset: 4px; }
 .steps a[aria-current="step"] { color: var(--ink); font-weight: 700; }
 .steps a[aria-current="step"]::before { color: var(--ink); background: var(--coral); border-color: var(--coral); }
-.test-intro { padding-block: var(--space-lg) 0; } .test-intro .headline { max-width: none; font-size: clamp(2.2rem, 4.5vw, 3.8rem); }
-.test-intro p { max-width: 64ch; }
+.test-intro { padding-block: var(--space-md) 12px; } .test-intro .headline { max-width: none; font-size: clamp(1.9rem, 3vw, 2.6rem); }
+.test-intro p { max-width: 90ch; margin-top: 4px; }
 .next-row { margin: var(--space-lg) 0 0; }
 @media (max-width: 1100px) { .step-nav { order: 3; flex-basis: 100%; justify-content: flex-start; } }
 @media (max-width: 760px) {
@@ -297,7 +297,8 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .check-mode { margin: 0; font-size: 14px; line-height: 1.4; } .check-mode .risk { margin-left: 4px; vertical-align: 1px; }
 .check-toggle { display: flex; gap: 6px; }
 .check-toggle button { flex: 1; min-height: 36px; padding: 6px 10px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: var(--radius-control); font: 600 13px/1.2 var(--display); cursor: pointer; }
-.check-toggle button:hover { border-color: var(--ink); }
+.check-toggle button:hover:not(:disabled) { border-color: var(--ink); }
+.check-toggle button:disabled { color: color-mix(in oklch, var(--ink) 45%, transparent); border-style: dashed; cursor: not-allowed; }
 .check-toggle button[aria-pressed="true"][data-status="found"] { color: var(--paper); background: oklch(40% .15 28); border-color: oklch(40% .15 28); }
 .check-toggle button[aria-pressed="true"][data-status="not-seen"] { color: var(--paper); background: var(--ink); border-color: var(--ink); }
 .checklist-empty { margin: 0; font-size: 14px; }
@@ -342,3 +343,142 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .owasp-id { font-weight: 700; font-variant-numeric: tabular-nums; }
 .owasp-table th { width: 40%; }
 .owasp-none th, .owasp-none td { color: color-mix(in oklch, var(--ink) 55%, transparent); }
+
+
+/* Testing workbench: techniques on the left, chat in the middle, evidence on the right.
+   The side panels stay in view as you scroll, and scroll inside themselves if they are taller than the screen. */
+.guide { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 0 0 var(--space-sm); }
+.guide-steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; counter-reset: guide; }
+.guide-steps li { display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 5px; color: color-mix(in oklch, var(--ink) 65%, transparent); background: var(--paper); border: 1px solid var(--line); border-radius: 999px; font: 600 14px/1.2 var(--display); }
+.guide-mark { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid currentColor; border-radius: 50%; font-size: 12px; }
+.guide-steps li[aria-current="step"] { color: var(--ink); border-color: var(--ink); background: var(--rice); }
+.guide-steps li[aria-current="step"] .guide-mark { color: var(--ink); background: var(--coral); border-color: var(--coral); }
+.guide-steps li.is-done { color: var(--ink); }
+.guide-steps li.is-done .guide-mark { color: var(--paper); background: var(--green); border-color: var(--green); font-size: 0; }
+.guide-steps li.is-done .guide-mark::after { content: '✓'; font-size: 14px; }
+.guide-hint { flex: 1 1 280px; margin: 0; font-size: 15px; font-weight: 500; }
+
+.workbench { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(260px, 360px); gap: var(--space-sm); align-items: start; }
+.panel { position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow-y: auto; padding: 18px; background: var(--rice); border: 1px solid var(--ink); border-radius: var(--radius-panel); overscroll-behavior: contain; }
+.panel h2 { margin: 0; font: 650 20px/1.2 var(--display); letter-spacing: -.02em; }
+.panel h3, .panel h4 { margin: var(--space-sm) 0 6px; font: 650 15px/1.3 var(--display); }
+.panel-note { margin: 6px 0 var(--space-xs); font-size: 14px; color: color-mix(in oklch, var(--ink) 75%, transparent); }
+
+.techniques-toggle > summary { display: flex; align-items: center; gap: 8px; list-style: none; cursor: default; pointer-events: none; }
+.techniques-toggle > summary::-webkit-details-marker { display: none; }
+.technique-group { border-top: 1px solid var(--line); }
+.technique-group h3 { margin: var(--space-xs) 0 8px; padding-top: var(--space-xs); font: 650 14px/1.2 var(--display); }
+.technique-group h3 .count { font-weight: 500; color: color-mix(in oklch, var(--ink) 60%, transparent); }
+.technique-group ul { display: grid; gap: 4px; margin: 0 0 var(--space-xs); padding: 0; list-style: none; }
+.technique-group h4 { margin: 12px 0 6px; font: 600 12.5px/1.2 var(--display); color: color-mix(in oklch, var(--ink) 72%, transparent); }
+.technique-note { margin: -4px 0 8px; font-size: 13.5px; }
+.technique { width: 100%; min-height: 40px; padding: 8px 10px; color: var(--ink); background: oklch(99.5% .004 70); border: 1px solid var(--line); border-radius: var(--radius-control); font: 600 13.5px/1.3 var(--display); text-align: left; cursor: pointer; transition: border-color 150ms ease, background-color 150ms ease; }
+.technique { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.technique:hover { border-color: var(--ink); }
+/* Tried techniques recede, so the untried ones stand out. */
+.technique:not([aria-pressed="true"]):has(.tried-mark:not([hidden])) { color: color-mix(in oklch, var(--ink) 68%, transparent); background: transparent; border-style: dashed; }
+.tried-mark { flex: none; display: grid; place-items: center; width: 20px; height: 20px; color: var(--paper); background: var(--teal); border-radius: 50%; font-size: 12px; font-weight: 700; }
+.technique[aria-pressed="true"] .tried-mark { color: var(--ink); background: var(--mint); }
+.technique[aria-pressed="true"] { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+.compose.is-ready textarea { border-color: var(--coral); box-shadow: 0 0 0 2px var(--coral); }
+.compose button[type="submit"]:disabled { opacity: .6; cursor: wait; }
+.message.typing .dots { display: inline-flex; gap: 5px; padding-block: 4px; }
+.message.typing .dots i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .35; animation: typing-dot 1s ease-in-out infinite; }
+.message.typing .dots i:nth-child(2) { animation-delay: .15s; }
+.message.typing .dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes typing-dot { 50% { opacity: 1; } }
+.message.is-new .bubble, #ev-happened.is-new { animation: arrive 1.2s cubic-bezier(.16, 1, .3, 1); }
+@keyframes arrive { from { box-shadow: 0 0 0 3px var(--coral); } to { box-shadow: 0 0 0 3px transparent; } }
+@media (prefers-reduced-motion: reduce) { .message.typing .dots i, .message.is-new .bubble, #ev-happened.is-new { animation: none; } }
+.technique:focus-visible { outline: 3px solid var(--coral); outline-offset: 1px; }
+
+/* Versions as folder tabs across the top of the chat. The selected tab joins the chat surface. */
+.version-tabs { display: flex; background: var(--rice); border-bottom: 1px solid var(--ink); }
+.version-tabs button { position: relative; display: flex; flex: 1; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 16px; color: color-mix(in oklch, var(--ink) 70%, transparent); background: transparent; border: 0; font: 650 16px/1 var(--display); cursor: pointer; transition: color 150ms ease, background-color 150ms ease; }
+.version-tabs button + button { border-left: 1px solid var(--line); }
+.version-tabs button:hover { color: var(--ink); background: color-mix(in oklch, var(--chat-surface) 60%, transparent); }
+.version-tabs button[aria-selected="true"] { color: var(--ink); background: var(--chat-surface); margin-bottom: -1px; box-shadow: inset 0 3px 0 var(--coral); }
+.version-tabs button:focus-visible { outline: 3px solid var(--coral); outline-offset: -3px; }
+.tab-new { width: 9px; height: 9px; background: var(--coral); border-radius: 50%; }
+.chat-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font: 500 14px/1.2 var(--display); }
+.chat-controls select { min-height: 40px; padding: 6px 10px; color: var(--ink); background: oklch(99% .006 70); border: 1px solid color-mix(in oklch, var(--ink) 45%, transparent); border-radius: var(--radius-control); font: 500 14px/1.2 var(--body); }
+.chat-controls .text-link { min-height: 40px; padding: 0; color: var(--ink); background: none; border: 0; cursor: pointer; text-decoration: underline; }
+/* Sized so the message box and Send are on screen when the page opens on a laptop. */
+.chat-tabbed .chat-body { height: clamp(280px, calc(100vh - 470px), 620px); min-height: 0; max-height: none; }
+.chat-tabbed .compose { gap: 10px; padding-block: 14px; }
+.chat-tabbed .compose textarea { min-height: 56px; }
+.chat-tabbed .compose textarea[readonly] { resize: none; cursor: default; background: oklch(94% .015 60); }
+.compose-note { flex: 1 1 100%; margin: -2px 0 0; color: var(--paper); font: 600 14px/1.3 var(--display); }
+.compose { flex-wrap: wrap; }
+.compose textarea { flex: 1 1 100%; }
+.compose-actions { display: flex; flex: 1 1 100%; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.compose-actions .check { color: var(--paper); font-size: 14px; }
+
+.evidence-empty { margin: 0; font-size: 14px; }
+.evidence-title { margin-top: 0 !important; }
+.evidence-detail-title { padding-top: var(--space-sm); border-top: 1px solid var(--line); }
+.compare-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.compare-row { display: grid; grid-template-columns: 64px 1fr; gap: 8px; width: 100%; padding: 8px 10px; color: var(--ink); background: var(--paper); border: 1px solid transparent; border-radius: var(--radius-control); font: 400 13.5px/1.35 var(--body); text-align: left; cursor: pointer; }
+.compare-row:hover { border-color: var(--ink); }
+.compare-row[aria-current="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.compare-row:focus-visible { outline: 3px solid var(--coral); outline-offset: 1px; }
+.compare-version { font: 650 13.5px/1.35 var(--display); }
+.evidence-summary { margin: 0 0 6px; font-size: 15px; font-weight: 500; }
+.evidence-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; font-size: 13px; }
+.tool-calls, .queue-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.tool-call { padding: 10px; background: var(--paper); border-radius: var(--radius-control); }
+.tool-call p { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; }
+.tool-call code { font: 600 13px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.tool-call details summary { margin-top: 6px; font: 600 13px/1.3 var(--display); cursor: pointer; }
+.tool-call pre { margin: 6px 0 0; padding: 8px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; background: oklch(98.5% .01 70); border-radius: var(--radius-control); font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.evidence > h2 { margin-bottom: var(--space-sm); }
+.ev-detail { margin-top: var(--space-sm); } .ev-detail > summary { min-height: 40px; display: flex; align-items: center; font: 650 14px/1.3 var(--display); cursor: pointer; }
+.ev-detail[open] > summary { margin-bottom: 4px; }
+.outbox-list, .earlier-list { margin: 0; padding-left: 20px; font-size: 13px; } .outbox-list li + li, .earlier-list li + li { margin-top: 4px; }
+.ev-list { margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px solid var(--line); }
+.ev-list > .panel-note { margin-top: 0; }
+.check-evidence { margin: 6px 0 0; font-size: 13px; line-height: 1.4; white-space: pre-line; }
+.ev-detail > summary { gap: 8px; list-style: none; } .ev-detail > summary::-webkit-details-marker { display: none; }
+.ev-detail > summary::before { content: '▸'; transition: transform 150ms ease; } .ev-detail[open] > summary::before { transform: rotate(90deg); }
+.evidence .checklist { padding: 0; background: none; border: 0; } .evidence .checklist h2 { font-size: 16px; }
+.evidence .checklist-items { grid-template-columns: 1fr; }
+
+@media (max-width: 1250px) {
+  .workbench { grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) minmax(240px, 300px); }
+    .chat-controls { justify-content: space-between; }
+}
+@media (max-width: 1000px) {
+  .workbench { grid-template-columns: minmax(0, 1fr); }
+  .panel { position: static; max-height: none; }
+  .techniques-toggle > summary { pointer-events: auto; cursor: pointer; min-height: 44px; }
+  .techniques-toggle > summary::before { content: '▸'; font-size: 14px; transition: transform 150ms var(--ease); }
+  .techniques-toggle[open] > summary::before { transform: rotate(90deg); }
+  .chat-tabbed .chat-body { height: 420px; }
+}
+@media (max-width: 760px) {
+  .guide-steps { flex-wrap: nowrap; gap: 6px; }
+  .guide-steps li:not([aria-current="step"]) { padding: 4px; }
+  .guide-steps li:not([aria-current="step"]) .guide-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* Northstar chat: a light reading surface under the dark header, so long replies are easy to read. */
+.chat-tabbed { --chat-surface: oklch(97.5% .012 70); color: var(--ink); background: var(--chat-surface); border: 1px solid var(--ink); }
+.chat-tabbed .chat-body { background: var(--chat-surface); }
+.chat-tabbed .chat-empty { color: var(--ink); }
+.chat-tabbed .message .role { color: color-mix(in oklch, var(--ink) 72%, transparent); }
+.chat-tabbed .bubble { color: var(--ink); background: oklch(99.5% .004 70); border: 1px solid var(--line); }
+.chat-tabbed .message.user .bubble { color: var(--paper); background: var(--green); border-color: var(--green); }
+.chat-tabbed .translate { color: var(--ink); }
+.chat-tabbed .translation { color: var(--ink); background: oklch(99.5% .004 70); border-color: var(--line); }
+.chat-tabbed .message.typing .bubble { color: var(--ink); }
+.chat-tabbed .compose { background: var(--rice); border-top: 1px solid var(--line); }
+.chat-tabbed .compose textarea[readonly] { background: oklch(99% .006 70); }
+.chat-tabbed .compose-actions .check, .chat-tabbed .compose-note { color: var(--ink); }
+
+/* The first instruction sits in the empty chat, pointing at the Techniques panel. */
+.chat-empty-hint { display: flex; align-items: center; gap: 12px; max-width: 52ch; margin: 0; padding: 14px 18px; color: var(--ink); background: color-mix(in oklch, var(--coral) 22%, var(--chat-surface, var(--paper))); border: 1px solid var(--coral); border-radius: var(--radius-panel); font: 650 16px/1.4 var(--display); }
+.hint-arrow::before { content: '←'; display: grid; place-items: center; width: 34px; height: 34px; color: var(--ink); background: var(--coral); border-radius: 50%; font-size: 18px; }
+.hint-arrow { flex: none; animation: nudge 1.6s cubic-bezier(.16, 1, .3, 1) infinite; }
+@keyframes nudge { 0%, 60%, 100% { transform: none; } 30% { transform: translateX(-5px); } }
+@media (max-width: 1000px) { .hint-arrow::before { content: '↑'; } @keyframes nudge { 30% { transform: translateY(-5px); } } }
+@media (prefers-reduced-motion: reduce) { .hint-arrow { animation: none; } }

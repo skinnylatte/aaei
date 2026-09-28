@@ -3,7 +3,7 @@
 
 import { esc, type Message } from './runner';
 
-export function createChatView(container: HTMLElement, names: () => { user: string; assistant: string }, emptyText: string) {
+export function createChatView(container: HTMLElement, names: () => { user: string; assistant: string }, emptyText: string, emptyHint = '') {
   let shown = 0;
 
   const bubble = (m: Message) => {
@@ -28,7 +28,7 @@ export function createChatView(container: HTMLElement, names: () => { user: stri
   return {
     reset() {
       shown = 0;
-      container.innerHTML = `<p class="chat-empty">${esc(emptyText)}</p>`;
+      container.innerHTML = `<p class="chat-empty">${esc(emptyText)}</p>${emptyHint ? `<p class="chat-empty-hint"><span class="hint-arrow" aria-hidden="true"></span><span>${esc(emptyHint)}</span></p>` : ''}`;
     },
     sync(messages: Message[]) {
       if (!shown && messages.length) container.innerHTML = '';

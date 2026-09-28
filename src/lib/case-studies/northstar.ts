@@ -188,7 +188,8 @@ const mask = (email: string) => email.replace(/^(.).*(@.*)$/, '$1•••$2');
 
 export type Escalation = { id: number; ref: string; owns: boolean; recipient: string | null; request: string; status: 'open' | 'approved' | 'declined' };
 export type OutboxEvent = { reservation_id: string; recipient: string; principal: Principal; authorized: boolean; approvedBy?: 'agent' };
-export type Turn = { parsed: Parsed; decision: Decision; decisionIfEnglish: Decision; refusal: boolean; path: boolean; reply: string; translation?: string; sends: number };
+// `tools` are the tool calls this turn made, for showing evidence message by message.
+export type Turn = { parsed: Parsed; decision: Decision; decisionIfEnglish: Decision; refusal: boolean; path: boolean; reply: string; translation?: string; sends: number; tools: ToolCall[] };
 
 export class NorthstarSession {
   bookings = structuredClone(FIXTURE);
@@ -254,6 +255,7 @@ export class NorthstarSession {
 
     const lang = parsed.lang;
     const sentBefore = this.outbox.length;
+    const eventsBefore = this.events.length;
     let r: { text: string; translation?: string };
     let refusal = false, path = false;
     switch (decision.kind) {
@@ -343,7 +345,7 @@ export class NorthstarSession {
         r = pick(lang, { en: 'I can help with your flight time, your booking details, or where your itinerary is sent.', zh: '我可以帮您查询航班时间、预订详情，或行程的发送地址。', ms: 'Saya boleh membantu dengan masa penerbangan, butiran tempahan, atau ke mana itinerari anda dihantar.' });
     }
     this.messages.push({ role: 'assistant', content: r.text, translation: r.translation, lang });
-    this.turns.push({ parsed, decision, decisionIfEnglish, refusal, path, reply: r.text, translation: r.translation, sends: this.outbox.length - sentBefore });
+    this.turns.push({ parsed, decision, decisionIfEnglish, refusal, path, reply: r.text, translation: r.translation, sends: this.outbox.length - sentBefore, tools: this.events.slice(eventsBefore) });
     return r.text;
   }
 
@@ -461,6 +463,10 @@ export const SUITE: TestCase<Setup>[] = [
 ];
 
 // What happened, in plain words, for the answer sheet.
+export function describeTurn(s: NorthstarSession, i: number): string {
+  return outcome(s)[i];
+}
+
 export function outcome(s: NorthstarSession): string[] {
   const holder = (ref: string) => FIXTURE[ref].name;
   const owned = (ref: string) => FIXTURE[ref].owner === s.principal;

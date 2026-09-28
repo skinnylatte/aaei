@@ -8,7 +8,7 @@ const q = <T extends Element = HTMLElement>(root: ParentNode, sel: string) => ro
 // ---------- Worksheet ----------
 
 type Status = 'found' | 'not-seen';
-type Row = { id: string; mode: string; harmed: string; severity: number; likelihood: number; status?: Status };
+type Row = { id: string; mode: string; harmed: string; severity: number; likelihood: number; status?: Status; evidence?: string };
 
 const storageKey = (caseId: string) => `aaei:${caseId}:worksheet`;
 const byRisk = (rows: Row[]) => [...rows].sort((a, b) => b.severity * b.likelihood - a.severity * a.likelihood);
@@ -135,7 +135,9 @@ export function mountWorksheet(root: HTMLElement, caseId: string, defaults: Fail
 
 // ---------- The same list on the testing page, marked as trainees test ----------
 
-export function mountChecklist(root: HTMLElement, caseId: string) {
+// `evidence` returns a short description of the latest result, saved with a failure mode when it is marked found.
+// When `evidence` is given, Found it stays disabled until there is a result to save.
+export function mountChecklist(root: HTMLElement, caseId: string, evidence?: () => string | null) {
   const key = storageKey(caseId);
   const list = q(root, '[data-checklist-items]');
   const summary = q(root, '[data-checklist-summary]');
@@ -149,9 +151,9 @@ export function mountChecklist(root: HTMLElement, caseId: string) {
     const notSeen = rows.filter((r) => r.status === 'not-seen').length;
     summary.textContent = `${found} found · ${notSeen} not seen · ${rows.length - found - notSeen} not tested yet`;
     list.innerHTML = rows.map((r) => `<li data-id="${r.id}" class="${r.status ? `is-${r.status}` : ''}">
-        <p class="check-mode">${esc(r.mode)} ${riskChip(r.severity * r.likelihood)}</p>
+        <p class="check-mode">${esc(r.mode)} ${riskChip(r.severity * r.likelihood)}</p>${r.status === 'found' && r.evidence ? `<p class="check-evidence"><strong>Evidence</strong>\n${esc(r.evidence)}</p>` : ''}
         <div class="check-toggle" role="group" aria-label="Result for: ${esc(r.mode)}">
-          <button type="button" data-status="found" aria-pressed="${r.status === 'found'}">Found it</button>
+          <button type="button" data-status="found" aria-pressed="${r.status === 'found'}"${evidence && r.status !== 'found' && !evidence() ? ' disabled title="Send a technique first"' : ''}>Found it</button>
           <button type="button" data-status="not-seen" aria-pressed="${r.status === 'not-seen'}">Not seen</button>
         </div>
       </li>`).join('');
@@ -166,6 +168,8 @@ export function mountChecklist(root: HTMLElement, caseId: string) {
     if (!row) return;
     const next = b.dataset.status as Status;
     row.status = row.status === next ? undefined : next;
+    if (row.status === 'found') row.evidence = evidence?.() ?? row.evidence;
+    else delete row.evidence;
     store.set(key, rows);
     render();
     list.querySelector<HTMLButtonElement>(`li[data-id="${id}"] [data-status="${next}"]`)?.focus();
@@ -173,4 +177,5 @@ export function mountChecklist(root: HTMLElement, caseId: string) {
   // Keep in step if the list is edited in another tab.
   addEventListener('storage', (e) => { if (e.key === key) render(); });
   render();
+  return { render };
 }

@@ -2,122 +2,352 @@
 import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
 import Checklist from '../../../components/case-studies/Checklist.astro';
 import { PRESET_GROUPS, PRESETS } from '../../../lib/case-studies/northstar';
+
+// Everyday requests come first, so testers see normal behaviour before the attacks.
+// Labels that read oddly once the attacks are split into subgroups.
+const relabel: Record<string, string> = { 'colleague-ms': 'Colleague request, in Malay', 'colleague-zh': 'Colleague request, in Chinese' };
+const presetById = Object.fromEntries(PRESETS.map((p) => [p.id, { ...p, label: relabel[p.id] ?? p.label }]));
+const sections = [
+  { id: 'everyday', label: PRESET_GROUPS.everyday, note: 'Try one first to see what normal looks like.', subgroups: [{ label: '', ids: PRESETS.filter((p) => p.group === 'everyday').map((p) => p.id) }] },
+  { id: 'attack', label: PRESET_GROUPS.attack, note: '', subgroups: [
+    { label: 'Asking for someone else', ids: ['colleague-en', 'colleague-en-details', 'family', 'name-lookup'] },
+    { label: 'Pretending to be someone', ids: ['travel-agent', 'authority', 'impersonation'] },
+    { label: 'In another language', ids: ['colleague-ms', 'colleague-zh'] },
+    { label: 'Breaking the rules', ids: ['override', 'roleplay', 'reveal-prompt', 'summarise-rules', 'staff-code'] },
+    { label: 'Step by step, or in bulk', ids: ['two-step', 'mass-send'] },
+  ] },
+];
+const grouped = sections.flatMap((s) => s.subgroups.flatMap((g) => g.ids));
+if (grouped.length !== PRESETS.length || PRESETS.some((p) => !grouped.includes(p.id))) throw new Error('Every Northstar technique must appear in exactly one sidebar group.');
+
+const guide = [
+  { id: 'send', label: 'Send an attack', hint: '' },
+  { id: 'mark', label: 'Mark it on your list', hint: '' },
+];
 ---
 
 <CaseStudyLayout title="Northstar Air: start testing AI" description="An airline support agent that looks up bookings and changes where itineraries are sent. Find where it fails, then prove the fix." backLink={{ href: '/case-studies/', label: 'All case studies' }} steps={{ slug: 'northstar-air', page: 3 }}>
-  <div class="intro test-intro"><h1 class="headline">Start testing AI</h1><p>Test Northstar Air against your list from <a class="text-link" href="/case-studies/northstar-air/before/">Before you start</a>, and note anything you find that is not on it.</p></div>
+  <div class="intro test-intro"><h1 class="headline">Start testing AI</h1><p>Test Northstar Air against your list from <a class="text-link" href="/case-studies/northstar-air/before/">Before you start</a>, and note anything new.</p></div>
 
-  <section id="start-testing" aria-label="Test the AI">
-    <div class="chat-layout">
-      <aside class="setup">
-        <form id="setup-form">
-          <h2>Start a session</h2>
-          <div class="field"><label for="chat-variant">Version</label><select id="chat-variant"><option value="weak">Weak</option><option value="patched">Patched</option><option value="safe">Safe</option></select></div>
-          <div class="field"><label for="chat-principal">Signed in as</label><select id="chat-principal"><option value="alex">Alex Morgan (owns B7N2M4)</option><option value="jordan">Jordan Lee (owns K3F9Q2)</option></select></div>
-          <button class="button button-primary" type="submit">Start fresh session <span aria-hidden="true">→</span></button>
-        </form>
-        <div class="presets">
-          <h2>Technique library</h2>
-          <p>Fills the message box, and starts a session if you haven't. The agent only understands these examples; anything else gets a polite refusal.</p>
-          {Object.entries(PRESET_GROUPS).map(([group, label]) => (
-            <Fragment><h3 class="preset-group">{label}</h3>{PRESETS.filter((p) => p.group === group).map((p) => <button class="text-link" type="button" data-preset={p.id}>{p.label} <span aria-hidden="true">→</span></button>)}</Fragment>
-          ))}
-        </div>
-      </aside>
-      <div class="test-main">
-        <section class="chat" aria-labelledby="chat-title">
-          <div class="chat-head"><h2 id="chat-title">Northstar Air</h2><p id="session-label">No session yet</p></div>
-          <div class="chat-body" id="messages" aria-live="polite"><p class="chat-empty">Welcome to Northstar Air. How can I help with your booking?</p></div>
-          <form id="chat-form" class="compose"><textarea id="chat-input" aria-label="Customer message" placeholder="Start a session to chat" disabled></textarea><button class="button button-primary" type="submit" disabled>Send <span aria-hidden="true">→</span></button></form>
-          <p class="form-error" id="chat-error" role="alert" hidden></p>
-        </section>
-        <Checklist caseId="northstar-air" />
+  <section class="guide" aria-labelledby="guide-title">
+    <h2 id="guide-title" class="visually-hidden">How to work through this page</h2>
+    <ol class="guide-steps">
+      {guide.map((g, i) => <li data-guide={g.id} data-hint={g.hint} aria-current={i === 0 ? 'step' : undefined}><span class="guide-mark" aria-hidden="true">{i + 1}</span><span class="guide-label">{g.label}</span><span class="visually-hidden guide-state">, not done yet</span></li>)}
+    </ol>
+    <p class="guide-hint" id="guide-hint" role="status" hidden={!guide[0].hint}>{guide[0].hint}</p>
+  </section>
+
+  <div class="workbench">
+    <aside class="panel techniques" aria-labelledby="techniques-title">
+      <details class="techniques-toggle" open>
+        <summary><h2 id="techniques-title">Techniques</h2></summary>
+        <p class="panel-note">Pick one, then press Send. Custom prompts will not work here.</p>
+        {sections.map((section) => (
+          <div class="technique-group" data-group={section.id}>
+            <h3>{section.label} <span class="count" data-count>({section.subgroups.reduce((n, g) => n + g.ids.length, 0)})</span></h3>
+            {section.note && <p class="technique-note">{section.note}</p>}
+            {section.subgroups.map((g) => (
+              <>
+                {g.label && <h4>{g.label}</h4>}
+                <ul>{g.ids.map((id) => presetById[id]).map((p) => <li><button class="technique" type="button" data-preset={p.id} aria-pressed="false"><span>{p.label}</span><span class="tried-mark" hidden><span aria-hidden="true">✓</span><span class="visually-hidden">, tried</span></span></button></li>)}</ul>
+              </>
+            ))}
+          </div>
+        ))}
+      </details>
+    </aside>
+
+    <section class="chat chat-tabbed" aria-labelledby="chat-title">
+      <h2 id="chat-title" class="visually-hidden">Chat with Northstar Air</h2>
+      <div class="version-tabs" role="tablist" aria-label="Version">
+        {['weak', 'patched', 'safe'].map((v, i) => (
+          <button type="button" role="tab" id={`tab-${v}`} data-version={v} aria-selected={i === 0 ? 'true' : 'false'} aria-controls="messages" tabindex={i === 0 ? undefined : '-1'}>
+            {v[0].toUpperCase() + v.slice(1)}<span class="tab-new" hidden><span class="visually-hidden">, new reply</span></span>
+          </button>
+        ))}
       </div>
-    </div>
-
-    <section class="queue" id="queue" aria-labelledby="queue-title" hidden>
-      <h2 id="queue-title">Human agent queue</h2>
-      <p>You are the Northstar agent. Decide each request with what's on this screen.</p>
-      <ul id="queue-list"></ul>
+      <div class="chat-body" id="messages" role="tabpanel" aria-labelledby="tab-weak" aria-live="polite"><p class="chat-empty">Welcome to Northstar Air. How can I help with your booking?</p><p class="chat-empty-hint"><span class="hint-arrow" aria-hidden="true"></span><span>Pick an attack from Techniques, then press Send. It goes to all three versions.</span></p></div>
+      <form id="chat-form" class="compose">
+        <textarea id="chat-input" aria-label="Customer message" aria-describedby="compose-note" placeholder="Pick a technique to fill this in" readonly></textarea>
+        <p class="compose-note" id="compose-note" hidden>The agent asked for an email address. Type one, then press Send.</p>
+        <div class="compose-actions">
+          <div class="chat-controls">
+            <label for="chat-principal">Signed in as</label>
+            <select id="chat-principal"><option value="alex">Alex Morgan (B7N2M4)</option><option value="jordan">Jordan Lee (K3F9Q2)</option></select>
+            <button type="button" class="text-link" id="start-over">Start over</button>
+          </div>
+          <button class="button button-primary" type="submit" id="send-button">Send <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+      <p class="form-error" id="chat-error" role="alert" hidden></p>
     </section>
 
-    <details class="behind" id="behind" hidden><summary>What happened behind the scenes</summary><div id="behind-body"></div></details>
-  </section>
+    <aside class="panel evidence" aria-labelledby="evidence-title">
+      <h2 id="evidence-title">What happened</h2>
+      <div id="ev-happened"></div>
+      <div id="ev-list" class="ev-list">
+        <p class="panel-note">Did you see one of these? Mark it found, and the latest result is saved as evidence.</p>
+        <Checklist caseId="northstar-air" />
+      </div>
+    </aside>
+  </div>
 
   <p class="answers-link"><a class="text-link" href="/case-studies/northstar-air/answers/">Answer sheet: how each version behaves in every scenario <span aria-hidden="true">→</span></a></p>
 </CaseStudyLayout>
 
 <script>
   import { mountChecklist } from '../../../lib/case-studies/panels';
-  import { NorthstarSession, PRESETS, PRINCIPAL_NAMES, TECHNIQUE_LABELS, type Principal } from '../../../lib/case-studies/northstar';
-  import { esc, LANG_LABELS, VARIANT_LABELS, type Variant } from '../../../lib/case-studies/runner';
+  import { NorthstarSession, PRESETS, PRINCIPAL_NAMES, TECHNIQUE_LABELS, describeTurn, type Principal } from '../../../lib/case-studies/northstar';
+  import { esc, LANG_LABELS, VARIANTS, VARIANT_LABELS, store, type ToolCall, type Variant } from '../../../lib/case-studies/runner';
   import { createChatView } from '../../../lib/case-studies/chat-view';
 
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const input = $<HTMLTextAreaElement>('#chat-input');
-  const send = $<HTMLButtonElement>('#chat-form button');
-  let chat: NorthstarSession | null = null;
   const normalize = (t: string) => t.trim().replace(/\s+/g, ' ').toLowerCase();
   const allowed = new Set(PRESETS.map((p) => normalize(p.text)));
-  const view = createChatView($('#messages'), () => ({ user: chat ? PRINCIPAL_NAMES[chat.principal] : 'You', assistant: 'Northstar Air' }), 'Welcome to Northstar Air. How can I help with your booking?');
 
-  const showError = (message = '') => { const e = $('#chat-error'); e.textContent = message; e.hidden = !message; };
+  let principal: Principal = 'alex';
+  let sessions = {} as Record<Variant, NorthstarSession>;
+  let active: Variant = 'weak';
+  let shownVariant: Variant | null = null;
+  const unread = new Set<Variant>();
+  const tried = new Set<string>();
+  let lastTechnique = '';
+  const done = new Set<string>();
 
-  function start() {
+  const view = createChatView($('#messages'), () => ({ user: PRINCIPAL_NAMES[principal], assistant: `Northstar Air · ${VARIANT_LABELS[active]}` }), 'Welcome to Northstar Air. How can I help with your booking?', 'Pick an attack from Techniques, then press Send. It goes to all three versions.');
+  const showError = (m = '') => { const e = $('#chat-error'); e.textContent = m; e.hidden = !m; };
+
+  function startOver() {
+    sessions = Object.fromEntries(VARIANTS.map((v) => [v, new NorthstarSession(v, { principal })])) as Record<Variant, NorthstarSession>;
+    unread.clear();
+    shownVariant = null;
     showError();
-    chat = new NorthstarSession($<HTMLSelectElement>('#chat-variant').value as Variant, { principal: $<HTMLSelectElement>('#chat-principal').value as Principal });
-    input.value = '';
-    view.reset();
     render();
+  }
+
+  // ---------- Guided steps ----------
+  function tick(id: string) {
+    if (done.has(id)) return;
+    done.add(id);
+    renderGuide();
+  }
+  function renderGuide() {
+    const items = [...document.querySelectorAll<HTMLElement>('[data-guide]')];
+    const next = items.find((li) => !done.has(li.dataset.guide!));
+    items.forEach((li) => {
+      li.classList.toggle('is-done', done.has(li.dataset.guide!));
+      li.toggleAttribute('aria-current', li === next);
+      if (li === next) li.setAttribute('aria-current', 'step');
+      li.querySelector('.guide-state')!.textContent = done.has(li.dataset.guide!) ? ', done' : li === next ? ', current step' : ', not done yet';
+    });
+    $('#guide-hint').hidden = next ? !next.dataset.hint : false;
+    $('#guide-hint').textContent = next ? next.dataset.hint! : 'Both steps done. Keep going with other techniques, or open the answer sheet to check your findings.';
+  }
+
+  // ---------- Sending ----------
+  const REPLY_DELAY = matchMedia('(prefers-reduced-motion: reduce)').matches ? 250 : 700;
+  let pending = false;
+
+  function send(text: string) {
+    if (!text.trim() || pending) return;
+    showError();
+    const preset = PRESETS.find((p) => normalize(p.text) === normalize(text));
+    let targets = [...VARIANTS];
+    // A typed email address only goes to the versions that asked for one.
+    if (!preset) targets = targets.filter((v) => sessions[v].awaitingEmail);
+    if (!targets.length) return;
+    if (preset) { tried.add(preset.id); lastTechnique = preset.label; }
+    const before = sessions[active].messages.length;
+    const activeSent = targets.includes(active);
+    try {
+      for (const v of targets) {
+        const s = sessions[v];
+        if (allowed.has(normalize(text)) || (s.awaitingEmail && text.includes('@'))) s.turn(text);
+        else s.decline(text);
+        if (v !== active) unread.add(v);
+      }
+    } catch (err) { showError((err as Error).message); }
+    input.value = '';
+    selectPreset(null);
+    // Show the customer's message first, then the agent's reply after a short pause, so each step is easy to follow.
+    const s = sessions[active];
+    if (!activeSent || s.messages.length <= before + 1) { render(); return; }
+    pending = true;
+    $<HTMLButtonElement>('#send-button').disabled = true;
+    checklist.render();
+    renderTabs();
+    if (shownVariant !== active) { view.reset(); shownVariant = active; }
+    view.sync(s.messages.slice(0, before + 1));
+    const typing = document.createElement('div');
+    typing.className = 'message assistant typing';
+    typing.innerHTML = `<p class="role">Northstar Air · ${VARIANT_LABELS[active]}</p><p class="bubble"><span class="visually-hidden">Agent is replying</span><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></p>`;
+    $('#messages').appendChild(typing);
+    $('#messages').scrollTop = $('#messages').scrollHeight;
+    setTimeout(() => {
+      typing.remove();
+      pending = false;
+      $<HTMLButtonElement>('#send-button').disabled = false;
+      render();
+      $('#messages').querySelectorAll('.message.assistant').forEach((m, i, all) => m.classList.toggle('is-new', i === all.length - 1));
+      $('#ev-happened').classList.remove('is-new'); void $('#ev-happened').offsetWidth; $('#ev-happened').classList.add('is-new');
+    }, REPLY_DELAY);
+  }
+
+  function selectPreset(id: string | null) {
+    document.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.preset === id)));
+    $('#chat-form').classList.toggle('is-ready', id !== null);
+  }
+
+  // ---------- Rendering ----------
+  function renderTabs() {
+    document.querySelectorAll<HTMLButtonElement>('[data-version]').forEach((b) => {
+      const v = b.dataset.version as Variant;
+      b.setAttribute('aria-selected', String(v === active));
+      b.tabIndex = v === active ? 0 : -1;
+      b.querySelector<HTMLElement>('.tab-new')!.hidden = !unread.has(v);
+    });
+    $('#messages').setAttribute('aria-labelledby', `tab-${active}`);
+  }
+
+  // What a tool call ended in: blocked, handed to a person, or done.
+  function toolResult(e: ToolCall) {
+    const out = (e.output ?? {}) as Record<string, unknown>;
+    if (out.error || out.blocked) return { label: 'Blocked', cls: 'ok' };
+    if (out.queued) return { label: 'Sent to a human agent', cls: '' };
+    return { label: 'Done', cls: e.authorized === false || out.revealed ? 'bad' : '' };
+  }
+
+  function renderEvidence() {
+    const s = sessions[active];
+    const panel = $('#ev-happened');
+    if (!s.turns.length) {
+      panel.innerHTML = `<p class="evidence-empty">Send a technique to see what each version did.</p>`;
+      return;
+    }
+    const i = s.turns.length - 1, t = s.turns[i];
+    const lastSaid = (v: Variant) => sessions[v].steps.filter((st) => st.action === 'say').at(-1)?.value;
+    const compared = VARIANTS.every((v) => sessions[v].turns.length && lastSaid(v) === lastSaid(active));
+    const summary = compared
+      ? `<h3 class="evidence-title">Same message, three versions</h3>
+        <ul class="compare-list">${VARIANTS.map((v) => `<li><button type="button" class="compare-row" data-compare="${v}"${v === active ? ' aria-current="true"' : ''}><span class="compare-version">${VARIANT_LABELS[v]}</span><span>${esc(describeTurn(sessions[v], sessions[v].turns.length - 1))}</span></button></li>`).join('')}</ul>`
+      : `<h3 class="evidence-title">${VARIANT_LABELS[active]}, message ${i + 1}</h3><p class="evidence-summary">${esc(describeTurn(s, i))}</p>`;
+    const tools = t.tools.map((e) => {
+      const r = toolResult(e);
+      const owner = e.authorized === undefined ? '' : `<span class="pill">${e.authorized ? 'Caller owns this booking' : 'Caller does not own this booking'}</span>`;
+      return `<li class="tool-call"><p><code>${esc(e.name)}</code> <span class="pill ${r.cls}">${r.label}</span> ${owner}</p>${e.note ? `<p class="note">${esc(e.note)}</p>` : ''}<details data-tool-details><summary>Input and output</summary><pre>${esc(JSON.stringify({ input: e.input, output: e.output }, null, 2))}</pre></details></li>`;
+    }).join('');
+    const queue = s.escalations.map((e) => `<li class="queue-item"><p><strong>Booking ${esc(e.ref)}</strong> <span class="pill ${e.owns ? 'ok' : 'bad'}">${e.owns ? 'Caller owns this booking' : 'Caller does not own this booking'}</span></p><p>${e.recipient ? `Change delivery to <strong>${esc(e.recipient)}</strong>` : 'Wants booking details'}</p>${e.status === 'open' ? `<div class="queue-actions"><button class="button button-primary" type="button" data-resolve="${e.id}" data-approve="1">Approve</button><button class="text-link" type="button" data-resolve="${e.id}" data-approve="0">Decline</button></div>` : `<p class="pill">${e.status === 'approved' ? 'Approved' : 'Declined'}</p>`}</li>`).join('');
+    const earlier = s.turns.slice(0, -1).map((_, j) => `<li>${esc(describeTurn(s, j))}</li>`).join('');
+    const outbox = s.outbox.length ? `<ul class="outbox-list">${[...s.outbox].reverse().map((o) => `<li><code>${esc(o.reservation_id)}</code> to ${esc(o.recipient)}</li>`).join('')}</ul>` : '<p class="note">Nothing sent.</p>';
+    const open = $('#ev-happened details.ev-detail')?.hasAttribute('open');
+    panel.innerHTML = `
+      ${summary}
+      ${s.escalations.some((e) => e.status === 'open') ? `<h4>Human agent queue</h4><p class="note">You are the Northstar agent. Decide with what is on screen.</p><ul class="queue-list">${queue}</ul>` : ''}
+      <details class="ev-detail"${open ? ' open' : ''}>
+        <summary>${VARIANT_LABELS[active]}: tool calls and outbox</summary>
+        <p class="evidence-meta">${esc(LANG_LABELS[t.parsed.lang])}${t.parsed.techniques.length ? ` · ${t.parsed.techniques.map((x) => `<span class="pill">${esc(TECHNIQUE_LABELS[x])}</span>`).join(' ')}` : ' · No attack technique detected'}</p>
+        ${t.decision.kind !== t.decisionIfEnglish.kind ? `<p class="note"><span class="pill bad">Different from English</span> In English the agent would have chosen "${esc(t.decisionIfEnglish.kind)}".</p>` : ''}
+        <h4>Tool calls</h4>
+        ${tools ? `<ul class="tool-calls">${tools}</ul>` : '<p class="note">No tools were called.</p>'}
+        ${s.escalations.some((e) => e.status !== 'open') ? `<h4>Human agent decisions</h4><ul class="queue-list">${queue}</ul>` : ''}
+        <h4>Test outbox</h4>
+        ${outbox}
+        ${earlier ? `<h4>Earlier messages</h4><ol class="earlier-list">${earlier}</ol>` : ''}
+      </details>`;
+  }
+
+  // Saved with a failure mode when it is marked found.
+  function currentEvidence() {
+    if (pending) return null;
+    const shown = VARIANTS.filter((v) => sessions[v]?.turns.length);
+    if (!shown.length) return null;
+    const lines = shown.map((v) => `${VARIANT_LABELS[v]}: ${describeTurn(sessions[v], sessions[v].turns.length - 1)}`);
+    return [lastTechnique ? `"${lastTechnique}"` : '', ...lines].filter(Boolean).join('\n');
+  }
+
+  function renderTried() {
+    document.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((b) => { b.querySelector<HTMLElement>('.tried-mark')!.hidden = !tried.has(b.dataset.preset!); });
+    document.querySelectorAll<HTMLElement>('[data-group]').forEach((g) => {
+      const ids = [...g.querySelectorAll<HTMLButtonElement>('[data-preset]')].map((b) => b.dataset.preset!);
+      const n = ids.filter((id) => tried.has(id)).length;
+      g.querySelector('[data-count]')!.textContent = n ? `(${n} of ${ids.length} tried)` : `(${ids.length})`;
+    });
+  }
+
+  // The message box is filled by techniques. It only opens for typing when the agent asks for an email address.
+  function renderCompose() {
+    const awaiting = VARIANTS.some((v) => sessions[v].awaitingEmail);
+    input.readOnly = !awaiting;
+    input.placeholder = awaiting ? 'Type an email address, such as me@example.test' : 'Pick a technique to fill this in';
+    $('#compose-note').hidden = !awaiting;
   }
 
   function render() {
-    input.disabled = send.disabled = !chat;
-    input.placeholder = chat ? 'Ask about a booking…' : 'Start a session to chat';
-    if (!chat) return;
-    $('#session-label').textContent = `${VARIANT_LABELS[chat.variant]} version · Signed in as ${PRINCIPAL_NAMES[chat.principal]}`;
-    view.sync(chat.messages);
-
-    const open = chat.escalations;
-    $('#queue').hidden = !open.length;
-    $('#queue-list').innerHTML = open.map((e) => `<li class="queue-item"><p><strong>Booking ${esc(e.ref)}</strong> · Caller signed in as ${esc(PRINCIPAL_NAMES[chat!.principal])} · <span class="pill ${e.owns ? 'ok' : 'bad'}">${e.owns ? 'Caller owns this booking' : 'Caller does not own this booking'}</span></p><p>Request: ${esc(e.request)}</p>${e.recipient ? `<p>Change delivery to <strong>${esc(e.recipient)}</strong></p>` : '<p>Wants booking details</p>'}${e.status === 'open' ? `<div class="queue-actions"><button class="button button-primary" type="button" data-resolve="${e.id}" data-approve="1">Approve</button><button class="text-link" type="button" data-resolve="${e.id}" data-approve="0">Decline</button></div>` : `<p class="pill">${e.status === 'approved' ? 'Approved' : 'Declined'}</p>`}</li>`).join('');
-
-    $('#behind').hidden = !chat.turns.length;
-    $('#behind-body').innerHTML = `<h3>What the agent understood</h3>${chat.turns.map((t, i) => `<div class="call"><p>Message ${i + 1} · ${LANG_LABELS[t.parsed.lang]} · decision <code>${esc(t.decision.kind)}</code>${t.decision.kind !== t.decisionIfEnglish.kind ? ` <span class="pill bad">In English it would have chosen ${esc(t.decisionIfEnglish.kind)}</span>` : ''}</p><p>${t.parsed.techniques.length ? t.parsed.techniques.map((x) => `<span class="pill">${esc(TECHNIQUE_LABELS[x])}</span>`).join(' ') : 'No attack technique detected'}</p></div>`).join('')}
-      <h3>Tool calls</h3>${chat.events.map((e) => `<div class="call"><p><code>${esc(e.name)}</code>${e.authorized === undefined ? '' : ` <span class="pill ${e.authorized ? 'ok' : 'bad'}">${e.authorized ? 'Caller owns this booking' : 'Caller does not own this booking'}</span>`}</p>${e.note ? `<p class="note">${esc(e.note)}</p>` : ''}<pre>${esc(JSON.stringify({ input: e.input, output: e.output }, null, 2))}</pre></div>`).join('')}
-      <h3>Test outbox</h3>${chat.outbox.length ? `<pre>${esc(JSON.stringify(chat.outbox, null, 2))}</pre>` : '<p>Nothing was sent.</p>'}`;
+    // Step 1 ticks once a reply to an attack is on screen, not when a technique is picked.
+    if (!pending && sessions.weak.turns.some((t) => t.parsed.techniques.length || t.decision.kind === 'change' || t.decision.kind === 'lookup')) tick('send');
+    renderTabs();
+    renderTried();
+    renderCompose();
+    checklist?.render();
+    const s = sessions[active];
+    if (shownVariant !== active) { view.reset(); shownVariant = active; }
+    view.sync(s.messages);
+    renderEvidence();
   }
 
-  $('#setup-form').addEventListener('submit', (e) => { e.preventDefault(); start(); input.focus(); });
-
-  $('#chat-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!chat || !input.value.trim()) return;
-    showError();
-    try {
-      // Only preset examples, or an email address the agent has just asked for, reach the agent.
-      if (allowed.has(normalize(input.value)) || (chat.awaitingEmail && input.value.includes('@'))) chat.turn(input.value);
-      else chat.decline(input.value);
-      input.value = '';
-    } catch (err) { showError((err as Error).message); }
+  // ---------- Events ----------
+  document.querySelectorAll<HTMLButtonElement>('[data-version]').forEach((b) => b.addEventListener('click', () => {
+    active = b.dataset.version as Variant;
+    unread.delete(active);
     render();
-    input.focus();
+  }));
+  $('.version-tabs').addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const i = VARIANTS.indexOf(active) + (e.key === 'ArrowRight' ? 1 : -1);
+    const next = VARIANTS.at(i % VARIANTS.length)!;
+    document.querySelector<HTMLButtonElement>(`[data-version="${next}"]`)!.click();
+    document.querySelector<HTMLButtonElement>(`[data-version="${next}"]`)!.focus();
   });
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) $<HTMLFormElement>('#chat-form').requestSubmit(); });
 
   document.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((b) => b.addEventListener('click', () => {
-    if (!chat) start();
     input.value = PRESETS.find((p) => p.id === b.dataset.preset)!.text;
-    input.focus();
+    input.dispatchEvent(new Event('input'));
+    selectPreset(b.dataset.preset!);
+    $<HTMLButtonElement>('#send-button').focus({ preventScroll: true });
   }));
+  input.addEventListener('input', () => {
+    const match = PRESETS.find((p) => normalize(p.text) === normalize(input.value));
+    selectPreset(match ? match.id : null);
+  });
+  $('#chat-form').addEventListener('submit', (e) => { e.preventDefault(); send(input.value); input.focus(); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) $<HTMLFormElement>('#chat-form').requestSubmit(); });
 
-  $('#queue-list').addEventListener('click', (e) => {
+  $<HTMLSelectElement>('#chat-principal').addEventListener('change', (e) => { principal = (e.target as HTMLSelectElement).value as Principal; startOver(); });
+  $('#start-over').addEventListener('click', startOver);
+
+  $('#ev-happened').addEventListener('click', (e) => {
+    const row = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-compare]');
+    if (row) { document.querySelector<HTMLButtonElement>(`[data-version="${row.dataset.compare}"]`)!.click(); return; }
+  });
+  $('#ev-happened').addEventListener('click', (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-resolve]');
-    if (!b || !chat) return;
-    chat.resolve(Number(b.dataset.resolve), b.dataset.approve === '1');
+    if (!b) return;
+    sessions[active].resolve(Number(b.dataset.resolve), b.dataset.approve === '1');
     render();
   });
 
 
-  mountChecklist(document.querySelector('[data-checklist]')!, 'northstar-air');
+  const checklist = mountChecklist(document.querySelector('[data-checklist]')!, 'northstar-air', currentEvidence);
+  $('#ev-list').addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('[data-status]')) return;
+    const rows = store.get<{ status?: string }[]>('aaei:northstar-air:worksheet', []);
+    if (rows.some((r) => r.status === 'found')) tick('mark');
+  });
+
+  // On small screens the technique list starts closed, so the chat is visible first.
+  if (matchMedia('(max-width: 1000px)').matches) $<HTMLDetailsElement>('.techniques-toggle').open = false;
+
+  startOver();
+  renderGuide();
 </script>
