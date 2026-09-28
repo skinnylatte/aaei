@@ -1,0 +1,38 @@
+/* Shared by every page. Page-specific styles stay with the page. */
+:root {
+  --ink: oklch(23% .045 350); --paper: oklch(96% .025 70); --green: oklch(35% .105 355); --green-dark: oklch(25% .075 355); --coral: oklch(69% .16 43); --rice: oklch(91% .045 65);
+  --line: color-mix(in oklch, var(--ink) 20%, transparent); --line-light: color-mix(in oklch, var(--paper) 30%, transparent);
+  --display: 'Manrope', Arial, sans-serif; --body: 'Noto Sans', Arial, sans-serif;
+  --gutter: clamp(20px, 4vw, 56px); --page: min(1400px, calc(100vw - 2 * var(--gutter))); --inset: calc((100vw - var(--page)) / 2);
+  --space-xs: 8px; --space-sm: 16px; --space-md: 24px; --space-lg: clamp(36px, 4vw, 56px); --space-xl: clamp(64px, 8vw, 112px); --space-section: clamp(88px, 11vw, 160px);
+  --panel-pad: clamp(24px, 5vw, 72px); --radius-panel: 10px; --radius-control: 2px;
+  --ease: cubic-bezier(.25, 1, .5, 1);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--paper); }
+body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+body::before { content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: .18; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E"); mix-blend-mode: multiply; }
+a { color: inherit; } ::selection { background: var(--coral); color: var(--ink); }
+.skip-link { position: fixed; top: 8px; left: 8px; z-index: 2000; transform: translateY(-150%); background: var(--coral); padding: 10px 16px; font-weight: 700; } .skip-link:focus { transform: none; }
+:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
+/* Shared type */
+.headline { margin: 0; font: 650 clamp(2.5rem, 5vw, 5.25rem)/.96 var(--display); letter-spacing: -.05em; text-wrap: balance; }
+/* Controls */
+.button { display: inline-flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 48px; padding: 14px 20px; border: 1px solid var(--coral); border-radius: var(--radius-control); font: 650 15px/1 var(--display); text-decoration: none; transition: transform 180ms var(--ease), background-color 180ms ease, border-color 180ms ease; }
+.button:hover { transform: translateY(-2px); } .button:active { transform: none; }
+.button-primary { min-width: 220px; color: var(--ink); background: var(--coral); } .button-primary:hover { background: var(--paper); border-color: var(--paper); }
+.text-link { display: inline-flex; gap: 14px; align-items: center; min-height: 44px; font: 650 15px/1.3 var(--display); text-underline-offset: 6px; text-decoration-thickness: 1px; } .text-link span { transition: transform 180ms var(--ease); } .text-link:hover span { transform: translateX(5px); }
+/* Header */
+.site-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); width: var(--page); margin: 0 auto; padding-block: var(--space-md); }
+.wordmark { display: inline-flex; align-items: center; gap: 12px; margin: 0; font: 600 13px/1.1 var(--display); letter-spacing: -.02em; }
+.mark { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid currentColor; border-radius: 50%; font-size: 18px; font-weight: 700; }
+/* Footer */
+footer { display: grid; grid-template-columns: auto 1fr; gap: var(--space-md) var(--space-xl); align-items: center; padding: var(--space-lg) var(--inset) var(--space-md); color: var(--paper); background: var(--ink); }
+footer > p:not(.wordmark) { margin: 0; justify-self: end; font-size: 14px; text-align: right; }
+footer small { grid-column: 1 / -1; margin-top: var(--space-md); padding-top: var(--space-sm); border-top: 1px solid color-mix(in oklch, var(--paper) 20%, transparent); font-size: 13px; opacity: .6; }
+button.text-link { padding: 0; color: inherit; background: none; border: 0; text-decoration: underline; cursor: pointer; }
+button.button { cursor: pointer; }
+@media (max-width: 760px) {
+  footer { grid-template-columns: 1fr; }
+  footer > p:not(.wordmark) { justify-self: start; text-align: left; }
+}

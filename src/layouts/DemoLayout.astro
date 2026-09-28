@@ -1,0 +1,34 @@
+---
+import '../styles/site.css';
+import '../styles/demos.css';
+
+interface Props { title: string; description: string; backLink?: { href: string; label: string } }
+const { title, description, backLink = { href: '/', label: 'Home' } } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#591c2d" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <title>{title} | Asian AI Evaluation Institute</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="wordmark" href="/"><span class="mark" aria-hidden="true">A</span><span>Asian AI<br />Evaluation Institute</span></a>
+      <a class="text-link back-link" href={backLink.href}><span aria-hidden="true">←</span> {backLink.label}</a>
+    </header>
+    <main id="main" class="demo-main"><slot /></main>
+    <footer>
+      <p class="wordmark"><span class="mark" aria-hidden="true">A</span><span>Asian AI<br />Evaluation Institute</span></p>
+      <p>Synthetic data only. No real email is sent.</p>
+      <small>© 2026 Asian AI Evaluation Institute</small>
+    </footer>
+  </body>
+</html>

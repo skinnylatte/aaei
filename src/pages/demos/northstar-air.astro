@@ -1,0 +1,83 @@
+---
+import DemoLayout from '../../layouts/DemoLayout.astro';
+---
+
+<DemoLayout title="Northstar Air chatbot" description="Send the same request to a weak and a safe airline support agent and compare what happens." backLink={{ href: '/demos/', label: 'All demos' }}>
+  <div class="intro"><h1 class="headline">Northstar Air customer service</h1><p>Send the same request to the weak and safe versions and compare the replies. The test identity is set here, outside the chat, so nothing a customer types can change who they are.</p></div>
+  <div class="chat-layout">
+    <aside class="setup">
+      <form id="setup-form">
+        <h2>Start a session</h2>
+        <div class="field"><label for="chat-variant">Version</label><select id="chat-variant"><option value="weak">Weak: skips the ownership check</option><option value="safe">Safe: checks who owns the booking</option></select></div>
+        <div class="field"><label for="chat-principal">Signed in as</label><select id="chat-principal"><option value="alex">Alex Morgan (owns B7N2M4)</option><option value="jordan">Jordan Lee (owns K3F9Q2)</option></select></div>
+        <button class="button button-primary" type="submit">Start fresh session <span aria-hidden="true">→</span></button>
+      </form>
+      <div class="presets">
+        <h2>Try a request</h2>
+        <p>Fills the message box. Start a session first.</p>
+        <button class="text-link" type="button" data-preset="colleague">A colleague asks for someone else's itinerary <span aria-hidden="true">→</span></button>
+        <button class="text-link" type="button" data-preset="innocent">Alex asks when their flight leaves <span aria-hidden="true">→</span></button>
+      </div>
+    </aside>
+    <section class="chat" aria-labelledby="chat-title">
+      <div class="chat-head"><h2 id="chat-title">Northstar Air</h2><p id="session-label">No session yet</p></div>
+      <div class="chat-body" id="messages" aria-live="polite"><p class="chat-empty">Welcome to Northstar Air. How can I help with your booking?</p></div>
+      <form id="chat-form" class="compose"><textarea id="chat-input" aria-label="Customer message" placeholder="Start a session to chat" disabled></textarea><button class="button button-primary" type="submit" disabled>Send <span aria-hidden="true">→</span></button></form>
+      <p class="form-error" id="chat-error" role="alert" hidden></p>
+    </section>
+  </div>
+  <details class="behind" id="behind" hidden><summary>What happened behind the scenes</summary><div id="behind-body"></div></details>
+</DemoLayout>
+
+<script>
+  import { PRESETS, Session, type Principal, type Variant } from '../../lib/northstar';
+
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+  const names: Record<Principal, string> = { alex: 'Alex Morgan', jordan: 'Jordan Lee' };
+  const input = $<HTMLTextAreaElement>('#chat-input');
+  const send = $<HTMLButtonElement>('#chat-form button');
+  let chat: Session | null = null;
+
+  const showError = (message = '') => { const e = $('#chat-error'); e.textContent = message; e.hidden = !message; };
+
+  function render() {
+    input.disabled = send.disabled = !chat;
+    input.placeholder = chat ? 'Ask about a booking…' : 'Start a session to chat';
+    if (!chat) return;
+    $('#session-label').textContent = `${chat.variant === 'weak' ? 'Weak' : 'Safe'} version · Signed in as ${names[chat.principal]}`;
+    const messages = $('#messages');
+    messages.innerHTML = chat.messages.length
+      ? chat.messages.map((m) => `<div class="message ${m.role}"><p class="role">${m.role === 'user' ? esc(names[chat!.principal]) : 'Northstar Air'}</p><p class="bubble">${esc(m.content)}</p></div>`).join('')
+      : '<p class="chat-empty">Welcome to Northstar Air. How can I help with your booking?</p>';
+    messages.scrollTop = messages.scrollHeight;
+    $('#behind').hidden = !chat.events.length;
+    $('#behind-body').innerHTML = `<h3>Tool calls</h3>${chat.events.map((e) => `<div class="call"><p><code>${esc(e.name)}</code> <span class="pill ${e.authorized ? 'ok' : 'bad'}">${e.authorized ? 'Caller owns this booking' : 'Caller does not own this booking'}</span></p><pre>${esc(JSON.stringify({ input: e.input, output: e.output }, null, 2))}</pre></div>`).join('')}
+      <h3>Test outbox</h3>${chat.outbox.length ? `<pre>${esc(JSON.stringify(chat.outbox, null, 2))}</pre>` : '<p>Nothing was sent.</p>'}`;
+  }
+
+  $('#setup-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    showError();
+    chat = new Session($<HTMLSelectElement>('#chat-variant').value as Variant, $<HTMLSelectElement>('#chat-principal').value as Principal);
+    input.value = '';
+    render();
+    input.focus();
+  });
+
+  $('#chat-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!chat || !input.value.trim()) return;
+    showError();
+    try { chat.turn(input.value); input.value = ''; } catch (err) { showError((err as Error).message); }
+    render();
+    input.focus();
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((b) => b.addEventListener('click', () => {
+    if (!chat) { showError('Start a session first.'); return; }
+    showError();
+    input.value = PRESETS[b.dataset.preset as keyof typeof PRESETS];
+    input.focus();
+  }));
+</script>

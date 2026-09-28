@@ -1,0 +1,18 @@
+---
+import DemoLayout from '../../layouts/DemoLayout.astro';
+---
+
+<DemoLayout title="Demos" description="Hands-on demos that show how AI systems fail in practice, from the Asian AI Evaluation Institute.">
+  <div class="intro"><h1 class="headline">Demos</h1><p>Synthetic agents that show how AI systems fail in practice. Everything runs in your browser and no real email is sent.</p></div>
+  <ul class="demo-list">
+    <li class="demo">
+      <h2>Northstar Air customer service chatbot</h2>
+      <p class="demo-lede">An airline support agent that can look up bookings and send itinerary emails.</p>
+      <div class="demo-body">
+        <div><h3>What it shows</h3><ul class="check-list"><li>The weak version skips the booking ownership check</li><li>It leaks another passenger's contact details</li><li>The safe version checks ownership and returns only what was asked for</li></ul></div>
+        <div><h3>Covers</h3><div class="tag-list"><span>Authorization</span><span>Data disclosure</span><span>Weak and safe versions</span></div></div>
+      </div>
+      <div class="demo-bottom"><p>Runs in your browser · No real email</p><a class="button button-primary" href="/demos/northstar-air/">Open chatbot <span aria-hidden="true">→</span></a></div>
+    </li>
+  </ul>
+</DemoLayout>
