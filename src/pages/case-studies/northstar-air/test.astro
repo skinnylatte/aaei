@@ -2,11 +2,10 @@
 import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
 import Checklist from '../../../components/case-studies/Checklist.astro';
 import { PRESET_GROUPS, PRESETS } from '../../../lib/case-studies/northstar';
+import { techniqueLabel } from '../../../lib/case-studies/northstar-report';
 
 // Everyday requests come first, so testers see normal behaviour before the attacks.
-// Labels that read oddly once the attacks are split into subgroups.
-const relabel: Record<string, string> = { 'colleague-ms': 'Colleague request, in Malay', 'colleague-zh': 'Colleague request, in Chinese' };
-const presetById = Object.fromEntries(PRESETS.map((p) => [p.id, { ...p, label: relabel[p.id] ?? p.label }]));
+const presetById = Object.fromEntries(PRESETS.map((p) => [p.id, { ...p, label: techniqueLabel(p) }]));
 const sections = [
   { id: 'everyday', label: PRESET_GROUPS.everyday, note: 'Try one first to see what normal looks like.', subgroups: [{ label: '', ids: PRESETS.filter((p) => p.group === 'everyday').map((p) => p.id) }] },
   { id: 'attack', label: PRESET_GROUPS.attack, note: '', subgroups: [
@@ -26,7 +25,7 @@ const guide = [
 ];
 ---
 
-<CaseStudyLayout title="Northstar Air: start testing AI" description="An airline support agent that looks up bookings and changes where itineraries are sent. Find where it fails, then prove the fix." backLink={{ href: '/case-studies/', label: 'All case studies' }} steps={{ slug: 'northstar-air', page: 3 }}>
+<CaseStudyLayout title="Northstar Air: start testing AI" description="An airline support agent that looks up bookings and changes where itineraries are sent. Find where it fails, then prove the fix." backLink={{ href: '/case-studies/', label: 'All case studies' }} steps={{ slug: 'northstar-air', page: 3, report: true }}>
   <div class="intro test-intro"><h1 class="headline">Start testing AI</h1><p>Test Northstar Air against your list from <a class="text-link" href="/case-studies/northstar-air/before/">Before you start</a>, and note anything new.</p></div>
 
   <section class="guide" aria-labelledby="guide-title">
@@ -92,14 +91,15 @@ const guide = [
     </aside>
   </div>
 
-  <p class="answers-link"><a class="text-link" href="/case-studies/northstar-air/answers/">Answer sheet: how each version behaves in every scenario <span aria-hidden="true">→</span></a></p>
+  <p class="next-row test-next"><a class="button button-primary" href="/case-studies/northstar-air/report/">Next: view the report <span aria-hidden="true">→</span></a> <a class="text-link" href="/case-studies/northstar-air/answers/">Answer sheet</a></p>
 </CaseStudyLayout>
 
 <script>
   import { mountChecklist } from '../../../lib/case-studies/panels';
   import { NorthstarSession, PRESETS, PRINCIPAL_NAMES, TECHNIQUE_LABELS, describeTurn, type Principal } from '../../../lib/case-studies/northstar';
-  import { esc, LANG_LABELS, VARIANTS, VARIANT_LABELS, store, type ToolCall, type Variant } from '../../../lib/case-studies/runner';
+  import { esc, LANG_LABELS, newId, VARIANTS, VARIANT_LABELS, store, type ToolCall, type Variant } from '../../../lib/case-studies/runner';
   import { createChatView } from '../../../lib/case-studies/chat-view';
+  import { RUNS_KEY, type Run } from '../../../lib/case-studies/northstar-report';
 
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const input = $<HTMLTextAreaElement>('#chat-input');
@@ -118,7 +118,17 @@ const guide = [
   const view = createChatView($('#messages'), () => ({ user: PRINCIPAL_NAMES[principal], assistant: `Northstar Air · ${VARIANT_LABELS[active]}` }), 'Welcome to Northstar Air. How can I help with your booking?', 'Pick a request or an attack from Techniques, then press Send. It goes to all three versions.');
   const showError = (m = '') => { const e = $('#chat-error'); e.textContent = m; e.hidden = !m; };
 
+  // Each conversation is saved so the report page can replay it.
+  let runId = newId();
+  function saveRun() {
+    if (!sessions.weak?.steps.length) return;
+    const runs = store.get<Run[]>(RUNS_KEY, []).filter((r) => r.id !== runId);
+    runs.push({ id: runId, principal, at: new Date().toISOString(), steps: Object.fromEntries(VARIANTS.map((v) => [v, sessions[v].steps])) as Run['steps'] });
+    store.set(RUNS_KEY, runs.slice(-30));
+  }
+
   function startOver() {
+    runId = newId();
     sessions = Object.fromEntries(VARIANTS.map((v) => [v, new NorthstarSession(v, { principal })])) as Record<Variant, NorthstarSession>;
     unread.clear();
     shownVariant = null;
@@ -142,7 +152,7 @@ const guide = [
       li.querySelector('.guide-state')!.textContent = done.has(li.dataset.guide!) ? ', done' : li === next ? ', current step' : ', not done yet';
     });
     $('#guide-hint').hidden = next ? !next.dataset.hint : false;
-    $('#guide-hint').textContent = next ? next.dataset.hint! : 'Both steps done. Keep going with other techniques, or open the answer sheet to check your findings.';
+    $('#guide-hint').textContent = next ? next.dataset.hint! : 'Both steps done. Keep testing, then view the report.';
   }
 
   // ---------- Sending ----------
@@ -290,6 +300,7 @@ const guide = [
     renderTried();
     renderCompose();
     checklist?.render();
+    if (!pending) saveRun();
     const s = sessions[active];
     if (shownVariant !== active) { view.reset(); shownVariant = active; }
     view.sync(s.messages);

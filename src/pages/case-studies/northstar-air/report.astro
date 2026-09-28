@@ -1,0 +1,162 @@
+---
+import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
+---
+
+<CaseStudyLayout title="Northstar Air: test report" description="Pass and fail results from your Northstar Air tests, and who should fix what." backLink={{ href: '/case-studies/', label: 'All case studies' }} steps={{ slug: 'northstar-air', page: 4, report: true }}>
+  <div class="intro report-intro">
+    <h1 class="headline">Test report: Northstar Air</h1>
+    <p class="report-meta" id="report-meta"></p>
+  </div>
+
+  <div class="report-empty" id="report-empty" hidden>
+    <h2>No tests yet</h2>
+    <p>Send a few techniques on the testing page, then come back.</p>
+    <p class="next-row"><a class="button button-primary" href="/case-studies/northstar-air/test/">Start testing AI <span aria-hidden="true">→</span></a></p>
+  </div>
+
+  <div id="report-body" hidden>
+    <section class="report-section" aria-labelledby="decision-title">
+      <h2 id="decision-title">Deploy?</h2>
+      <div class="decisions" id="decisions"></div>
+    </section>
+
+    <section class="report-section" aria-labelledby="fix-title">
+      <h2 id="fix-title">What to fix, and who</h2>
+      <div class="table-scroll"><table class="report-table fix-table" id="fixes"></table></div>
+    </section>
+
+    <section class="report-section" aria-labelledby="tests-title">
+      <h2 id="tests-title">All tests</h2>
+      <div class="tests-toolbar">
+        <div class="seg" role="group" aria-label="Version" id="tests-version"></div>
+        <div class="seg seg-small" role="group" aria-label="Show" id="tests-filter">
+          <button type="button" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" data-filter="fail" aria-pressed="false">Failed</button>
+          <button type="button" data-filter="pass" aria-pressed="false">Passed</button>
+        </div>
+      </div>
+      <div class="table-scroll"><table class="report-table" id="tests"></table></div>
+      <p class="report-gaps" id="report-gaps"></p>
+    </section>
+
+    <div class="report-actions">
+      <a class="button button-secondary" href="/case-studies/northstar-air/test/">Keep testing</a>
+      <button class="text-link" type="button" id="report-print">Print or save as PDF</button>
+      <button class="text-link" type="button" id="report-clear">Clear results</button>
+      <span class="report-confirm" id="report-confirm" hidden>Clear every test from this browser? <button class="text-link" type="button" id="report-clear-yes">Yes, clear</button> <button class="text-link" type="button" id="report-clear-no">Keep them</button></span>
+    </div>
+  </div>
+</CaseStudyLayout>
+
+<script>
+  import { PRESETS } from '../../../lib/case-studies/northstar';
+  import { buildTests, decision, INSIGHTS, insightFor, RUNS_KEY, signedInAs, type Run, type TestResult } from '../../../lib/case-studies/northstar-report';
+  import { esc, store, VARIANTS, VARIANT_LABELS, type Variant } from '../../../lib/case-studies/runner';
+
+  const $ = (s: string) => document.querySelector<HTMLElement>(s)!;
+  const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+  function render() {
+    const runs = store.get<Run[]>(RUNS_KEY, []);
+    const tests = buildTests(runs);
+    $('#report-empty').hidden = tests.length > 0;
+    $('#report-body').hidden = !tests.length;
+    if (!tests.length) { $('#report-meta').textContent = ''; return; }
+
+    const last = runs.map((r) => r.at).sort().at(-1)!;
+    $('#report-meta').textContent = `${plural(tests.length, 'test')} · last run ${new Date(last).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })} · based only on the tests you ran`;
+
+    renderDecisions(tests);
+    renderFixes(tests);
+    renderTests(tests);
+    const untried = PRESETS.length - new Set(tests.map((t) => t.presetId)).size;
+    $('#report-gaps').innerHTML = untried ? `${plural(untried, 'technique')} not tried yet. <a class="text-link" href="/case-studies/northstar-air/test/">Keep testing</a> for a fuller picture.` : '';
+  }
+
+  function renderDecisions(tests: TestResult[]) {
+    $('#decisions').innerHTML = VARIANTS.map((v) => {
+      const d = decision(tests, v);
+      const failed = tests.filter((t) => !t.results[v].pass).length;
+      return `<div class="decision decision-${d.tone}">
+        <h3>${VARIANT_LABELS[v]}</h3>
+        <p class="decision-verdict">${d.verdict}</p>
+        <p class="decision-count">${tests.length - failed} passed · ${failed} failed</p>
+      </div>`;
+    }).join('');
+  }
+
+  // One row per problem found, with the versions it affects and who acts on it.
+  function renderFixes(tests: TestResult[]) {
+    const seen = new Map<string, Set<Variant>>();
+    for (const t of tests) for (const v of VARIANTS) for (const f of t.results[v].failed) {
+      const id = insightFor(f);
+      if (!seen.has(id)) seen.set(id, new Set());
+      seen.get(id)!.add(v);
+    }
+    const ids = Object.keys(INSIGHTS).filter((id) => seen.has(id));
+    const rows = ids.map((id) => {
+      const ins = INSIGHTS[id];
+      return `<tr>
+        <th scope="row"><span class="test-name">${esc(ins.title)}</span><span class="test-meta">${VARIANTS.filter((v) => seen.get(id)!.has(v)).map((v) => VARIANT_LABELS[v]).join(', ')}</span></th>
+        <td class="fix-who">${esc(ins.actions[0].who)}</td><td>${esc(ins.actions[0].what)}</td>
+      </tr>`;
+    }).join('');
+    $('#fixes').innerHTML = `<caption class="visually-hidden">Problems found and who should fix them</caption>
+      <colgroup><col class="col-problem"><col class="col-who"><col></colgroup>
+      <thead><tr><th scope="col">Problem</th><th scope="col">Who</th><th scope="col">Next step</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="3" class="muted">No check failed in the tests you ran.</td></tr>'}
+        <tr><th scope="row"><span class="test-name">Launch decision</span></th><td class="fix-who">Product owner</td><td>Decide whether each version can launch, with sign-off from security and risk.</td></tr>
+      </tbody>`;
+  }
+
+  // The tests table shows one version at a time.
+  let view: Variant = 'weak';
+  let filter: 'all' | 'fail' | 'pass' = 'all';
+  let current: TestResult[] = [];
+
+  function renderTests(tests: TestResult[]) {
+    current = tests;
+    const failedIn = (v: Variant) => tests.filter((t) => !t.results[v].pass).length;
+    $('#tests-version').innerHTML = VARIANTS.map((v) => `<button type="button" data-version="${v}" aria-pressed="${v === view}"><span>${VARIANT_LABELS[v]}</span><span class="seg-count ${failedIn(v) ? 'has-fail' : ''}">${failedIn(v) ? `${failedIn(v)} failed` : 'all passed'}</span></button>`).join('');
+    document.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
+
+    const shown = tests.filter((t) => filter === 'all' || (filter === 'fail') !== t.results[view].pass);
+
+    const rows = shown.map((t, i) => {
+      const r = t.results[view];
+      return `<tr class="${r.pass ? 'is-pass' : 'is-fail'}">
+        <td class="col-n">${i + 1}</td>
+        <th scope="row"><span class="test-name">${esc(t.label)}</span>${t.principal !== 'alex' ? `<span class="test-meta">Signed in as ${esc(signedInAs(t.principal))}</span>` : ''}</th>
+        <td class="col-result"><span class="result-badge ${r.pass ? 'ok' : 'bad'}"><span aria-hidden="true">${r.pass ? '✓' : '✕'}</span> ${r.pass ? 'Pass' : 'Fail'}</span></td>
+        <td>${r.lines.map(esc).join(' ') || 'No reply recorded.'}</td>
+        <td>${r.failed.length ? `<ul class="failed-checks">${r.failed.map((f) => `<li>${esc(f.label)}</li>`).join('')}</ul>` : '<span class="muted">None</span>'}</td>
+      </tr>`;
+    }).join('');
+    $('#tests').innerHTML = `<caption class="visually-hidden">${VARIANT_LABELS[view]} version: result of every test</caption>
+      <colgroup><col class="col-n"><col class="col-test"><col class="col-result"><col class="col-what"><col class="col-why"></colgroup>
+      <thead><tr><th scope="col"><span class="visually-hidden">Number</span></th><th scope="col">Test</th><th scope="col">Result</th><th scope="col">What ${VARIANT_LABELS[view]} did</th><th scope="col">Checks failed</th></tr></thead>
+      <tbody>${rows || `<tr><td colspan="5" class="muted">No ${filter === 'fail' ? 'failures' : 'passes'} for ${VARIANT_LABELS[view]}.</td></tr>`}</tbody>`;
+  }
+
+  $('#tests-version').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-version]');
+    if (!b) return;
+    view = b.dataset.version as Variant;
+    renderTests(current);
+    document.querySelector<HTMLButtonElement>(`#tests-version [data-version="${view}"]`)?.focus();
+  });
+  $('#tests-filter').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-filter]');
+    if (!b) return;
+    filter = b.dataset.filter as typeof filter;
+    renderTests(current);
+  });
+
+  $('#report-print').addEventListener('click', () => print());
+  $('#report-clear').addEventListener('click', () => { $('#report-confirm').hidden = false; $('#report-clear').hidden = true; });
+  $('#report-clear-no').addEventListener('click', () => { $('#report-confirm').hidden = true; $('#report-clear').hidden = false; });
+  $('#report-clear-yes').addEventListener('click', () => { store.set(RUNS_KEY, []); $('#report-confirm').hidden = true; $('#report-clear').hidden = false; render(); });
+  addEventListener('storage', (e) => { if (e.key === RUNS_KEY) render(); });
+
+  render();
+</script>
