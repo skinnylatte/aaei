@@ -285,7 +285,7 @@ const guide = [
 
   function render() {
     // Step 1 ticks once a reply is on screen, not when a technique is picked.
-    if (!pending && sessions.weak.turns.some((t) => t.parsed.techniques.length || t.decision.kind === 'change' || t.decision.kind === 'lookup')) tick('send');
+    if (!pending && VARIANTS.some((v) => sessions[v].turns.length)) tick('send');
     renderTabs();
     renderTried();
     renderCompose();
