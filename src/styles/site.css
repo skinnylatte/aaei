@@ -1,6 +1,8 @@
 /* Shared by every page. Page-specific styles stay with the page. */
 :root {
   --ink: oklch(23% .045 350); --paper: oklch(96% .025 70); --green: oklch(35% .105 355); --green-dark: oklch(25% .075 355); --coral: oklch(69% .16 43); --rice: oklch(91% .045 65);
+  /* Case study colours: each pair passes WCAG AA for text (checked at 6.7:1 or higher). */
+  --coral-light: oklch(83% .09 45); --teal: oklch(40% .075 200); --mint: oklch(90% .06 180); --ochre: oklch(84% .11 85);
   --line: color-mix(in oklch, var(--ink) 20%, transparent); --line-light: color-mix(in oklch, var(--paper) 30%, transparent);
   --display: 'Manrope', Arial, sans-serif; --body: 'Noto Sans', Arial, sans-serif;
   --gutter: clamp(20px, 4vw, 56px); --page: min(1400px, calc(100vw - 2 * var(--gutter))); --inset: calc((100vw - var(--page)) / 2);

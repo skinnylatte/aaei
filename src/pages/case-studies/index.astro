@@ -3,44 +3,38 @@ import CaseStudyLayout from '../../layouts/CaseStudyLayout.astro';
 
 const studies = [
   {
+    id: 'northstar-air',
     href: '/case-studies/northstar-air/',
     title: 'Northstar Air customer service',
     lede: 'An airline support agent that looks up bookings and changes where itineraries are sent.',
-    practise: ['Test what the agent will do for someone who is not the booking holder', 'Try different attack techniques, in English, Chinese and Malay', 'Judge a human agent\'s decision with only what is on their screen'],
     tags: ['Authorization', 'Privacy', 'Human escalation'],
-    for: 'product, engineering and customer operations',
   },
   {
+    id: 'tidewater',
     href: '/case-studies/tidewater/',
     title: 'Tidewater Logistics invoice approvals',
     lede: 'An accounts-payable agent that reads invoices and prepares payments for a finance officer to approve.',
-    practise: ['Write an attack and hide it in a document the agent reads', 'Approve a payment batch the way a busy finance officer would', 'Find out whether a mitigation holds, and what it breaks'],
     tags: ['Prompt injection', 'Excessive agency', 'Human approval'],
-    for: 'security, finance, risk and audit',
   },
   {
+    id: 'harbour-city',
     href: '/case-studies/harbour-city/',
     title: 'Harbour City Services grant assistant',
     lede: 'A multilingual public services assistant answering residents\' questions about a household grant.',
-    practise: ['Ask the same question in English, Chinese, Malay, Tamil and mixed language', 'Rank failures by who gets hurt, and how badly', 'Decide what gap between languages is acceptable'],
     tags: ['Multilingual', 'Misinformation', 'Fairness'],
-    for: 'public sector, policy and legal',
   },
 ];
 ---
 
 <CaseStudyLayout title="Case studies" description="Hands-on case studies that show how AI systems fail in practice, from the Asian AI Evaluation Institute.">
   <div class="intro"><h1 class="headline">Case studies</h1><p>Three synthetic AI systems to test the way you would before deployment. Each has a weak, a patched and a safe version. Everything runs in your browser and nothing real is sent.</p></div>
-  <ul class="demo-list">
+  <ul class="case-grid">
     {studies.map((s) => (
-      <li class="demo">
-        <h2>{s.title}</h2>
-        <p class="demo-lede">{s.lede}</p>
-        <div class="demo-body">
-          <div><h3>You will</h3><ul class="check-list">{s.practise.map((p) => <li>{p}</li>)}</ul></div>
-          <div><h3>Covers</h3><div class="tag-list">{s.tags.map((t) => <span>{t}</span>)}</div><p class="demo-for">Written with {s.for} in mind.</p></div>
-        </div>
-        <div class="demo-bottom"><p>About 30 to 35 minutes</p><a class="button button-primary" href={s.href}>Open case study <span aria-hidden="true">→</span></a></div>
+      <li class={`case-tile case-tile-${s.id}`}>
+        <h2><a href={s.href}>{s.title}</a></h2>
+        <p class="case-tile-lede">{s.lede}</p>
+        <div class="tag-list">{s.tags.map((t) => <span>{t}</span>)}</div>
+        <div class="case-tile-bottom"><p>About 30 to 35 minutes</p><span class="button" aria-hidden="true">Open <span>→</span></span></div>
       </li>
     ))}
   </ul>
