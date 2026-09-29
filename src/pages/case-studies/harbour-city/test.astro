@@ -208,11 +208,23 @@ const guide = [
 
   // ---------- Judging an answer against the policy ----------
   const STATUS_LABEL: Record<DocStatus, string> = { official: 'Official', outdated: 'Outdated', unreviewed: 'Unreviewed', tampered: 'Tampered', restricted: 'Case records' };
-  const sourcePill = (t: Turn) => {
-    if (!t.claims.source) return '<span class="muted">None</span>';
-    const d = docById(t.claims.source);
-    return `<span class="pill ${d.status === 'official' ? 'ok' : d.status === 'restricted' ? '' : 'bad'}" title="${esc(d.title)}">${STATUS_LABEL[d.status]}</span>`;
+  // What each status means, in plain words, wherever a source is shown.
+  const STATUS_MEANS: Record<DocStatus, string> = {
+    official: 'Published by Harbour City Services and checked.',
+    outdated: 'An old version that was never taken out of the search index.',
+    unreviewed: 'A draft that nobody at Harbour City has checked.',
+    tampered: 'Edited by an account that is not on the staff list.',
+    restricted: 'Private case records.',
   };
+  const statusPill = (st: DocStatus) => `<span class="pill ${st === 'official' ? 'ok' : st === 'restricted' ? '' : 'bad'}">${STATUS_LABEL[st]}</span>`;
+  // Where one answer came from: the page, its status, and why that status matters.
+  const sourceHtml = (t: Turn, full: boolean) => {
+    if (!t.claims.source) return `<p class="src-line">${t.claims.fabricated ? 'No source: the answer was made up.' : 'No page was used.'}</p>`;
+    const d = docById(t.claims.source);
+    const why = full && d.status !== 'official' ? `<span class="src-why">${esc(d.detail)}</span>` : '';
+    return `<p class="src-line">From <strong>${esc(d.title)}</strong> ${statusPill(d.status)}${why}</p>`;
+  };
+  let kbOpen = true;
   const lastTurns = (v: Variant) => (last ? sessions[v].turns.slice(last.from, last.from + last.langs.length) : []);
 
   // ---------- Rendering ----------
@@ -246,17 +258,18 @@ const guide = [
     }).join('');
     const rows = lastTurns(active).map((t) => {
       const j = judge(t, applicant);
-      return `<li class="${j.ok ? '' : 'is-fail'}"><p class="lang-head"><strong>${esc(LANG_LABELS[t.lang])}</strong> ${sourcePill(t)}</p><p class="lang-verdict"><span class="result-badge ${j.ok ? 'ok' : 'bad'}"><span aria-hidden="true">${j.ok ? '✓' : '✕'}</span> ${esc(j.label)}</span></p><p class="lang-answer">${esc(t.translation ?? t.reply)}</p></li>`;
+      return `<li class="${j.ok ? '' : 'is-fail'}"><p class="lang-head"><strong>${esc(LANG_LABELS[t.lang])}</strong></p>${sourceHtml(t, true)}<p class="lang-verdict"><span class="result-badge ${j.ok ? 'ok' : 'bad'}"><span aria-hidden="true">${j.ok ? '✓' : '✕'}</span> ${esc(j.label)}</span></p><p class="lang-answer">${esc(t.translation ?? t.reply)}</p></li>`;
     }).join('');
-    const open = $('#ev-happened details.ev-detail')?.hasAttribute('open');
+    const used = new Set(lastTurns(active).map((t) => t.claims.source).filter(Boolean));
     panel.innerHTML = `
       <h3 class="evidence-title">"${esc(q.label)}", ${last.langs.length === 1 ? `in ${esc(LANG_LABELS[last.langs[0]])}` : 'in every language'}</h3>
       <ul class="compare-list">${summary}</ul>
       <h4>${VARIANT_LABELS[active]}, answer by answer</h4>
       <ul class="lang-list" aria-label="${VARIANT_LABELS[active]}: each language's answer in English, checked against the policy, with its source">${rows}</ul>
-      <details class="ev-detail"${open ? ' open' : ''}>
-        <summary>What is in the knowledge base</summary>
-        <ul class="kb-list">${DOCS.map((d) => `<li><span class="pill ${d.status === 'official' ? 'ok' : d.status === 'restricted' ? '' : 'bad'}">${STATUS_LABEL[d.status]}</span> <strong>${esc(d.title)}</strong>. ${esc(d.detail)}</li>`).join('')}</ul>
+      <details class="ev-detail kb"${kbOpen ? ' open' : ''}>
+        <summary>Where the answers come from</summary>
+        <p class="note">The assistant looks up pages in its search index, then answers from what it finds. ${VARIANT_LABELS[active]}'s index holds these pages. The ones marked "Used" answered this question.</p>
+        <ul class="kb-list">${DOCS.map((d) => `<li class="${used.has(d.id) ? 'is-used' : ''}"><p class="kb-title"><strong>${esc(d.title)}</strong> ${statusPill(d.status)}${used.has(d.id) ? ' <span class="kb-used">Used</span>' : ''}</p><p class="kb-means">${esc(STATUS_MEANS[d.status])} ${d.status === 'official' ? '' : esc(d.detail)}</p></li>`).join('')}</ul>
       </details>`;
   }
 
@@ -267,12 +280,22 @@ const guide = [
     return [`"${q.label}"${applicant === 'none' ? '' : `, signed in as ${who(applicant)}`}`, ...VARIANTS.map((v) => `${VARIANT_LABELS[v]}: ${lastTurns(v).map((t) => `${LANG_LABELS[t.lang]}: ${judge(t, applicant).label}`).join('; ')}`)].join('\n');
   }
 
+  // Under each reply in the chat, name the page it came from.
+  function annotateChat() {
+    const turns = sessions[active].turns;
+    document.querySelectorAll<HTMLElement>('#messages .message.assistant:not(.typing)').forEach((m, i) => {
+      if (m.querySelector('.src-line') || !turns[i]) return;
+      m.querySelector('.bubble')!.insertAdjacentHTML('afterend', sourceHtml(turns[i], false));
+    });
+  }
+
   function render() {
     renderTabs();
     renderTried();
     if (!pending) {
       if (shownVariant !== active) { view.reset(); shownVariant = active; }
       view.sync(sessions[active].messages);
+      annotateChat();
     }
     renderEvidence();
     checklist?.render();
@@ -297,6 +320,7 @@ const guide = [
     document.querySelector<HTMLButtonElement>(`[data-version="${next}"]`)!.click();
     document.querySelector<HTMLButtonElement>(`[data-version="${next}"]`)!.focus();
   });
+  $('#ev-happened').addEventListener('toggle', (e) => { if ((e.target as HTMLElement).matches('details.kb')) kbOpen = (e.target as HTMLDetailsElement).open; }, true);
   $('#ev-happened').addEventListener('click', (e) => {
     const row = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-compare]');
     if (row) document.querySelector<HTMLButtonElement>(`[data-version="${row.dataset.compare}"]`)!.click();

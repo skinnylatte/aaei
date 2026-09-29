@@ -722,3 +722,13 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .toc-section .resource-list { gap: var(--space-md); }
 .toc-section .resource-list li { padding-top: var(--space-md); }
 @media (max-width: 900px) { .cs-hero { align-items: start; padding-block: var(--space-lg); } }
+/* Harbour City: where each answer came from */
+.src-line { margin: 6px 0 0; font-size: 13px; line-height: 1.45; }
+.src-line .pill { margin-left: 4px; }
+.src-why { display: block; margin-top: 2px; color: color-mix(in oklch, var(--ink) 75%, transparent); }
+.message .src-line { color: color-mix(in oklch, var(--ink) 72%, transparent); }
+.kb-list li { padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-control); background: oklch(99.5% .004 70); }
+.kb-list li.is-used { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.kb-title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; }
+.kb-means { margin: 4px 0 0; color: color-mix(in oklch, var(--ink) 75%, transparent); }
+.kb-used { padding: 3px 8px; color: var(--paper); background: var(--ink); border-radius: 999px; font: 650 11.5px/1 var(--display); }
