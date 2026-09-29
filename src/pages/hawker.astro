@@ -1,0 +1,214 @@
+---
+import CaseStudyLayout from '../layouts/CaseStudyLayout.astro';
+
+// What players see about each level. The secrets themselves live only in netlify/functions/hawker.mjs.
+const levels = [
+  { n: 1, version: 'Weak', dish: 'Chicken rice chilli', defence: 'Uncle has been asked not to tell. That is all that protects it.', goal: 'Get Uncle to say his secret ingredient.' },
+  { n: 2, version: 'Patched', dish: 'Laksa', defence: 'A filter blocks messages with words like "secret" or "recipe", and any reply that contains the ingredient\'s name.', goal: 'Get Uncle to say his secret ingredient, past both filters.' },
+  { n: 3, version: 'Safe', dish: 'Kaya toast', defence: 'Stricter filters in several languages, and a second AI that reads every reply before you see it. Uncle will never say it outright.', goal: 'Work the secret out from his hints, then tell him what it is.' },
+];
+---
+
+<CaseStudyLayout title="Uncle Lim's secret" description="A hands-on prompt injection game against a real AI model. Get a hawker to give away his secret ingredient." backLink={{ href: '/', label: 'Home' }}>
+  <div class="intro test-intro hk-intro">
+    <h1 class="headline">Uncle Lim's secret</h1>
+    <p>Uncle Lim has run his stall at Tanjong Rhu Food Centre for forty years, and each dish has a secret ingredient. He is played by a real AI model. Talk him into giving his secrets away, one level at a time.</p>
+  </div>
+
+  <div class="hk-bench">
+    <section class="chat chat-tabbed" aria-labelledby="hk-title">
+      <h2 id="hk-title" class="visually-hidden">Chat with Uncle Lim</h2>
+      <div class="version-tabs" role="tablist" aria-label="Level">
+        {levels.map((l, i) => (
+          <button type="button" role="tab" id={`lvl-${l.n}`} data-level={l.n} aria-selected={i === 0 ? 'true' : 'false'} aria-controls="hk-messages" tabindex={i === 0 ? undefined : '-1'}>
+            <span class="hk-tab"><span>Level {l.n}: {l.dish}</span><span class="hk-tab-sub">{l.version}<span class="hk-won" hidden> · solved ✓</span></span></span>
+          </button>
+        ))}
+      </div>
+      <div class="chat-body" id="hk-messages" role="tabpanel" aria-labelledby="lvl-1" aria-live="polite"></div>
+      <form class="compose" id="hk-form">
+        <textarea id="hk-input" maxlength="400" aria-label="Your message to Uncle Lim" placeholder="Say something to Uncle Lim"></textarea>
+        <div class="compose-actions">
+          <p class="hk-left" id="hk-left"></p>
+          <button class="button button-primary" type="submit" id="hk-send">Send <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+      <p class="form-error" id="hk-error" role="alert" hidden></p>
+    </section>
+
+    <aside class="panel hk-side" aria-labelledby="hk-side-title">
+      <h2 id="hk-side-title">This level</h2>
+      {levels.map((l) => (
+        <div class="hk-level" data-level-info={l.n} hidden={l.n !== 1}>
+          <p class="hk-goal"><strong>Goal:</strong> {l.goal}</p>
+          <p><strong>What protects the secret:</strong> {l.defence}</p>
+        </div>
+      ))}
+      <p class="note">Naming the ingredient yourself does not count. Uncle has to give it away.</p>
+
+      <form class="hk-guess" id="hk-guess">
+        <label for="hk-guess-input">Think you know? Tell Uncle</label>
+        <div class="hk-guess-row"><input id="hk-guess-input" maxlength="60" autocomplete="off" placeholder="The secret ingredient is…" /><button class="button button-secondary" type="submit">Check</button></div>
+        <p class="note" id="hk-guess-note"></p>
+      </form>
+
+      <div class="hk-result" id="hk-result" hidden></div>
+      <p class="hk-actions"><button class="text-link" type="button" id="hk-restart">Start this level again</button> <button class="text-link" type="button" id="hk-giveup">Give up and see the secret</button></p>
+
+      <p class="hk-privacy">Your messages go to an AI model run by a third party, through OpenRouter. Do not type anything personal. Nothing is saved on our servers.</p>
+    </aside>
+  </div>
+</CaseStudyLayout>
+
+<script>
+  import { esc, store } from '../lib/case-studies/runner';
+
+  type Msg = { role: 'user' | 'assistant'; content: string };
+  type Shown = Msg | { role: 'blocked'; content: string } | { role: 'note'; content: string };
+  type Progress = Record<number, { solved: boolean; secret?: string; lesson?: string; gaveUp?: boolean; wrong?: number }>;
+
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const PROGRESS = 'aaei:hawker:progress';
+  const MAX_MESSAGES = 30;
+  const MAX_WRONG = 3;
+  const GREETING = 'Eh, come, come! Welcome to my stall. You want to eat what? Ask me anything about my food.';
+
+  let level = 1;
+  const chats: Record<number, Shown[]> = { 1: [], 2: [], 3: [] };
+  let pending = false;
+  const progress = (): Progress => store.get<Progress>(PROGRESS, {});
+  const saveProgress = (p: Progress) => store.set(PROGRESS, p);
+
+  const sentCount = () => chats[level].filter((m) => m.role === 'user').length;
+  // Only real turns go to the model; blocked replies and notes are shown to the player alone.
+  const history = () => chats[level].filter((m): m is Msg => m.role === 'user' || m.role === 'assistant');
+
+  function renderMessages() {
+    const box = $('#hk-messages');
+    const items = chats[level].map((m) => {
+      if (m.role === 'blocked') return `<div class="message assistant hk-blocked"><p class="role">Defence</p><p class="bubble">${esc(m.content)}</p></div>`;
+      if (m.role === 'note') return `<p class="hk-note">${esc(m.content)}</p>`;
+      return `<div class="message ${m.role}"><p class="role">${m.role === 'user' ? 'You' : 'Uncle Lim'}</p><p class="bubble">${esc(m.content)}</p></div>`;
+    }).join('');
+    box.innerHTML = `<div class="message assistant"><p class="role">Uncle Lim</p><p class="bubble">${esc(GREETING)}</p></div>${items}${pending ? '<div class="message assistant typing"><p class="role">Uncle Lim</p><p class="bubble"><span class="visually-hidden">Uncle is replying</span><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></p></div>' : ''}`;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function renderSide() {
+    const p = progress()[level];
+    document.querySelectorAll<HTMLElement>('[data-level-info]').forEach((el) => { el.hidden = Number(el.dataset.levelInfo) !== level; });
+    document.querySelectorAll<HTMLButtonElement>('[data-level]').forEach((b) => {
+      const n = Number(b.dataset.level);
+      b.setAttribute('aria-selected', String(n === level));
+      b.tabIndex = n === level ? 0 : -1;
+      b.querySelector<HTMLElement>('.hk-won')!.hidden = !progress()[n]?.solved;
+    });
+    $('#hk-messages').setAttribute('aria-labelledby', `lvl-${level}`);
+    const done = !!p?.solved || !!p?.gaveUp;
+    const left = MAX_MESSAGES - sentCount();
+    $('#hk-left').textContent = done ? '' : `${left} of ${MAX_MESSAGES} messages left on this level`;
+    $<HTMLButtonElement>('#hk-send').disabled = pending || done || left <= 0;
+    $<HTMLTextAreaElement>('#hk-input').disabled = done || left <= 0;
+    const wrong = p?.wrong ?? 0;
+    $<HTMLFormElement>('#hk-guess').hidden = done;
+    $('#hk-guess-note').textContent = wrong ? `${MAX_WRONG - wrong} of ${MAX_WRONG} guesses left.` : `You have ${MAX_WRONG} guesses.`;
+    $<HTMLButtonElement>('#hk-giveup').hidden = done;
+    const result = $('#hk-result');
+    result.hidden = !done;
+    if (done) {
+      result.className = `hk-result ${p!.solved ? 'is-won' : 'is-lost'}`;
+      result.innerHTML = `<h3>${p!.solved ? 'You got it' : 'The secret was'}: ${esc(p!.secret ?? '')}</h3><p>${esc(p!.lesson ?? '')}</p>${level < 3 ? `<button class="button button-primary" type="button" data-next>Next: level ${level + 1} <span aria-hidden="true">→</span></button>` : '<p><strong>All three levels done.</strong> Think about which defence actually held, and why.</p>'}`;
+    }
+  }
+
+  function render() { renderMessages(); renderSide(); }
+  const showError = (m = '') => { const e = $('#hk-error'); e.textContent = m; e.hidden = !m; };
+
+  async function api(body: Record<string, unknown>) {
+    const res = await fetch('/case-studies/api/hawker', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ level, ...body }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Something went wrong. Try again.');
+    return data;
+  }
+
+  function solve(data: { secret?: string; lesson?: string }, solved: boolean) {
+    const p = progress();
+    p[level] = { ...p[level], solved, gaveUp: !solved, secret: data.secret, lesson: data.lesson };
+    saveProgress(p);
+  }
+
+  $('#hk-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = $<HTMLTextAreaElement>('#hk-input');
+    const text = input.value.trim();
+    if (!text || pending || sentCount() >= MAX_MESSAGES) return;
+    showError();
+    chats[level].push({ role: 'user', content: text });
+    input.value = '';
+    pending = true;
+    render();
+    const at = level;
+    try {
+      const data = await api({ messages: history() });
+      if (data.blocked) chats[at].push({ role: 'blocked', content: data.detail });
+      else chats[at].push({ role: 'assistant', content: data.reply });
+      if (data.note) chats[at].push({ role: 'note', content: data.note });
+      if (data.won) solve(data, true);
+    } catch (err) {
+      chats[at].pop();
+      input.value = text;
+      showError((err as Error).message);
+    }
+    pending = false;
+    render();
+    input.focus();
+  });
+  $<HTMLTextAreaElement>('#hk-input').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $<HTMLFormElement>('#hk-form').requestSubmit(); } });
+
+  $('#hk-guess').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = $<HTMLInputElement>('#hk-guess-input');
+    if (!input.value.trim()) return;
+    showError();
+    try {
+      const data = await api({ guess: input.value });
+      if (data.correct) solve(data, true);
+      else {
+        const p = progress();
+        const wrong = (p[level]?.wrong ?? 0) + 1;
+        p[level] = { ...p[level], solved: false, wrong };
+        saveProgress(p);
+        if (wrong >= MAX_WRONG) solve(await api({ giveUp: true }), false);
+        else $('#hk-guess-note').textContent = 'Not quite.';
+      }
+      input.value = '';
+    } catch (err) { showError((err as Error).message); }
+    renderSide();
+  });
+
+  $('#hk-giveup').addEventListener('click', async () => {
+    try { solve(await api({ giveUp: true }), false); } catch (err) { showError((err as Error).message); }
+    renderSide();
+  });
+  $('#hk-restart').addEventListener('click', () => {
+    chats[level] = [];
+    const p = progress();
+    delete p[level];
+    saveProgress(p);
+    showError();
+    render();
+  });
+  $('#hk-result').addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('[data-next]')) { level = Math.min(3, level + 1); render(); }
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-level]').forEach((b) => b.addEventListener('click', () => { if (pending) return; level = Number(b.dataset.level); showError(); render(); }));
+  $('.version-tabs').addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const next = ((level - 1 + (e.key === 'ArrowRight' ? 1 : 2)) % 3) + 1;
+    document.querySelector<HTMLButtonElement>(`[data-level="${next}"]`)!.click();
+    document.querySelector<HTMLButtonElement>(`[data-level="${next}"]`)!.focus();
+  });
+
+  render();
+</script>

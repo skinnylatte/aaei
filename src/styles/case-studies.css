@@ -732,3 +732,30 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .kb-title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; }
 .kb-means { margin: 4px 0 0; color: color-mix(in oklch, var(--ink) 75%, transparent); }
 .kb-used { padding: 3px 8px; color: var(--paper); background: var(--ink); border-radius: 999px; font: 650 11.5px/1 var(--display); }
+
+/* Uncle Lim's secret: the prompt injection game */
+.hk-bench { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); gap: var(--space-sm); align-items: start; }
+.hk-bench .chat-body { height: clamp(320px, calc(100vh - 460px), 560px); min-height: 0; max-height: none; }
+.hk-tab { display: grid; gap: 3px; text-align: center; }
+.hk-tab-sub { font: 500 12.5px/1.2 var(--display); color: color-mix(in oklch, var(--ink) 65%, transparent); }
+.hk-won { color: var(--teal); font-weight: 700; }
+.hk-left { margin: 0; font-size: 13.5px; color: color-mix(in oklch, var(--ink) 70%, transparent); }
+.hk-blocked .bubble { color: oklch(38% .15 28); background: oklch(95% .035 28); border-color: color-mix(in oklch, oklch(45% .17 28) 40%, transparent); font-size: 14.5px; }
+.hk-note { align-self: center; max-width: 52ch; margin: 0; padding: 8px 12px; background: var(--rice); border-radius: var(--radius-control); font-size: 14px; text-align: center; }
+.hk-side h2 { margin-bottom: var(--space-xs); }
+.hk-level p { margin: 0 0 10px; font-size: 15px; line-height: 1.5; }
+.hk-goal { padding: 10px 12px; background: oklch(99.5% .004 70); border: 1px solid var(--line); border-radius: var(--radius-control); }
+.hk-guess { display: grid; gap: 6px; margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px solid var(--line); }
+.hk-guess label { font: 650 14.5px/1.3 var(--display); }
+.hk-guess-row { display: flex; gap: 8px; }
+.hk-guess-row input { flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px; color: var(--ink); background: oklch(99% .006 70); border: 1px solid color-mix(in oklch, var(--ink) 45%, transparent); border-radius: var(--radius-control); font: 400 15px/1.3 var(--body); }
+.hk-guess-row input:focus-visible { outline: 3px solid var(--coral); outline-offset: 1px; }
+.hk-guess .note { margin: 0; }
+.hk-result { margin-top: var(--space-sm); padding: 14px 16px; border-radius: var(--radius-panel); border: 1px solid var(--ink); }
+.hk-result.is-won { background: oklch(95% .03 170); } .hk-result.is-lost { background: oklch(95% .05 85); }
+.hk-result h3 { margin: 0 0 6px !important; font: 700 18px/1.25 var(--display); }
+.hk-result p { margin: 0 0 10px; font-size: 15px; line-height: 1.5; }
+.hk-actions { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: var(--space-sm) 0 0; }
+.hk-actions .text-link { padding: 0; color: var(--ink); background: none; border: 0; cursor: pointer; text-decoration: underline; font-size: 14px; }
+.hk-privacy { margin: var(--space-sm) 0 0; padding-top: var(--space-sm); border-top: 1px solid var(--line); font-size: 13px; color: color-mix(in oklch, var(--ink) 70%, transparent); }
+@media (max-width: 900px) { .hk-bench { grid-template-columns: minmax(0, 1fr); } .hk-bench .chat-body { height: 420px; } }

@@ -1,4 +1,4 @@
-// Password-protects the case studies behind the branded sign-in page at /signin/.
+// Password-protects the case studies, and the hawker game at /hawker, behind the branded sign-in page at /signin/.
 // Runs on Netlify's servers before any case study page is sent, so it cannot be bypassed in the browser.
 //
 // Required environment variable (Netlify > Site configuration > Environment variables):
@@ -44,18 +44,19 @@ const readCookie = (request, name) => {
   }
   return null;
 };
-const sessionCookie = (value, maxAge) => `${COOKIE}=${value}; Path=/case-studies; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
+// Path=/ so the session also reaches /hawker. Sessions from before this change used Path=/case-studies.
+const sessionCookie = (value, maxAge, path = '/') => `${COOKIE}=${value}; Path=${path}; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
 
-// Only ever send people back to a case study page, never to another site.
+// Only ever send people back to a case study page or the hawker game, never to another site.
 const safeNext = (value) => {
   const next = String(value ?? '');
-  const isCaseStudyPath = /^\/case-studies(\/|$)/.test(next) && !next.startsWith('//') && !next.includes('\\');
+  const isCaseStudyPath = /^\/(case-studies|hawker)(\/|$)/.test(next) && !next.startsWith('//') && !next.includes('\\');
   return isCaseStudyPath && !/^\/case-studies\/(login|logout)\b/.test(next) ? next : '/case-studies/';
 };
 
-const redirect = (location, cookie) => {
+const redirect = (location, ...cookies) => {
   const headers = new Headers({ Location: location, 'Cache-Control': 'no-store' });
-  if (cookie) headers.set('Set-Cookie', cookie);
+  for (const cookie of cookies) headers.append('Set-Cookie', cookie);
   return new Response(null, { status: 303, headers });
 };
 
@@ -79,7 +80,8 @@ export default async (request, context) => {
     return redirect(`${SIGN_IN}?error=1&next=${encodeURIComponent(next)}`);
   }
 
-  if (url.pathname === '/case-studies/logout') return redirect(`${SIGN_IN}?signedout=1`, sessionCookie('', 0));
+  // Clear the session on both paths, so older sessions sign out too.
+  if (url.pathname === '/case-studies/logout') return redirect(`${SIGN_IN}?signedout=1`, sessionCookie('', 0), sessionCookie('', 0, '/case-studies'));
 
   const token = readCookie(request, COOKIE);
   if (token && (await isValidToken(token, password))) {
@@ -91,4 +93,4 @@ export default async (request, context) => {
   return redirect(`${SIGN_IN}?next=${encodeURIComponent(safeNext(url.pathname + url.search))}`);
 };
 
-export const config = { path: ['/case-studies', '/case-studies/*'] };
+export const config = { path: ['/case-studies', '/case-studies/*', '/hawker', '/hawker/*'] };
