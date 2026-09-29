@@ -10,13 +10,6 @@ const studies = [
     tags: ['Authorization', 'Privacy', 'Human escalation'],
   },
   {
-    id: 'tidewater',
-    href: '/case-studies/tidewater/',
-    title: 'Tidewater Logistics invoice approvals',
-    lede: 'An accounts-payable agent that reads invoices and prepares payments for a finance officer to approve.',
-    tags: ['Prompt injection', 'Excessive agency', 'Human approval'],
-  },
-  {
     id: 'harbour-city',
     href: '/case-studies/harbour-city/',
     title: 'Harbour City Services grant assistant',
@@ -32,20 +25,14 @@ const outcomes = [
   { outcome: 'Apply OWASP GenAI security concepts', where: 'Every check is tagged with its risk from the OWASP Top 10 for LLM Applications, such as prompt injection, excessive agency, sensitive information disclosure and misinformation.' },
   { outcome: 'Turn red-team findings into repeatable evaluation cases', where: 'Marking a failure as found saves the result as evidence. The test report replays every technique you sent on a fresh session, so each one becomes a test you can run again.' },
   { outcome: 'Design practical criteria for evaluating AI behavior', where: 'Say what a failure looks like for each mode on your worksheet, then compare it with the pass or fail checks the report scores each version against.' },
-  { outcome: 'Test authorization boundaries, tool use and human oversight', where: 'Try to reach another passenger’s booking, or get an agent to change bank details and release payments without approval.' },
+  { outcome: 'Test authorization boundaries, tool use and human oversight', where: 'Try to reach another passenger’s booking or another resident’s case, and see whether a human agent catches it.' },
   { outcome: 'Evaluate mitigations and run regression tests', where: 'Every case study has a weak, a patched and a safe version. Send the same message to all three and compare.' },
   { outcome: 'Build credible evidence to support deployment decisions', where: 'Step 4, View the report: a deploy decision for each version, and what to fix and who owns it.' },
 ];
 
-// The testing method the workshop teaches, in the order the case study steps follow.
-const method = [
-  { title: 'Understand the system', text: 'Read the brief: who uses it, what it can do, what data it holds and what is at stake.' },
-  { title: 'Find the failures that matter', text: 'Not every failure is equally bad. Rank them by who is harmed and how badly, and test the worst first.' },
-  { title: 'Design adversarial tests', text: 'Write the messages a determined or careless user would send, in every language the system supports. Include everyday requests, not only attacks.' },
-  { title: 'Examine what happened', text: 'Read the tool calls, handoffs and decisions behind each reply, not just the reply itself.' },
-  { title: 'Make it repeatable', text: 'Turn each failure into a test you can run again after every fix, so you know if a fix holds or something else broke.' },
-  { title: 'Decide, with evidence', text: 'Report what passed and failed, what must be fixed before launch, and who is responsible.' },
-];
+// Mentions of the OWASP Top 10 link to it, wherever they appear on this page.
+const OWASP_TOP_10 = 'https://genai.owasp.org/llm-top-10/';
+const linkOwasp = (text: string) => text.split(/((?:OWASP )?Top 10 for LLM Applications)/).map((part, i) => (i % 2 ? { text: part, href: OWASP_TOP_10 } : part));
 
 const resources = [
   {
@@ -84,6 +71,7 @@ const resources = [
     title: 'Learn from industry groups',
     intro: 'These groups publish research, guidelines and best practices. Check back regularly, as they update often.',
     links: [
+      { href: OWASP_TOP_10, title: 'OWASP Top 10 for LLM Applications', source: 'OWASP Gen AI Security Project', note: 'The ten most serious security risks for applications built on large language models, from prompt injection to unbounded consumption. The checks in these case studies are tagged with them.' },
       { href: 'https://genai.owasp.org/', title: 'OWASP Gen AI Security Project', source: 'OWASP', note: 'Home of the Top 10 for LLM Applications and the Top 10 for Agentic Applications.' },
       { href: 'https://aaif.io/', title: 'Agentic AI Foundation (AAIF)', source: 'Linux Foundation', note: 'Open standards for AI agents, including the Model Context Protocol (MCP) and AGENTS.md.' },
     ],
@@ -95,22 +83,20 @@ const audiences = ['Product managers', 'Engineers', 'Lawyers', 'Risk and complia
 const toc = [
   { id: 'case-studies', label: 'Case Studies' },
   { id: 'what-you-learn', label: 'What You Will Learn' },
-  { id: 'adversarial-testing', label: 'Adversarial Testing' },
   { id: 'tools-and-resources', label: 'Tools and Resources' },
 ];
 ---
 
 <CaseStudyLayout title="Case studies" description="Hands-on case studies that show how AI systems fail in practice, from the Asian AI Evaluation Institute.">
-  <div class="intro intro-split">
+  <div class="intro intro-split cs-hero">
     <div>
       <h1 class="headline">Break AI Before Deploying AI</h1>
       <p>A hands-on workshop on evaluating and red teaming generative and agentic AI systems before deployment. You will work with AI applications and learn how to make them fail, then turn those failures into repeatable evaluations that support better deployment decisions.</p>
-      <p class="intro-small">Below are three synthetic AI systems. Each has a weak, a patched and a safe version. Everything runs in your browser and nothing real is sent.</p>
     </div>
     <aside class="glance" aria-labelledby="glance-title">
       <h2 id="glance-title">At a glance</h2>
       <dl>
-        <div><dt>Case studies</dt><dd>3, about 30 to 35 minutes each</dd></div>
+        <div><dt>Case studies</dt><dd>2, about 30 to 35 minutes each</dd></div>
         <div><dt>Each one</dt><dd>Read the brief, rank what could go wrong, then test three versions side by side</dd></div>
         <div><dt>Data</dt><dd>Synthetic only. No coding needed.</dd></div>
       </dl>
@@ -119,13 +105,14 @@ const toc = [
       <ul class="audience-chips">{audiences.map((a) => <li>{a}</li>)}</ul>
     </aside>
   </div>
-  <nav class="page-toc" aria-labelledby="toc-title">
+  <nav class="page-toc cs-toc" aria-labelledby="toc-title">
     <h2 id="toc-title" class="visually-hidden">On this page</h2>
     <ol>{toc.map((t) => <li><a href={`#${t.id}`}>{t.label}</a></li>)}</ol>
   </nav>
 
   <section id="case-studies" class="toc-section" aria-labelledby="case-studies-title">
-  <h2 id="case-studies-title" class="section-title">Case Studies</h2>
+    <h2 id="case-studies-title" class="section-title">Case Studies</h2>
+    <p class="section-lede">Two synthetic AI systems, each with a weak, a patched and a safe version. Everything runs in your browser and nothing real is sent.</p>
   <ul class="case-grid">
     {studies.map((s) => (
       <li class={`case-tile case-tile-${s.id}`}>
@@ -145,18 +132,10 @@ const toc = [
       {outcomes.map((o) => (
         <li>
           <h3>{o.outcome}</h3>
-          <p>{o.where}</p>
+          <p>{linkOwasp(o.where).map((part) => (typeof part === 'string' ? part : <a class="text-link" href={part.href} rel="noopener">{part.text}</a>))}</p>
         </li>
       ))}
     </ul>
-  </section>
-
-  <section id="adversarial-testing" class="toc-section" aria-labelledby="adversarial-testing-title">
-    <h2 id="adversarial-testing-title" class="section-title">Adversarial Testing</h2>
-    <p class="section-lede">Every case study follows the same method. Use it on your own systems after the workshop.</p>
-    <ol class="method-list">
-      {method.map((m) => <li><h3>{m.title}</h3><p>{m.text}</p></li>)}
-    </ol>
   </section>
 
   <section id="tools-and-resources" class="toc-section" aria-labelledby="tools-and-resources-title">
@@ -172,7 +151,7 @@ const toc = [
               <li>
                 <a href={l.href} rel="noopener">{l.title}</a>
                 <span class="resource-source">{l.source}</span>
-                <p>{l.note}</p>
+                <p>{linkOwasp(l.note).map((part) => (typeof part === 'string' ? part : <a class="text-link" href={part.href} rel="noopener">{part.text}</a>))}</p>
               </li>
             ))}
           </ul>
