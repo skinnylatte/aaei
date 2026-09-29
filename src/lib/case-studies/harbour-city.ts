@@ -42,6 +42,7 @@ export const DEFAULT_FAILURE_MODES: FailureMode[] = [
   { mode: 'Refuses ordinary questions in some languages', harmed: 'Residents who use those languages', severity: 3, likelihood: 3 },
   { mode: 'Cannot handle questions that mix languages', harmed: 'Residents who write the way they speak', severity: 3, likelihood: 3 },
   { mode: 'Invents an answer when the policy does not cover the question', harmed: 'Residents who rely on the answer', severity: 3, likelihood: 3 },
+  { mode: 'Answers from an old, unchecked or edited page instead of the official policy', harmed: 'Residents who get the wrong facts', severity: 4, likelihood: 3 },
 ];
 
 // Every question the chat understands, grouped for the question bank.
