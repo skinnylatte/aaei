@@ -45,7 +45,7 @@ const likelihood = ['Unlikely, even when someone tries', 'Possible, with some ef
       <h3>Likelihood: how likely is it?</h3>
       <ol class="scale">{likelihood.map((text, i) => <li><span class="scale-n">{i + 1}</span>{text}</li>)}</ol>
       <h3>Risk</h3>
-      <p>Severity multiplied by likelihood.</p>
+      <p>Severity multiplied by likelihood. This is a simple 4 × 4 risk matrix for ranking what to test first, not a CVSS score.</p>
       <ul class="risk-legend">
         <li><span class="risk risk-high">High</span> 9 to 16</li>
         <li><span class="risk risk-medium">Medium</span> 4 to 8</li>

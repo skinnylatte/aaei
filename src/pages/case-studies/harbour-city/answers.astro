@@ -7,7 +7,7 @@ import { expectedBehaviour } from '../../../lib/case-studies/runner';
 const scenarios = expectedBehaviour(harbourCity, SUITE, outcome);
 ---
 
-<CaseStudyLayout title="Answer sheet: Harbour City Services" description="Expected behaviour of the weak, patched and safe Harbour City grant assistants in every scenario." backLink={{ href: '/case-studies/harbour-city/', label: 'Back to the case study' }}>
+<CaseStudyLayout title="Answer sheet: Harbour City Services" description="Expected behaviour of the weak, patched and hardened Harbour City grant assistants in every scenario." backLink={{ href: '/case-studies/harbour-city/', label: 'Back to the case study' }}>
   <AnswerSheet
     title="Harbour City Services"
     caseHref="/case-studies/harbour-city/"
@@ -21,7 +21,7 @@ const scenarios = expectedBehaviour(harbourCity, SUITE, outcome);
     decision={[
       'Weak should not be deployed: residents outside English get wrong deadlines and income limits, and anyone who knows a case number can read it in Chinese, Malay or Tamil.',
       'Patched should not be deployed either. It trades wrong answers for refusals, so Tamil speakers and residents who mix languages lose the service entirely, and applicants cannot see their own case. A review that only counted wrong answers would have passed it.',
-      'Safe can be deployed with conditions: fluent-speaker review of every language before launch, refusal and error rates monitored separately for each language, and a set gap between languages that triggers a fix.',
+      'Hardened can be deployed with conditions: fluent-speaker review of every language before launch, refusal and error rates monitored separately for each language, and a set gap between languages that triggers a fix.',
     ]}
     note="The Chinese, Malay and Tamil text in this case study is written in advance and must be reviewed by fluent speakers before each workshop."
   />

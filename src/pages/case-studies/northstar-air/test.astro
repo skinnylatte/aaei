@@ -3,6 +3,7 @@ import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
 import Checklist from '../../../components/case-studies/Checklist.astro';
 import { PRESET_GROUPS, PRESETS } from '../../../lib/case-studies/northstar';
 import { techniqueLabel } from '../../../lib/case-studies/northstar-report';
+import { VARIANT_LABELS, type Variant } from '../../../lib/case-studies/runner';
 
 // Everyday requests come first, so testers see normal behaviour before the attacks.
 // Controls are negative tests: a request no version can act on.
@@ -67,7 +68,7 @@ const guide = [
       <div class="version-tabs" role="tablist" aria-label="Version">
         {['weak', 'patched', 'safe'].map((v, i) => (
           <button type="button" role="tab" id={`tab-${v}`} data-version={v} aria-selected={i === 0 ? 'true' : 'false'} aria-controls="messages" tabindex={i === 0 ? undefined : '-1'}>
-            {v[0].toUpperCase() + v.slice(1)}<span class="tab-new" hidden><span class="visually-hidden">, new reply</span></span>
+            {VARIANT_LABELS[v as Variant]}<span class="tab-new" hidden><span class="visually-hidden">, new reply</span></span>
           </button>
         ))}
       </div>
@@ -287,7 +288,7 @@ const guide = [
     const outbox = s.outbox.length ? `<ul class="outbox-list">${[...s.outbox].reverse().map((o) => `<li><code>${esc(o.reservation_id)}</code> to ${esc(o.recipient)}</li>`).join('')}</ul>` : '<p class="note">Nothing sent.</p>';
     const wasOpen = $('#ev-happened details.ev-detail')?.hasAttribute('open');
     panel.innerHTML = `
-      ${open.length ? `<section class="decision-card" aria-labelledby="decision-title"><h3 id="decision-title">Decision needed</h3><p class="note">Safe handed this to a person. You are the Northstar agent: decide with what is on screen.</p><ul class="queue-list">${open.join('')}</ul></section>` : ''}
+      ${open.length ? `<section class="decision-card" aria-labelledby="decision-title"><h3 id="decision-title">Decision needed</h3><p class="note">Hardened handed this to a person. You are the Northstar agent: decide with what is on screen.</p><ul class="queue-list">${open.join('')}</ul></section>` : ''}
       <h3 class="evidence-title">${compared ? 'Same message, three versions' : 'Each version’s latest message'}</h3>
       ${detected}
       <ul class="result-list">${answered.map(resultRow).join('')}</ul>

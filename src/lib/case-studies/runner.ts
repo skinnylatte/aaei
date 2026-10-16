@@ -3,7 +3,7 @@
 
 export type Variant = 'weak' | 'patched' | 'safe';
 export const VARIANTS: Variant[] = ['weak', 'patched', 'safe'];
-export const VARIANT_LABELS: Record<Variant, string> = { weak: 'Weak', patched: 'Patched', safe: 'Safe' };
+export const VARIANT_LABELS: Record<Variant, string> = { weak: 'Weak', patched: 'Patched', safe: 'Hardened' };
 
 export type Lang = 'en' | 'zh' | 'ms' | 'ta' | 'mixed';
 export const LANG_LABELS: Record<Lang, string> = { en: 'English', zh: 'Chinese', ms: 'Malay', ta: 'Tamil', mixed: 'Mixed language' };
