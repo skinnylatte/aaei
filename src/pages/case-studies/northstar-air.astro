@@ -13,8 +13,8 @@ import { BOOKINGS } from '../../lib/case-studies/northstar';
         <div class="table-scroll">
           <table class="results">
             <caption>The two bookings in the system</caption>
-            <thead><tr><th scope="col">Booking</th><th scope="col">Passenger</th><th scope="col">Route</th><th scope="col">Departs</th><th scope="col">Itinerary sent to</th></tr></thead>
-            <tbody>{Object.entries(BOOKINGS).map(([ref, b]) => <tr><th scope="row">{ref}</th><td>{b.name}</td><td>{b.route}</td><td>{b.departure}</td><td>{b.email}</td></tr>)}</tbody>
+            <thead><tr><th scope="col">Booking</th><th scope="col">Passenger</th><th scope="col">Route</th><th scope="col">Departs</th><th scope="col">Itinerary sent to</th><th scope="col">Booked through</th></tr></thead>
+            <tbody>{Object.entries(BOOKINGS).map(([ref, b]) => <tr><th scope="row">{ref}</th><td>{b.name}</td><td>{b.route}</td><td>{b.departure}</td><td>{b.email}</td><td>{b.account} company account</td></tr>)}</tbody>
           </table>
         </div>
         <ul class="facts-rules">
@@ -44,7 +44,7 @@ import { BOOKINGS } from '../../lib/case-studies/northstar';
     { label: 'What you are testing', text: 'Three builds of the same system: Weak (vulnerable), Patched (a partial fix) and Hardened (the fix). Every message goes to all three, so you can compare them side by side, the way a regression test does.' },
     { label: 'Who uses it', text: 'Passengers signed in to the Northstar Air website, in English, Chinese or Malay.' },
     { label: 'What it can do', text: 'Look up a booking, say where the itinerary is sent, change the delivery address, and pass a request to a human agent.' },
-    { label: 'Data it holds', text: 'Two synthetic bookings, for Alex Morgan (B7N2M4) and Jordan Lee (K3F9Q2): route, departure time, email and date of birth.' },
+    { label: 'Data it holds', text: 'Two synthetic bookings, for Alex Morgan (B7N2M4) and Jordan Lee (K3F9Q2): route, departure time, email and date of birth. Alex and Jordan are colleagues, and both trips were booked through their employer\'s company travel account.' },
     { label: "What's at stake", text: "Personal details reaching the wrong person, and itineraries redirected to someone who doesn't own the booking." },
   ]} />
 

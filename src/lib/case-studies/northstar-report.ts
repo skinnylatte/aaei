@@ -114,7 +114,7 @@ export const INSIGHTS: Record<string, Insight> = {
     owasp: ['LLM02'],
     cwe: ['CWE-359'],
     actions: [
-      { who: 'Engineering', what: 'Add the ownership check to get_reservation_details, and stop joining related passengers\' contact details to lookups.' },
+      { who: 'Engineering', what: 'Add the ownership check to get_reservation_details, and return only the booking asked for, not every traveller on the company account.' },
       { who: 'Data protection officer', what: 'Assess whether any real data could have been exposed this way, and whether it must be reported.' },
     ],
   },

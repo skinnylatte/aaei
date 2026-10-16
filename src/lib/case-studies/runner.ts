@@ -37,6 +37,7 @@ export type OwaspId = keyof typeof OWASP;
 // MITRE ATLAS techniques the scenarios use, named as in ATLAS.
 export const ATLAS = {
   'AML.T0051.000': 'LLM Prompt Injection: Direct',
+  'AML.T0051.001': 'LLM Prompt Injection: Indirect',
   'AML.T0053': 'AI Agent Tool Invocation',
   'AML.T0054': 'LLM Jailbreak',
   'AML.T0056': 'Extract LLM System Prompt',
