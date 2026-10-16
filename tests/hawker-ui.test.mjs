@@ -8,7 +8,7 @@ import { transformSync } from 'esbuild';
 // Run the actual browser script with deferred API replies to reproduce races.
 function setup() {
   const elements = new Map();
-  const make = () => ({ value: '', hidden: false, disabled: false, dataset: {}, textContent: '', innerHTML: '', listeners: {}, setAttribute() {}, focus() {}, querySelector() { return make(); }, addEventListener(name, fn) { this.listeners[name] = fn; } });
+  const make = () => ({ value: '', hidden: false, disabled: false, dataset: {}, textContent: '', innerHTML: '', listeners: {}, setAttribute() {}, focus() {}, scrollIntoView() {}, querySelector() { return make(); }, addEventListener(name, fn) { this.listeners[name] = fn; } });
   const el = (key) => { if (!elements.has(key)) elements.set(key, make()); return elements.get(key); };
   const tabs = [1, 2, 3].map((n) => Object.assign(make(), { dataset: { level: String(n) } }));
   const controls = [make(), make(), make()];
@@ -24,7 +24,7 @@ function setup() {
       resolve: (data, status = 200) => resolve({ ok: status === 200, json: async () => data }),
     })),
   });
-  vm.runInContext(transformSync(source + '\nglobalThis.state = () => ({level,pending,games,chats,namedFirst,progress:progress()});', { loader: 'ts' }).code, context);
+  vm.runInContext(transformSync(source + '\nglobalThis.state = () => ({level,pending,games,chats,namedFirst,hintCounts,selectedReplies,progress:progress()});', { loader: 'ts' }).code, context);
   const fire = (selector, name = 'click', event = {}) => el(selector).listeners[name]({ preventDefault() {}, ...event });
   return { el, tabs, controls, requests, fire, state: () => context.state() };
 }
@@ -34,6 +34,10 @@ async function chat(h, result, text = 'Hello Uncle') {
   const task = h.fire('#hk-form', 'submit');
   h.requests.at(-1).resolve(result);
   await task;
+}
+
+function mark(h, index) {
+  return h.fire('#hk-messages', 'click', { target: { closest: () => ({ dataset: { markReply: String(index) } }) } });
 }
 
 test('blocked inputs stay visible but never enter later model history', async () => {
@@ -55,7 +59,7 @@ test('chat, evidence submission, give-up and finish lock navigation and duplicat
     const at = h.state().level, game = h.state().games[at], before = h.requests.length;
     let task;
     if (action === 'chat') { h.el('#hk-input').value = 'Hello'; task = h.fire('#hk-form', 'submit'); }
-    if (action === 'guess') { h.el('#hk-evidence').value = '1'; h.el('#hk-guess-input').value = 'Yakult'; task = h.fire('#hk-guess', 'submit'); }
+    if (action === 'guess') { mark(h, 1); h.el('#hk-guess-input').value = 'Yakult'; task = h.fire('#hk-guess', 'submit'); }
     if (action === 'giveup') task = h.fire('#hk-giveup');
     if (action === 'finish') task = h.fire('#hk-finish');
     assert.equal(h.state().pending, true);
@@ -76,10 +80,42 @@ test('level 1 hides guessing; level 2 requires a selected reply and submits its 
   await chat(h, { reply: 'A revealing description', evidence: 'real-receipt' });
   h.el('#hk-guess-input').value = 'Yakult'; await h.fire('#hk-guess', 'submit');
   assert.equal(h.requests.length, 1); assert.match(h.el('#hk-error').textContent, /Select a reply/);
-  h.el('#hk-evidence').value = '1'; const task = h.fire('#hk-guess', 'submit');
+  assert.equal(h.el('#hk-guess').hidden, true);
+  mark(h, 1);
+  assert.equal(h.el('#hk-guess').hidden, false);
+  assert.equal(h.el('#hk-evidence-picker').hidden, true);
+  assert.equal(h.el('#hk-selected-reply').textContent, 'A revealing description');
+  const task = h.fire('#hk-guess', 'submit');
   assert.equal(h.requests[1].body.evidence, 'real-receipt');
   h.requests[1].resolve({ correct: false, retryEvidence: true, detail: 'Need stronger evidence' }); await task;
   assert.equal(h.state().progress[2]?.wrong, undefined);
+});
+
+test('hints reveal progressively without exposing the solution on arrival', () => {
+  const h = setup();
+  assert.equal(h.el('#hk-hints-list').innerHTML, '');
+  h.fire('#hk-next-hint'); assert.equal(h.state().hintCounts[1], 1);
+  assert.doesNotMatch(h.el('#hk-hints-list').innerHTML, /complete shopping list/);
+  h.fire('#hk-next-hint'); h.fire('#hk-next-hint');
+  assert.match(h.el('#hk-hints-list').innerHTML, /complete shopping list/);
+  assert.equal(h.el('#hk-next-hint').disabled, true);
+  h.tabs[1].listeners.click(); assert.equal(h.el('#hk-hints-list').innerHTML, '');
+  h.tabs[0].listeners.click(); assert.equal(h.state().hintCounts[1], 3);
+  h.fire('#hk-restart'); assert.equal(h.state().hintCounts[1], 0);
+  h.tabs[2].listeners.click(); assert.equal(h.el('#hk-next-hint').hidden, true);
+});
+
+test('marking evidence ignores blocked inputs and preserves the revealing reply on success', async () => {
+  const h = setup(); h.tabs[1].listeners.click();
+  await chat(h, { blocked: 'input', detail: 'Input stopped' });
+  mark(h, 0); assert.equal(h.state().selectedReplies[2], '');
+  await chat(h, { reply: 'Y4kult', evidence: 'signed-reply' });
+  const index = h.state().chats[2].findIndex((m) => m.role === 'assistant');
+  mark(h, index); h.el('#hk-guess-input').value = 'Yakult';
+  const task = h.fire('#hk-guess', 'submit');
+  h.requests.at(-1).resolve({ correct: true, secret: 'Yakult', evidenceReply: 'Y4kult' }); await task;
+  assert.equal(h.state().chats[2][index].finding, true);
+  assert.match(h.el('#hk-result').innerHTML, /Y4kult/);
 });
 
 test('level 3 no-disclosure conclusion requires an attempt and does not claim other levels are done', async () => {

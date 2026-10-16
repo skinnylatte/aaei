@@ -769,6 +769,12 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .hk-hints { margin: var(--space-sm) 0; font-size: 14px; }
 .hk-hints summary { cursor: pointer; text-decoration: underline; }
 .hk-hints p { margin: 8px 0; }
+.hk-hints ol { margin: 8px 0; padding-left: 20px; }
+.hk-hints li + li { margin-top: 10px; }
+.hk-hints button { min-height: 44px; }
+.hk-mark-reply { align-self: start; min-height: 44px; padding: 8px 0; color: var(--ink); border: 0; background: none; text-decoration: underline; cursor: pointer; font: 500 14px/1.4 var(--body); }
+.hk-finding .bubble { border: 2px solid var(--teal); background: oklch(95% .03 170); }
+.hk-result blockquote, #hk-selected-reply { margin: 8px 0; padding: 8px 12px; border-left: 3px solid var(--teal); font-size: 14px; overflow-wrap: anywhere; }
 .hk-bench button:disabled, .hk-bench select:disabled { opacity: .55; cursor: not-allowed; }
 .hk-guess-row { display: flex; gap: 8px; }
 .hk-guess-row input { flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px; color: var(--ink); background: oklch(99% .006 70); border: 1px solid color-mix(in oklch, var(--ink) 45%, transparent); border-radius: var(--radius-control); font: 400 15px/1.3 var(--body); }
