@@ -237,7 +237,8 @@ const guide = [
     const out = (e.output ?? {}) as Record<string, unknown>;
     if (out.error || out.blocked) return { label: 'Blocked', cls: 'ok' };
     if (out.queued) return { label: 'Sent to a human agent', cls: '' };
-    return { label: 'Done', cls: e.authorized === false || out.revealed ? 'bad' : '' };
+    if (out.revealed) return { label: 'Revealed', cls: 'bad' };
+    return { label: e.name === 'send_itinerary' || e.name === 'notify_previous_address' ? 'Sent' : 'Done', cls: e.authorized === false ? 'bad' : '' };
   }
 
   // One line per tool call, in the terms of the audit log.
@@ -256,8 +257,10 @@ const guide = [
     const badge = failed.length
       ? `<span class="result-badge bad"><span aria-hidden="true">✕</span> Failed</span> <span class="result-fails">${esc(kinds.join(', '))}</span>`
       : applied ? '<span class="result-badge ok"><span aria-hidden="true">✓</span> Passed</span>' : '<span class="result-badge">No check applies</span>';
-    const parity = t.decision.kind !== t.decisionIfEnglish.kind ? ' <span class="log-bad">· not what it does in English</span>' : '';
-    const log = t.tools.length ? t.tools.map(logLine).join('<br>') : '<span>No tool was called.</span>';
+    const parity = t.decision.kind !== t.decisionIfEnglish.kind ? ' <span class="log-bad">· warning: handled differently from English</span>' : '';
+    // Identical lines, such as one send per address, are counted rather than repeated.
+    const lines = t.tools.map(logLine).reduce<{ line: string; n: number }[]>((acc, line) => { const last = acc.at(-1); if (last?.line === line) last.n++; else acc.push({ line, n: 1 }); return acc; }, []);
+    const log = lines.length ? lines.map((l) => (l.n > 1 ? `${l.line} ×${l.n}` : l.line)).join('<br>') : '<span>No tool was called.</span>';
     return `<li class="result-row${failed.length ? ' is-fail' : ''}${v === active ? ' is-active' : ''}">
       <p class="result-head"><span class="compare-version">${VARIANT_LABELS[v]}</span> ${badge}</p>
       <p class="result-what">${esc(describeTurn(s, i))}</p>

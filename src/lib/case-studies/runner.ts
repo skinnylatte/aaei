@@ -12,7 +12,9 @@ export type ToolCall = { name: string; input: Record<string, unknown>; output: R
 
 // A tool call as it would appear in the service's audit log: stamped with when, which session, which request and who.
 export type AuditEntry = ToolCall & { at: string; session: string; request: number; principal: string };
-export const auditJson = (e: AuditEntry) => JSON.stringify({ timestamp: e.at, session_id: e.session, request_id: `req-${e.request}`, principal: e.principal, tool: e.name, input: e.input, output: e.output, ...(e.authorized === undefined ? {} : { authz: e.authorized ? 'owner' : 'not_owner' }) });
+// Guardrails and replies are logged as events, not as tool calls, because the model did not call anything.
+export const EVENTS = new Set(['chat_response', 'security_event', 'third_party_filter', 'send_limit']);
+export const auditJson = (e: AuditEntry) => JSON.stringify({ timestamp: e.at, session_id: e.session, request_id: `req-${e.request}`, principal: e.principal, ...(EVENTS.has(e.name) ? { event: e.name } : { tool: e.name }), input: e.input, output: e.output, ...(e.authorized === undefined ? {} : { authz: e.authorized ? 'owner' : 'not_owner' }) });
 export const newSessionId = () => `sess-${Math.random().toString(36).slice(2, 8)}`;
 export type Message = { role: 'user' | 'assistant'; content: string; translation?: string; lang?: Lang };
 
