@@ -8,6 +8,8 @@ const studies = [
     title: 'Northstar Air customer service',
     lede: 'An airline support agent that looks up bookings and changes where itineraries are sent.',
     tags: ['Authorization', 'Privacy', 'Human escalation'],
+    duration: 'About 30 to 35 minutes',
+    action: 'Open',
   },
   {
     id: 'harbour-city',
@@ -15,6 +17,17 @@ const studies = [
     title: 'Harbour City Services grant assistant',
     lede: 'A multilingual public services assistant answering residents\' questions about a household grant.',
     tags: ['Multilingual', 'Misinformation', 'Fairness'],
+    duration: 'About 30 to 35 minutes',
+    action: 'Open',
+  },
+  {
+    id: 'hawker',
+    href: '/hawker/',
+    title: "Uncle Lim’s secret",
+    lede: 'A hawker chatbot has secret ingredients to protect. Test three levels of defences and discover what still gets through.',
+    tags: ['Prompt injection', 'Information disclosure', 'AI guards'],
+    duration: 'About 10–15 minutes',
+    action: 'Play the game',
   },
 ];
 
@@ -97,7 +110,8 @@ const toc = [
       <h2 id="glance-title">At a glance</h2>
       <dl>
         <div><dt>Case studies</dt><dd>2, about 30 to 35 minutes each</dd></div>
-        <div><dt>Each one</dt><dd>Read the brief, rank what could go wrong, then test three versions side by side</dd></div>
+        <div><dt>Game</dt><dd>Uncle Lim’s secret, about 10–15 minutes</dd></div>
+        <div><dt>Case study format</dt><dd>Read the brief, rank what could go wrong, then test three versions side by side</dd></div>
         <div><dt>Data</dt><dd>Synthetic only. No coding needed.</dd></div>
       </dl>
       <h3>Who it is for</h3>
@@ -112,14 +126,14 @@ const toc = [
 
   <section id="case-studies" class="toc-section" aria-labelledby="case-studies-title">
     <h2 id="case-studies-title" class="section-title">Case Studies</h2>
-    <p class="section-lede">Two synthetic AI systems, each with a weak, a patched and a safe version. Everything runs in your browser and nothing real is sent.</p>
+    <p class="section-lede">Two case studies and a game. Choose any activity: compare three versions of each case study, or test the hawker chatbot’s defences. All scenarios use fictional data. The game sends your messages to an external AI service through OpenRouter. Do not enter personal information.</p>
   <ul class="case-grid">
     {studies.map((s) => (
       <li class={`case-tile case-tile-${s.id}`}>
         <h3><a href={s.href}>{s.title}</a></h3>
         <p class="case-tile-lede">{s.lede}</p>
         <div class="tag-list">{s.tags.map((t) => <span>{t}</span>)}</div>
-        <div class="case-tile-bottom"><p>About 30 to 35 minutes</p><span class="button" aria-hidden="true">Open <span>→</span></span></div>
+        <div class="case-tile-bottom"><p>{s.duration}</p><span class="button" aria-hidden="true">{s.action} <span>→</span></span></div>
       </li>
     ))}
   </ul>

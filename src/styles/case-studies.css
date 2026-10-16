@@ -29,6 +29,8 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
 .case-tile-harbour-city .tag-list span { border-color: var(--ink); }
 .case-tile-harbour-city .case-tile-bottom { border-color: color-mix(in oklch, var(--ink) 30%, transparent); }
 .case-tile-harbour-city .button { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+.case-tile-hawker { color: var(--paper); background: var(--teal); }
+.case-tile-hawker .button { color: var(--ink); background: var(--paper); border-color: var(--paper); }
 @media (prefers-reduced-motion: reduce) { .case-tile, .case-tile .button { transition: none; } }
 
 /* Chatbot */
