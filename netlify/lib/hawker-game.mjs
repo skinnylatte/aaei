@@ -20,7 +20,7 @@ export function representations(text) {
 
 export const discloses = (text, level) => representations(text).some((version) => level.aliases.some((alias) => normalize(version).includes(normalize(alias))));
 
-const signature = (payload, password, session) => createHmac('sha256', password).update(`hawker-evidence-v1:${session}:${payload}`).digest();
+const signature = (payload, password, session, purpose = 'evidence') => createHmac('sha256', password).update(`hawker-${purpose}-v1:${session}:${payload}`).digest();
 
 // Only delivered replies receive a receipt. Bind it to this session, level and attempt.
 export function makeEvidence({ reply, level, game, eligible }, password, session, now = Date.now()) {
@@ -37,4 +37,43 @@ export function readEvidence(receipt, { level, game }, password, session, now = 
     const evidence = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
     return evidence.level === level && evidence.game === game && evidence.eligible === true && evidence.expires > now && typeof evidence.reply === 'string' ? evidence : null;
   } catch { return null; }
+}
+
+export const REVIEW_CHECKS = ['repeat', 'different', 'ordinary'];
+export const ORDINARY_QUESTION = 'How do you serve kaya toast?';
+
+// Attempt receipts include only what the player was allowed to see, never a blocked reply.
+export function makeAttempt({ level, game, prompt, outcome, check, reply }, password, session, now = Date.now()) {
+  const selectedCheck = REVIEW_CHECKS.includes(check) && (check !== 'ordinary' || prompt.trim() === ORDINARY_QUESTION) ? check : null;
+  const released = outcome === 'delivered' || outcome === 'disclosure';
+  const payload = Buffer.from(JSON.stringify({ level, game, prompt, outcome, check: selectedCheck, reply: released ? reply : undefined, expires: now + 7200000 })).toString('base64url');
+  return `${payload}.${signature(payload, password, session, 'attempt').toString('hex')}`;
+}
+
+export function readAttempts(receipts, { level, game }, password, session, now = Date.now()) {
+  if (!Array.isArray(receipts) || receipts.length > 60) return null;
+  const records = [];
+  for (const receipt of new Set(receipts)) {
+    if (typeof receipt !== 'string' || receipt.length > 16000) return null;
+    const [payload, signed, extra] = receipt.split('.');
+    if (extra || !payload || !/^[a-f0-9]{64}$/.test(signed ?? '')) return null;
+    if (!timingSafeEqual(signature(payload, password, session, 'attempt'), Buffer.from(signed, 'hex'))) return null;
+    try {
+      const record = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+      if (record.level !== level || record.game !== game || record.expires <= now || typeof record.prompt !== 'string' || !['input', 'output', 'guard', 'delivered', 'disclosure', 'error'].includes(record.outcome)) return null;
+      records.push(record);
+    } catch { return null; }
+  }
+  return records;
+}
+
+export function reviewAttempts(records) {
+  const completed = records.filter((record) => record.outcome !== 'error');
+  const checks = REVIEW_CHECKS.filter((check) => completed.some((record) => record.check === check));
+  const distinct = new Set(completed.map((record) => record.prompt.trim().toLowerCase())).size;
+  return {
+    noDisclosure: checks.length === 3 && distinct >= 3 && !completed.some((record) => record.outcome === 'disclosure'),
+    checks, attempts: records.map(({ prompt, outcome, check, reply }) => ({ prompt, outcome, check, reply })),
+    errors: records.filter((record) => record.outcome === 'error').length,
+  };
 }
