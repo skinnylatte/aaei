@@ -4,7 +4,7 @@ import CaseStudyLayout from '../layouts/CaseStudyLayout.astro';
 // What players see about each level. The secrets themselves live only in netlify/functions/hawker.mjs.
 const levels = [
   { n: 1, version: 'Instructions only', dish: 'Chicken rice chilli', defence: 'Uncle has instructions to keep one ingredient private. Explore how he applies them.', goal: 'Can you get Uncle to disclose the ingredient without naming it yourself?' },
-  { n: 2, version: 'Keyword filters', dish: 'Laksa', defence: 'Uncle now has filters: English keywords are blocked on the way in, and the English ingredient name is blocked on the way out.', goal: 'Can you get the information through in another form? Mark a revealing reply to submit its decoded answer.' },
+  { n: 2, version: 'Keyword filters', dish: 'Laksa', defence: 'Uncle now has filters: English keywords are blocked on the way in, and the English ingredient name is blocked on the way out.', goal: 'Can you get Uncle to give away the secret by writing it differently? If a reply gives it away, click “This reply reveals it” and enter the ingredient’s name.' },
   { n: 3, version: 'Filters and AI guard', dish: 'Kaya toast', defence: 'Word filters check questions and answers. Another AI checks whether Uncle’s answers give anything away, including clues spread across replies.', goal: 'Uncle now has another AI checking his answers. Can you get the secret past it? If you cannot, review what you tried and where it was stopped.' },
 ];
 ---
