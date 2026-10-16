@@ -110,8 +110,8 @@ const guide = [
 
 <script>
   import { mountChecklist } from '../../../lib/case-studies/panels';
-  import { CASES, DOCS, HarbourSession, QUESTION_BANK, docById, type Applicant, type DocStatus, type Turn } from '../../../lib/case-studies/harbour-city';
-  import { esc, LANG_LABELS, store, VARIANTS, VARIANT_LABELS, type Lang, type Variant } from '../../../lib/case-studies/runner';
+  import { CASES, DOCS, HarbourSession, QUESTION_BANK, docById, type Applicant, type Doc, type DocStatus, type Turn } from '../../../lib/case-studies/harbour-city';
+  import { auditJson, esc, LANG_LABELS, store, VARIANTS, VARIANT_LABELS, type AuditEntry, type Lang, type Variant } from '../../../lib/case-studies/runner';
   import { createChatView } from '../../../lib/case-studies/chat-view';
   import { judge, TESTS_KEY, type SavedTest } from '../../../lib/case-studies/harbour-city-report';
 
@@ -224,6 +224,12 @@ const guide = [
     const why = full && d.status !== 'official' ? `<span class="src-why">${esc(d.detail)}</span>` : '';
     return `<p class="src-line">From <strong>${esc(d.title)}</strong> ${statusPill(d.status)}${why}</p>`;
   };
+  // A page's edit history, as the content system logged it.
+  const historyHtml = (d: Doc) => `<ol class="kb-history" aria-label="Edit history of ${esc(d.title)}">${d.history.map((r) => `<li><span class="kb-at">${esc(r.at)}</span> <code>${esc(r.by)}</code>${r.staff ? '' : ' <span class="pill bad">Not on staff list</span>'} <span>${esc(r.action)}</span></li>`).join('')}</ol>`;
+  // The whole session as JSON lines, the way a SIEM would ingest it.
+  const auditLog = (events: AuditEntry[]) => events.length
+    ? `<details class="ev-detail"><summary>Audit log</summary><p class="note">Every tool call this session made, one JSON object per line. A page that is not official, or a case returned to someone who does not own it, is something you could alert on.</p><pre class="audit-log" tabindex="0" aria-label="Audit log, ${events.length} ${events.length === 1 ? 'entry' : 'entries'}">${esc(events.map(auditJson).join('\n'))}</pre></details>`
+    : '';
   let kbOpen = true;
   const lastTurns = (v: Variant) => (last ? sessions[v].turns.slice(last.from, last.from + last.langs.length) : []);
 
@@ -269,8 +275,9 @@ const guide = [
       <details class="ev-detail kb"${kbOpen ? ' open' : ''}>
         <summary>Where the answers come from</summary>
         <p class="note">The assistant looks up pages in its search index, then answers from what it finds. ${VARIANT_LABELS[active]}'s index holds these pages. The ones marked "Used" answered this question.</p>
-        <ul class="kb-list">${DOCS.map((d) => `<li class="${used.has(d.id) ? 'is-used' : ''}"><p class="kb-title"><strong>${esc(d.title)}</strong> ${statusPill(d.status)}${used.has(d.id) ? ' <span class="kb-used">Used</span>' : ''}</p><p class="kb-means">${esc(STATUS_MEANS[d.status])} ${d.status === 'official' ? '' : esc(d.detail)}</p></li>`).join('')}</ul>
-      </details>`;
+        <ul class="kb-list">${DOCS.map((d) => `<li class="${used.has(d.id) ? 'is-used' : ''}"><p class="kb-title"><strong>${esc(d.title)}</strong> ${statusPill(d.status)}${used.has(d.id) ? ' <span class="kb-used">Used</span>' : ''}</p><p class="kb-means">${esc(STATUS_MEANS[d.status])} ${d.status === 'official' ? '' : esc(d.detail)}</p>${historyHtml(d)}</li>`).join('')}</ul>
+      </details>
+      ${auditLog(sessions[active].events)}`;
   }
 
   // Saved with a failure mode when it is marked found.

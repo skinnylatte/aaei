@@ -9,6 +9,11 @@ export type Lang = 'en' | 'zh' | 'ms' | 'ta' | 'mixed';
 export const LANG_LABELS: Record<Lang, string> = { en: 'English', zh: 'Chinese', ms: 'Malay', ta: 'Tamil', mixed: 'Mixed language' };
 
 export type ToolCall = { name: string; input: Record<string, unknown>; output: Record<string, unknown>; authorized?: boolean; note?: string };
+
+// A tool call as it would appear in the service's audit log: stamped with when, which session, which request and who.
+export type AuditEntry = ToolCall & { at: string; session: string; request: number; principal: string };
+export const auditJson = (e: AuditEntry) => JSON.stringify({ timestamp: e.at, session_id: e.session, request_id: `req-${e.request}`, principal: e.principal, tool: e.name, input: e.input, output: e.output, ...(e.authorized === undefined ? {} : { authz: e.authorized ? 'owner' : 'not_owner' }) });
+export const newSessionId = () => `sess-${Math.random().toString(36).slice(2, 8)}`;
 export type Message = { role: 'user' | 'assistant'; content: string; translation?: string; lang?: Lang };
 
 // One step a trainee took, replayable against any variant.
@@ -29,9 +34,40 @@ export const OWASP = {
 } as const;
 export type OwaspId = keyof typeof OWASP;
 
+// MITRE ATLAS techniques the scenarios use, named as in ATLAS.
+export const ATLAS = {
+  'AML.T0051.000': 'LLM Prompt Injection: Direct',
+  'AML.T0053': 'AI Agent Tool Invocation',
+  'AML.T0054': 'LLM Jailbreak',
+  'AML.T0056': 'Extract LLM System Prompt',
+  'AML.T0057': 'LLM Data Leakage',
+  'AML.T0070': 'RAG Poisoning',
+  'AML.T0073': 'Impersonation',
+  'AML.T0083': 'Credentials from AI Agent Configuration',
+  'AML.T0034': 'Cost Harvesting',
+} as const;
+export type AtlasId = keyof typeof ATLAS;
+export const atlasUrl = (id: AtlasId) => `https://atlas.mitre.org/techniques/${id}`;
+
+// The classic weakness behind each failure, for testers who know them from web and API security.
+export const CWE = {
+  'CWE-639': 'Authorization Bypass Through User-Controlled Key (IDOR)',
+  'CWE-862': 'Missing Authorization',
+  'CWE-807': 'Reliance on Untrusted Inputs in a Security Decision',
+  'CWE-290': 'Authentication Bypass by Spoofing',
+  'CWE-798': 'Use of Hard-coded Credentials',
+  'CWE-184': 'Incomplete List of Disallowed Inputs',
+  'CWE-770': 'Allocation of Resources Without Limits or Throttling',
+  'CWE-359': 'Exposure of Private Personal Information to an Unauthorized Actor',
+  'CWE-345': 'Insufficient Verification of Data Authenticity',
+} as const;
+export type CweId = keyof typeof CWE;
+export const cweUrl = (id: CweId) => `https://cwe.mitre.org/data/definitions/${id.slice(4)}.html`;
+
 // A scenario with a fixed setup and steps. `lesson` is the teaching point shown on the answer sheet.
 // `owasp` lists the OWASP risks it exercises; empty means it tests usefulness or fairness rather than security.
-export type TestCase<Setup = Record<string, string>> = { id: string; name: string; description: string; lesson: string; owasp: OwaspId[]; setup: Setup; steps: Step[] };
+// `atlas` and `cwe` give the same scenario in MITRE ATLAS and CWE terms.
+export type TestCase<Setup = Record<string, string>> = { id: string; name: string; description: string; lesson: string; owasp: OwaspId[]; atlas?: AtlasId[]; cwe?: CweId[]; setup: Setup; steps: Step[] };
 
 export type CheckResult = { pass: boolean; detail: string };
 export type Check<S> = {

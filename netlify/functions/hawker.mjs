@@ -12,6 +12,11 @@
 // Optional:
 //   HAWKER_MODEL        OpenRouter model id. Defaults to a low-cost model.
 //
+// Every exchange is saved anonymously to the "hawker-log" Netlify Blobs store: the level, what the player sent,
+// Uncle's reply or the defence that blocked it, and whether it won. No names, emails or IP addresses.
+// Download or clear it with the hawker-log function.
+
+import { getStore } from '@netlify/blobs';
 import { discloses, isAnswer, makeEvidence, readEvidence } from '../lib/hawker-game.mjs';
 
 const MODEL = 'openai/gpt-4o-mini';
@@ -126,6 +131,16 @@ async function evidenceSupports(apiKey, level, reply) {
   throw new Error('Evidence review returned an invalid verdict.');
 }
 
+// Save one event. A failed save never breaks the game.
+async function log(event) {
+  try {
+    const at = new Date().toISOString();
+    await getStore('hawker-log').setJSON(`${at.slice(0, 10)}/${event.game}/${at}-${Math.random().toString(36).slice(2, 8)}`, { at, model: Netlify.env.get('HAWKER_MODEL') || MODEL, ...event });
+  } catch (err) {
+    console.error('Hawker log:', err.message);
+  }
+}
+
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
 export default async (request) => {
@@ -143,6 +158,7 @@ export default async (request) => {
   if (!level) return json({ error: 'Unknown level.' }, 400);
   // Bind evidence to the current attempt rather than accepting another attempt's reply.
   const game = /^[a-z0-9]{8,32}$/.test(String(body.game ?? '')) ? body.game : 'unknown';
+  const base = { game, level: body.level };
 
   if (body.finish) {
     if (levelNumber !== 3) return json({ error: 'Only level 3 has a no-disclosure conclusion.' }, 400);
@@ -151,6 +167,7 @@ export default async (request) => {
 
   // Giving up shows the secret and how it was protected.
   if (body.giveUp) {
+    await log({ ...base, type: 'give-up' });
     return json({ secret: level.secret, lesson: level.lesson });
   }
   // A decoded answer must be supported by a reply actually delivered in this attempt.
@@ -164,6 +181,7 @@ export default async (request) => {
         if (!(await evidenceSupports(apiKey, level, evidence.reply))) return json({ correct: false, retryEvidence: true, detail: 'That reply does not identify the ingredient clearly enough. Choose stronger evidence or keep testing.' });
       } catch { return json({ error: 'Evidence could not be reviewed right now. Your attempt has not been marked wrong. Try again.' }, 502); }
     }
+    await log({ ...base, type: 'guess', guess: body.guess.slice(0, 60), correct });
     return json(correct ? { correct, secret: level.secret, lesson: level.lesson, evidenceReply: evidence.reply } : { correct });
   }
 
@@ -179,6 +197,7 @@ export default async (request) => {
 
   const word = level.blockedWords && hasWord(last.content, level.blockedWords);
   if (word) {
+    await log({ ...base, type: 'message', message: last.content, blocked: 'input', matched: word });
     return json({ reply: null, blocked: 'input', detail: `Your message was blocked before it reached Uncle, because it contains "${word}".` });
   }
 
@@ -191,6 +210,7 @@ export default async (request) => {
   }
 
   if (level.blockedWords && outputHit(reply, level)) {
+    await log({ ...base, type: 'message', message: last.content, reply, blocked: 'output' });
     return json({ reply: null, blocked: 'output', detail: "Uncle's reply was blocked, because it contained the secret ingredient." });
   }
   if (level.guard) {
@@ -198,12 +218,14 @@ export default async (request) => {
     try { leak = await guardSays(apiKey, level, reply); }
     catch { return json({ error: 'The AI guard could not complete its check. No reply was released. Try again.' }, 502); }
     if (leak) {
+      await log({ ...base, type: 'message', message: last.content, reply, blocked: 'guard' });
       return json({ reply: null, blocked: 'guard', detail: "Uncle's reply was blocked by the AI guard, which judged that it gave the secret away." });
     }
   }
 
   const won = discloses(reply, level) && !playerSaid;
   const evidence = makeEvidence({ reply, level: levelNumber, game, eligible: !playerSaid }, password, session);
+  await log({ ...base, type: 'message', message: last.content, reply, won, ...(mentions(reply, level) && playerSaid ? { namedFirst: true } : {}) });
   return json({ reply, won, evidence: playerSaid ? undefined : evidence, namedFirst: playerSaid, ...(won ? { secret: level.secret, lesson: level.lesson } : {}), ...(playerSaid ? { note: 'You supplied the answer in this conversation, so later replies cannot prove Uncle disclosed it first. Restart this level for a fresh attempt.' } : {}) });
 };
 

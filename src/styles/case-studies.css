@@ -328,6 +328,13 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .owasp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 var(--space-sm); }
 .owasp-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--paper); border: 1px solid var(--ink); border-radius: 999px; font: 600 13px/1.2 var(--display); }
 .owasp-tag-quiet { border-color: var(--line); color: color-mix(in oklch, var(--ink) 70%, transparent); }
+.framework-tags { display: grid; gap: 6px; margin: 0 0 var(--space-sm); font-size: 13px; }
+.framework-tags > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.framework-tags dt { min-width: 9em; font: 650 13px/1.3 var(--display); }
+.framework-tags dd { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.framework-tag { padding: 4px 9px; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; font: 600 12.5px/1.2 var(--display); text-decoration: none; }
+.framework-tag:hover { border-color: var(--ink); }
+.framework-tag:focus-visible { outline: 3px solid var(--coral); outline-offset: 1px; }
 .owasp-id { font-weight: 700; font-variant-numeric: tabular-nums; }
 .owasp-table th { width: 40%; }
 .owasp-none th, .owasp-none td { color: color-mix(in oklch, var(--ink) 55%, transparent); }
@@ -733,7 +740,16 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .kb-list li.is-used { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 .kb-title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; }
 .kb-means { margin: 4px 0 0; color: color-mix(in oklch, var(--ink) 75%, transparent); }
-.kb-used { padding: 3px 8px; color: var(--paper); background: var(--ink); border-radius: 999px; font: 650 11.5px/1 var(--display); }
+.kb-history { display: grid; gap: 4px; margin: 6px 0 0; padding: 6px 0 0; border-top: 1px dashed var(--line); list-style: none; }
+.kb-list .kb-history li { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+.kb-history li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.kb-history li > span:last-child { flex-basis: 100%; }
+.kb-history code { font: 600 12px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+.kb-at { font: 12px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; color: color-mix(in oklch, var(--ink) 75%, transparent); }
+.pill-aka { font-weight: 500; }
+.audit-log { max-height: 260px; margin: 6px 0 0; padding: 8px; overflow: auto; white-space: pre; background: oklch(98.5% .01 70); border-radius: var(--radius-control); font: 11.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.audit-log:focus-visible { outline: 3px solid var(--coral); outline-offset: 1px; }
+.kb-used {padding: 3px 8px; color: var(--paper); background: var(--ink); border-radius: 999px; font: 650 11.5px/1 var(--display); }
 
 /* Uncle Lim's secret: the prompt injection game */
 .hk-bench { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); gap: var(--space-sm); align-items: start; }

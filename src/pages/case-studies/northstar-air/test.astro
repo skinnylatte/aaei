@@ -96,8 +96,8 @@ const guide = [
 
 <script>
   import { mountChecklist } from '../../../lib/case-studies/panels';
-  import { NorthstarSession, PRESETS, PRINCIPAL_NAMES, TECHNIQUE_LABELS, describeTurn, type Principal } from '../../../lib/case-studies/northstar';
-  import { esc, LANG_LABELS, newId, VARIANTS, VARIANT_LABELS, store, type ToolCall, type Variant } from '../../../lib/case-studies/runner';
+  import { NorthstarSession, PRESETS, PRINCIPAL_NAMES, TECHNIQUE_CLASSIC, TECHNIQUE_LABELS, describeTurn, type Principal } from '../../../lib/case-studies/northstar';
+  import { auditJson, esc, LANG_LABELS, newId, VARIANTS, VARIANT_LABELS, store, type AuditEntry, type ToolCall, type Variant } from '../../../lib/case-studies/runner';
   import { createChatView } from '../../../lib/case-studies/chat-view';
   import { RUNS_KEY, type Run } from '../../../lib/case-studies/northstar-report';
 
@@ -245,7 +245,7 @@ const guide = [
     const tools = t.tools.map((e) => {
       const r = toolResult(e);
       const owner = e.authorized === undefined ? '' : `<span class="pill">${e.authorized ? 'Caller owns this booking' : 'Caller does not own this booking'}</span>`;
-      return `<li class="tool-call"><p><code>${esc(e.name)}</code> <span class="pill ${r.cls}">${r.label}</span> ${owner}</p>${e.note ? `<p class="note">${esc(e.note)}</p>` : ''}<details data-tool-details><summary>Input and output</summary><pre>${esc(JSON.stringify({ input: e.input, output: e.output }, null, 2))}</pre></details></li>`;
+      return `<li class="tool-call"><p><code>${esc(e.name)}</code> <span class="pill ${r.cls}">${r.label}</span> ${owner}</p>${e.note ? `<p class="note">${esc(e.note)}</p>` : ''}<details data-tool-details><summary>Audit log entry</summary><pre>${esc(JSON.stringify(JSON.parse(auditJson(e)), null, 2))}</pre></details></li>`;
     }).join('');
     const queue = s.escalations.map((e) => `<li class="queue-item"><p><strong>Booking ${esc(e.ref)}</strong> <span class="pill ${e.owns ? 'ok' : 'bad'}">${e.owns ? 'Caller owns this booking' : 'Caller does not own this booking'}</span></p><p>${e.recipient ? `Change delivery to <strong>${esc(e.recipient)}</strong>` : 'Wants booking details'}</p>${e.status === 'open' ? `<div class="queue-actions"><button class="button button-primary" type="button" data-resolve="${e.id}" data-approve="1">Approve</button><button class="text-link" type="button" data-resolve="${e.id}" data-approve="0">Decline</button></div>` : `<p class="pill">${e.status === 'approved' ? 'Approved' : 'Declined'}</p>`}</li>`).join('');
     const earlier = s.turns.slice(0, -1).map((_, j) => `<li>${esc(describeTurn(s, j))}</li>`).join('');
@@ -256,7 +256,7 @@ const guide = [
       ${s.escalations.some((e) => e.status === 'open') ? `<h4>Human agent queue</h4><p class="note">You are the Northstar agent. Decide with what is on screen.</p><ul class="queue-list">${queue}</ul>` : ''}
       <details class="ev-detail"${open ? ' open' : ''}>
         <summary>${VARIANT_LABELS[active]}: tool calls and outbox</summary>
-        <p class="evidence-meta">${esc(LANG_LABELS[t.parsed.lang])}${t.parsed.techniques.length ? ` · ${t.parsed.techniques.map((x) => `<span class="pill">${esc(TECHNIQUE_LABELS[x])}</span>`).join(' ')}` : ' · No attack technique detected'}</p>
+        <p class="evidence-meta">${esc(LANG_LABELS[t.parsed.lang])}${t.parsed.techniques.length ? ` · ${t.parsed.techniques.map((x) => `<span class="pill">${esc(TECHNIQUE_LABELS[x])} <span class="pill-aka">(${esc(TECHNIQUE_CLASSIC[x].toLowerCase())})</span></span>`).join(' ')}` : ' · No attack technique detected'}</p>
         ${t.decision.kind !== t.decisionIfEnglish.kind ? `<p class="note"><span class="pill bad">Different from English</span> In English the agent would have chosen "${esc(t.decisionIfEnglish.kind)}".</p>` : ''}
         <h4>Tool calls</h4>
         ${tools ? `<ul class="tool-calls">${tools}</ul>` : '<p class="note">No tools were called.</p>'}
@@ -264,7 +264,14 @@ const guide = [
         <h4>Test outbox</h4>
         ${outbox}
         ${earlier ? `<h4>Earlier messages</h4><ol class="earlier-list">${earlier}</ol>` : ''}
+        ${auditLog(s.events)}
       </details>`;
+  }
+
+  // The whole session as JSON lines, the way a SIEM would ingest it.
+  function auditLog(events: AuditEntry[]) {
+    if (!events.length) return '';
+    return `<h4>Audit log</h4><p class="note">Every tool call this session made, one JSON object per line. In a real deployment this is where detection happens: the chat is what the attacker says, the log is what the agent did.</p><pre class="audit-log" tabindex="0" aria-label="Audit log, ${events.length} ${events.length === 1 ? 'entry' : 'entries'}">${esc(events.map(auditJson).join('\n'))}</pre>`;
   }
 
   // Saved with a failure mode when it is marked found.
