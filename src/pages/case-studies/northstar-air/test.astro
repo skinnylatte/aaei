@@ -83,8 +83,12 @@ const guide = [
 
     <aside class="panel evidence" aria-labelledby="evidence-title">
       <h2 id="evidence-title">What happened</h2>
-      <div id="ev-happened"></div>
-      <div id="ev-list" class="ev-list">
+      <div class="ev-tabs" role="tablist" aria-label="What happened">
+        <button type="button" role="tab" id="evtab-results" data-ev-tab="results" aria-controls="ev-happened" aria-selected="true">Results</button>
+        <button type="button" role="tab" id="evtab-list" data-ev-tab="list" aria-controls="ev-list" aria-selected="false" tabindex="-1">Your list <span class="ev-tab-count" data-found-count></span></button>
+      </div>
+      <div id="ev-happened" role="tabpanel" aria-labelledby="evtab-results"></div>
+      <div id="ev-list" class="ev-list" role="tabpanel" aria-labelledby="evtab-list" hidden>
         <p class="panel-note">Did you see one of these? Mark it found, and the latest result is saved as evidence.</p>
         <Checklist caseId="northstar-air" />
       </div>
@@ -95,8 +99,8 @@ const guide = [
 </CaseStudyLayout>
 
 <script>
-  import { mountChecklist } from '../../../lib/case-studies/panels';
-  import { NorthstarSession, PRESETS, PRINCIPAL_NAMES, TECHNIQUE_CLASSIC, TECHNIQUE_LABELS, describeTurn, type Principal } from '../../../lib/case-studies/northstar';
+  import { mountChecklist, mountEvidenceTabs } from '../../../lib/case-studies/panels';
+  import { NorthstarSession, PRESETS, PRINCIPAL_NAMES, TECHNIQUE_CLASSIC, TECHNIQUE_LABELS, describeTurn, turnVerdict, type Escalation, type Principal } from '../../../lib/case-studies/northstar';
   import { auditJson, esc, LANG_LABELS, newId, VARIANTS, VARIANT_LABELS, store, type AuditEntry, type ToolCall, type Variant } from '../../../lib/case-studies/runner';
   import { createChatView } from '../../../lib/case-studies/chat-view';
   import { RUNS_KEY, type Run } from '../../../lib/case-studies/northstar-report';
@@ -200,6 +204,7 @@ const guide = [
       $<HTMLButtonElement>('#send-button').disabled = false;
       render();
       $('#messages').querySelectorAll('.message.assistant').forEach((m, i, all) => m.classList.toggle('is-new', i === all.length - 1));
+      evTabs.show('results');
       $('#ev-happened').classList.remove('is-new'); void $('#ev-happened').offsetWidth; $('#ev-happened').classList.add('is-new');
     }, REPLY_DELAY);
   }
@@ -228,44 +233,67 @@ const guide = [
     return { label: 'Done', cls: e.authorized === false || out.revealed ? 'bad' : '' };
   }
 
+  // One line per tool call, in the terms of the audit log.
+  function logLine(e: ToolCall) {
+    const r = toolResult(e);
+    const ref = (e.input as { reservation_id?: string }).reservation_id;
+    const owner = e.authorized === false ? ` · caller does not own ${esc(ref ?? 'this booking')}` : '';
+    return `<code>${esc(e.name)}</code> <span class="${r.cls === 'bad' ? 'log-bad' : r.cls === 'ok' ? 'log-ok' : ''}">${esc(r.label.toLowerCase())}${owner}</span>`;
+  }
+
+  // Each version's latest message: a verdict from the checks, what it did, and what the log shows.
+  function resultRow(v: Variant) {
+    const s = sessions[v], i = s.turns.length - 1, t = s.turns[i];
+    const { applied, failed } = turnVerdict(s, i);
+    const kinds = [...new Set(failed.map((f) => f.kind))];
+    const badge = failed.length
+      ? `<span class="result-badge bad"><span aria-hidden="true">✕</span> Failed</span> <span class="result-fails">${esc(kinds.join(', '))}</span>`
+      : applied ? '<span class="result-badge ok"><span aria-hidden="true">✓</span> Passed</span>' : '<span class="result-badge">No check applies</span>';
+    const parity = t.decision.kind !== t.decisionIfEnglish.kind ? ' <span class="log-bad">· not what it does in English</span>' : '';
+    const log = t.tools.length ? t.tools.map(logLine).join('<br>') : '<span>No tool was called.</span>';
+    return `<li class="result-row${failed.length ? ' is-fail' : ''}${v === active ? ' is-active' : ''}">
+      <p class="result-head"><span class="compare-version">${VARIANT_LABELS[v]}</span> ${badge}</p>
+      <p class="result-what">${esc(describeTurn(s, i))}</p>
+      <p class="result-log">${log}${parity}</p>
+      ${failed.length ? `<ul class="result-why">${failed.map((f) => `<li>${esc(f.detail)}</li>`).join('')}</ul>` : ''}
+      <div class="result-actions">${v === active ? '<span class="result-showing">Showing in chat</span>' : `<button type="button" class="text-link" data-compare="${v}">Show ${VARIANT_LABELS[v]} chat</button>`}${t.tools.length ? `<details class="result-entries"><summary>Log ${t.tools.length === 1 ? 'entry' : `entries (${t.tools.length})`}</summary><pre>${esc(t.tools.map(auditJson).join('\n'))}</pre></details>` : ''}</div>
+    </li>`;
+  }
+
+  const queueItem = (v: Variant, e: Escalation) => `<li class="queue-item"><p><strong>Booking ${esc(e.ref)}</strong> <span class="pill ${e.owns ? 'ok' : 'bad'}">${e.owns ? 'Caller owns this booking' : 'Caller does not own this booking'}</span></p><p>${e.recipient ? `Change delivery to <strong>${esc(e.recipient)}</strong>` : 'Wants booking details'}</p>${e.status === 'open' ? `<div class="queue-actions"><button class="button button-primary" type="button" data-resolve="${e.id}" data-variant="${v}" data-approve="1">Approve</button><button class="text-link" type="button" data-resolve="${e.id}" data-variant="${v}" data-approve="0">Decline</button></div>` : `<p class="pill">${e.status === 'approved' ? 'Approved' : 'Declined'}</p>`}</li>`;
+
   function renderEvidence() {
     const s = sessions[active];
     const panel = $('#ev-happened');
-    if (!s.turns.length) {
+    const answered = VARIANTS.filter((v) => sessions[v].turns.length);
+    if (!answered.length) {
       panel.innerHTML = `<p class="evidence-empty">Send a technique to see what each version did.</p>`;
       return;
     }
-    const i = s.turns.length - 1, t = s.turns[i];
     const lastSaid = (v: Variant) => sessions[v].steps.filter((st) => st.action === 'say').at(-1)?.value;
-    const compared = VARIANTS.every((v) => sessions[v].turns.length && lastSaid(v) === lastSaid(active));
-    const summary = compared
-      ? `<h3 class="evidence-title">Same message, three versions</h3>
-        <ul class="compare-list">${VARIANTS.map((v) => `<li><button type="button" class="compare-row" data-compare="${v}"${v === active ? ' aria-current="true"' : ''}><span class="compare-version">${VARIANT_LABELS[v]}</span><span>${esc(describeTurn(sessions[v], sessions[v].turns.length - 1))}</span></button></li>`).join('')}</ul>`
-      : `<h3 class="evidence-title">${VARIANT_LABELS[active]}, message ${i + 1}</h3><p class="evidence-summary">${esc(describeTurn(s, i))}</p>`;
-    const tools = t.tools.map((e) => {
-      const r = toolResult(e);
-      const owner = e.authorized === undefined ? '' : `<span class="pill">${e.authorized ? 'Caller owns this booking' : 'Caller does not own this booking'}</span>`;
-      return `<li class="tool-call"><p><code>${esc(e.name)}</code> <span class="pill ${r.cls}">${r.label}</span> ${owner}</p>${e.note ? `<p class="note">${esc(e.note)}</p>` : ''}<details data-tool-details><summary>Audit log entry</summary><pre>${esc(JSON.stringify(JSON.parse(auditJson(e)), null, 2))}</pre></details></li>`;
-    }).join('');
-    const queue = s.escalations.map((e) => `<li class="queue-item"><p><strong>Booking ${esc(e.ref)}</strong> <span class="pill ${e.owns ? 'ok' : 'bad'}">${e.owns ? 'Caller owns this booking' : 'Caller does not own this booking'}</span></p><p>${e.recipient ? `Change delivery to <strong>${esc(e.recipient)}</strong>` : 'Wants booking details'}</p>${e.status === 'open' ? `<div class="queue-actions"><button class="button button-primary" type="button" data-resolve="${e.id}" data-approve="1">Approve</button><button class="text-link" type="button" data-resolve="${e.id}" data-approve="0">Decline</button></div>` : `<p class="pill">${e.status === 'approved' ? 'Approved' : 'Declined'}</p>`}</li>`).join('');
+    const compared = answered.length === VARIANTS.length && VARIANTS.every((v) => lastSaid(v) === lastSaid(active));
+    const t = (s.turns.length ? s : sessions[answered[0]]).turns.at(-1)!;
+    const detected = `<p class="evidence-meta">${esc(LANG_LABELS[t.parsed.lang])} · ${t.parsed.techniques.length ? t.parsed.techniques.map((x) => `<span class="pill">${esc(TECHNIQUE_LABELS[x])} <span class="pill-aka">(${esc(TECHNIQUE_CLASSIC[x].toLowerCase())})</span></span>`).join(' ') : 'No attack technique detected'}</p>`;
+    // The human agent's queue, from whichever version handed a request over.
+    const open = VARIANTS.flatMap((v) => sessions[v].escalations.filter((e) => e.status === 'open').map((e) => queueItem(v, e)));
+    const decided = s.escalations.filter((e) => e.status !== 'open').map((e) => queueItem(active, e)).join('');
     const earlier = s.turns.slice(0, -1).map((_, j) => `<li>${esc(describeTurn(s, j))}</li>`).join('');
     const outbox = s.outbox.length ? `<ul class="outbox-list">${[...s.outbox].reverse().map((o) => `<li><code>${esc(o.reservation_id)}</code> to ${esc(o.recipient)}</li>`).join('')}</ul>` : '<p class="note">Nothing sent.</p>';
-    const open = $('#ev-happened details.ev-detail')?.hasAttribute('open');
+    const wasOpen = $('#ev-happened details.ev-detail')?.hasAttribute('open');
     panel.innerHTML = `
-      ${summary}
-      ${s.escalations.some((e) => e.status === 'open') ? `<h4>Human agent queue</h4><p class="note">You are the Northstar agent. Decide with what is on screen.</p><ul class="queue-list">${queue}</ul>` : ''}
-      <details class="ev-detail"${open ? ' open' : ''}>
-        <summary>${VARIANT_LABELS[active]}: tool calls and outbox</summary>
-        <p class="evidence-meta">${esc(LANG_LABELS[t.parsed.lang])}${t.parsed.techniques.length ? ` · ${t.parsed.techniques.map((x) => `<span class="pill">${esc(TECHNIQUE_LABELS[x])} <span class="pill-aka">(${esc(TECHNIQUE_CLASSIC[x].toLowerCase())})</span></span>`).join(' ')}` : ' · No attack technique detected'}</p>
-        ${t.decision.kind !== t.decisionIfEnglish.kind ? `<p class="note"><span class="pill bad">Different from English</span> In English the agent would have chosen "${esc(t.decisionIfEnglish.kind)}".</p>` : ''}
-        <h4>Tool calls</h4>
-        ${tools ? `<ul class="tool-calls">${tools}</ul>` : '<p class="note">No tools were called.</p>'}
-        ${s.escalations.some((e) => e.status !== 'open') ? `<h4>Human agent decisions</h4><ul class="queue-list">${queue}</ul>` : ''}
+      ${open.length ? `<section class="decision-card" aria-labelledby="decision-title"><h3 id="decision-title">Decision needed</h3><p class="note">Safe handed this to a person. You are the Northstar agent: decide with what is on screen.</p><ul class="queue-list">${open.join('')}</ul></section>` : ''}
+      <h3 class="evidence-title">${compared ? 'Same message, three versions' : 'Each version’s latest message'}</h3>
+      ${detected}
+      <ul class="result-list">${answered.map(resultRow).join('')}</ul>
+      <button type="button" class="ev-next" data-goto-list>Seen a failure? Mark it on your list <span aria-hidden="true">→</span></button>
+      ${s.turns.length ? `<details class="ev-detail"${wasOpen ? ' open' : ''}>
+        <summary>${VARIANT_LABELS[active]}: outbox, earlier messages and full log</summary>
+        ${decided ? `<h4>Human agent decisions</h4><ul class="queue-list">${decided}</ul>` : ''}
         <h4>Test outbox</h4>
         ${outbox}
         ${earlier ? `<h4>Earlier messages</h4><ol class="earlier-list">${earlier}</ol>` : ''}
         ${auditLog(s.events)}
-      </details>`;
+      </details>` : ''}`;
   }
 
   // The whole session as JSON lines, the way a SIEM would ingest it.
@@ -351,12 +379,13 @@ const guide = [
   $('#ev-happened').addEventListener('click', (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-resolve]');
     if (!b) return;
-    sessions[active].resolve(Number(b.dataset.resolve), b.dataset.approve === '1');
+    sessions[b.dataset.variant as Variant].resolve(Number(b.dataset.resolve), b.dataset.approve === '1');
     render();
   });
 
 
   const checklist = mountChecklist(document.querySelector('[data-checklist]')!, 'northstar-air', currentEvidence);
+  const evTabs = mountEvidenceTabs($('.panel.evidence'), 'northstar-air');
   $('#ev-list').addEventListener('click', (e) => {
     if (!(e.target as HTMLElement).closest('[data-status]')) return;
     const rows = store.get<{ status?: string }[]>('aaei:northstar-air:worksheet', []);

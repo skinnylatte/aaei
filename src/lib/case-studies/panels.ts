@@ -157,6 +157,7 @@ export function mountChecklist(root: HTMLElement, caseId: string, evidence?: () 
           <button type="button" data-status="not-seen" aria-pressed="${r.status === 'not-seen'}">Not seen</button>
         </div>
       </li>`).join('');
+    root.dispatchEvent(new CustomEvent('checklist-change', { bubbles: true }));
   };
 
   list.addEventListener('click', (e) => {
@@ -178,4 +179,37 @@ export function mountChecklist(root: HTMLElement, caseId: string, evidence?: () 
   addEventListener('storage', (e) => { if (e.key === key) render(); });
   render();
   return { render };
+}
+
+// ---------- What happened: Results and Your list, as two tabs ----------
+
+// `root` is the evidence panel. Tabs are buttons with `data-ev-tab` and `aria-controls`.
+export function mountEvidenceTabs(root: HTMLElement, caseId: string) {
+  const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-ev-tab]')];
+  const count = q(root, '[data-found-count]');
+  const show = (name: string, focus = false) => {
+    tabs.forEach((t) => {
+      const on = t.dataset.evTab === name;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on;
+      if (on && focus) t.focus();
+    });
+    root.scrollTop = 0;
+  };
+  const refresh = () => {
+    const rows = store.get<Row[]>(storageKey(caseId), []);
+    const found = rows.filter((r) => r.status === 'found').length;
+    count.textContent = rows.length ? `${found} of ${rows.length} found` : '';
+  };
+  tabs.forEach((t) => t.addEventListener('click', () => show(t.dataset.evTab!)));
+  q(root, '[role="tablist"]').addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const i = tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true');
+    show(tabs.at((i + (e.key === 'ArrowRight' ? 1 : -1)) % tabs.length)!.dataset.evTab!, true);
+  });
+  root.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('[data-goto-list]')) show('list', true); });
+  root.addEventListener('checklist-change', refresh);
+  refresh();
+  return { show, refresh };
 }

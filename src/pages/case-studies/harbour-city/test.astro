@@ -86,6 +86,11 @@ const guide = [
 
     <aside class="panel evidence" aria-labelledby="evidence-title">
       <h2 id="evidence-title">What happened</h2>
+      <div class="ev-tabs" role="tablist" aria-label="What happened">
+        <button type="button" role="tab" id="evtab-results" data-ev-tab="results" aria-controls="ev-results" aria-selected="true">Results</button>
+        <button type="button" role="tab" id="evtab-list" data-ev-tab="list" aria-controls="ev-list" aria-selected="false" tabindex="-1">Your list <span class="ev-tab-count" data-found-count></span></button>
+      </div>
+      <div id="ev-results" role="tabpanel" aria-labelledby="evtab-results">
       <div class="policy-card">
         <h3>What the official policy says</h3>
         <dl>
@@ -98,7 +103,8 @@ const guide = [
         </dl>
       </div>
       <div id="ev-happened"></div>
-      <div id="ev-list" class="ev-list">
+      </div>
+      <div id="ev-list" class="ev-list" role="tabpanel" aria-labelledby="evtab-list" hidden>
         <p class="panel-note">Did you see one of these? Mark it found, and the latest results are saved as evidence.</p>
         <Checklist caseId="harbour-city" />
       </div>
@@ -109,8 +115,8 @@ const guide = [
 </CaseStudyLayout>
 
 <script>
-  import { mountChecklist } from '../../../lib/case-studies/panels';
-  import { CASES, DOCS, HarbourSession, QUESTION_BANK, docById, type Applicant, type Doc, type DocStatus, type Turn } from '../../../lib/case-studies/harbour-city';
+  import { mountChecklist, mountEvidenceTabs } from '../../../lib/case-studies/panels';
+  import { CASES, DOCS, HarbourSession, QUESTION_BANK, docById, turnsVerdict, type Applicant, type Doc, type DocStatus, type Turn } from '../../../lib/case-studies/harbour-city';
   import { auditJson, esc, LANG_LABELS, store, VARIANTS, VARIANT_LABELS, type AuditEntry, type Lang, type Variant } from '../../../lib/case-studies/runner';
   import { createChatView } from '../../../lib/case-studies/chat-view';
   import { judge, TESTS_KEY, type SavedTest } from '../../../lib/case-studies/harbour-city-report';
@@ -202,6 +208,7 @@ const guide = [
       $<HTMLButtonElement>('#send-button').disabled = false;
       tick('ask');
       render();
+      evTabs.show('results');
       $('#ev-happened').classList.remove('is-new'); void $('#ev-happened').offsetWidth; $('#ev-happened').classList.add('is-new');
     }, REPLY_DELAY);
   }
@@ -225,12 +232,12 @@ const guide = [
     return `<p class="src-line">From <strong>${esc(d.title)}</strong> ${statusPill(d.status)}${why}</p>`;
   };
   // A page's edit history, as the content system logged it.
-  const historyHtml = (d: Doc) => `<ol class="kb-history" aria-label="Edit history of ${esc(d.title)}">${d.history.map((r) => `<li><span class="kb-at">${esc(r.at)}</span> <code>${esc(r.by)}</code>${r.staff ? '' : ' <span class="pill bad">Not on staff list</span>'} <span>${esc(r.action)}</span></li>`).join('')}</ol>`;
+  const historyHtml = (d: Doc) => d.status === 'official' ? '' : `<ol class="kb-history" aria-label="Edit history of ${esc(d.title)}">${d.history.map((r) => `<li><span class="kb-at">${esc(r.at)}</span> <code>${esc(r.by)}</code>${r.staff ? '' : ' <span class="pill bad">Not on staff list</span>'} <span>${esc(r.action)}</span></li>`).join('')}</ol>`;
   // The whole session as JSON lines, the way a SIEM would ingest it.
   const auditLog = (events: AuditEntry[]) => events.length
     ? `<details class="ev-detail"><summary>Audit log</summary><p class="note">Every tool call this session made, one JSON object per line. A page that is not official, or a case returned to someone who does not own it, is something you could alert on.</p><pre class="audit-log" tabindex="0" aria-label="Audit log, ${events.length} ${events.length === 1 ? 'entry' : 'entries'}">${esc(events.map(auditJson).join('\n'))}</pre></details>`
     : '';
-  let kbOpen = true;
+  let kbOpen = false, kbAll = false;
   const lastTurns = (v: Variant) => (last ? sessions[v].turns.slice(last.from, last.from + last.langs.length) : []);
 
   // ---------- Rendering ----------
@@ -253,29 +260,62 @@ const guide = [
     });
   }
 
+  // What the log shows for one version's latest questions, counted by tool and outcome.
+  function logSummary(v: Variant) {
+    const s = sessions[v], from = last!.from, n = last!.langs.length;
+    const events = s.events.filter((e) => e.request > from && e.request <= from + n);
+    const counts = new Map<string, { n: number; bad: boolean }>();
+    for (const e of events) {
+      const out = e.output as { doc_status?: DocStatus; results?: number; error?: string };
+      const outcome = e.name === 'search_index' ? (out.doc_status ?? 'no results') : out.error ? 'blocked' : e.authorized ? 'own case' : 'returned another resident’s case';
+      const bad = e.name === 'search_index' ? outcome !== 'official' : outcome === 'returned another resident’s case';
+      const key = `${e.name}\u0000${outcome}`;
+      counts.set(key, { n: (counts.get(key)?.n ?? 0) + 1, bad });
+    }
+    const lines = [...counts].map(([key, c]) => { const [tool, outcome] = key.split('\u0000'); return `<code>${esc(tool)}</code> <span class="${c.bad ? 'log-bad' : ''}">${esc(outcome)}${c.n > 1 ? ` ×${c.n}` : ''}</span>`; });
+    const silent = n - new Set(events.map((e) => e.request)).size;
+    if (silent) lines.push(`<span>No tool call for ${silent} ${silent === 1 ? 'question' : 'questions'}</span>`);
+    return { html: lines.join('<br>'), events };
+  }
+
+  function resultRow(v: Variant) {
+    const total = last!.langs.length;
+    const wrong = lastTurns(v).filter((t) => !judge(t, applicant).ok).length;
+    const { failed } = turnsVerdict(sessions[v], last!.from, total);
+    const kinds = [...new Set(failed.map((f) => f.kind))];
+    const badge = wrong
+      ? `<span class="result-badge bad"><span aria-hidden="true">✕</span> ${total === 1 ? 'Problem' : `${wrong} of ${total} with a problem`}</span>`
+      : `<span class="result-badge ok"><span aria-hidden="true">✓</span> ${total === 1 ? 'Correct' : `All ${total} correct`}</span>`;
+    const log = logSummary(v);
+    return `<li class="result-row${wrong ? ' is-fail' : ''}${v === active ? ' is-active' : ''}">
+      <p class="result-head"><span class="compare-version">${VARIANT_LABELS[v]}</span> ${badge}${kinds.length ? ` <span class="result-fails">${esc(kinds.join(', '))}</span>` : ''}</p>
+      <p class="result-log">${log.html}</p>
+      ${failed.length ? `<ul class="result-why">${failed.map((f) => `<li>${esc(f.detail)}</li>`).join('')}</ul>` : ''}
+      <div class="result-actions">${v === active ? '<span class="result-showing">Showing in chat</span>' : `<button type="button" class="text-link" data-compare="${v}">Show ${VARIANT_LABELS[v]} chat</button>`}${log.events.length ? `<details class="result-entries"><summary>Log entries (${log.events.length})</summary><pre>${esc(log.events.map(auditJson).join('\n'))}</pre></details>` : ''}</div>
+    </li>`;
+  }
+
   function renderEvidence() {
     const panel = $('#ev-happened');
     if (!last) { panel.innerHTML = '<p class="evidence-empty">Ask a question to compare every language, and every version, against the policy.</p>'; return; }
     const q = question(last.q);
-    const wrongCount = (v: Variant) => lastTurns(v).filter((t) => !judge(t, applicant).ok).length;
-    const summary = VARIANTS.map((v) => {
-      const n = wrongCount(v), total = last!.langs.length;
-      return `<li><button type="button" class="compare-row" data-compare="${v}"${v === active ? ' aria-current="true"' : ''}><span class="compare-version">${VARIANT_LABELS[v]}</span><span>${n ? `<span class="pill bad">${total === 1 ? 'Problem' : `${n} of ${total} with a problem`}</span>` : `<span class="pill ok">${total === 1 ? 'Correct' : `All ${total} correct`}</span>`}</span></button></li>`;
-    }).join('');
     const rows = lastTurns(active).map((t) => {
       const j = judge(t, applicant);
       return `<li class="${j.ok ? '' : 'is-fail'}"><p class="lang-head"><strong>${esc(LANG_LABELS[t.lang])}</strong></p>${sourceHtml(t, true)}<p class="lang-verdict"><span class="result-badge ${j.ok ? 'ok' : 'bad'}"><span aria-hidden="true">${j.ok ? '✓' : '✕'}</span> ${esc(j.label)}</span></p><p class="lang-answer">${esc(t.translation ?? t.reply)}</p></li>`;
     }).join('');
     const used = new Set(lastTurns(active).map((t) => t.claims.source).filter(Boolean));
+    const pages = kbAll ? DOCS : DOCS.filter((d) => used.has(d.id));
     panel.innerHTML = `
       <h3 class="evidence-title">"${esc(q.label)}", ${last.langs.length === 1 ? `in ${esc(LANG_LABELS[last.langs[0]])}` : 'in every language'}</h3>
-      <ul class="compare-list">${summary}</ul>
+      <ul class="result-list">${VARIANTS.map(resultRow).join('')}</ul>
+      <button type="button" class="ev-next" data-goto-list>Seen a failure? Mark it on your list <span aria-hidden="true">→</span></button>
       <h4>${VARIANT_LABELS[active]}, answer by answer</h4>
       <ul class="lang-list" aria-label="${VARIANT_LABELS[active]}: each language's answer in English, checked against the policy, with its source">${rows}</ul>
       <details class="ev-detail kb"${kbOpen ? ' open' : ''}>
         <summary>Where the answers come from</summary>
-        <p class="note">The assistant looks up pages in its search index, then answers from what it finds. ${VARIANT_LABELS[active]}'s index holds these pages. The ones marked "Used" answered this question.</p>
-        <ul class="kb-list">${DOCS.map((d) => `<li class="${used.has(d.id) ? 'is-used' : ''}"><p class="kb-title"><strong>${esc(d.title)}</strong> ${statusPill(d.status)}${used.has(d.id) ? ' <span class="kb-used">Used</span>' : ''}</p><p class="kb-means">${esc(STATUS_MEANS[d.status])} ${d.status === 'official' ? '' : esc(d.detail)}</p>${historyHtml(d)}</li>`).join('')}</ul>
+        <p class="note">The assistant looks up pages in its search index, then answers from what it finds. ${kbAll ? `These are all the pages in ${VARIANT_LABELS[active]}'s index. The ones marked "Used" answered this question.` : `These are the pages ${VARIANT_LABELS[active]} used for this question.`}</p>
+        ${pages.length ? `<ul class="kb-list">${pages.map((d) => `<li class="${used.has(d.id) ? 'is-used' : ''}"><p class="kb-title"><strong>${esc(d.title)}</strong> ${statusPill(d.status)}${kbAll && used.has(d.id) ? ' <span class="kb-used">Used</span>' : ''}</p><p class="kb-means">${esc(STATUS_MEANS[d.status])} ${d.status === 'official' ? '' : esc(d.detail)}</p>${historyHtml(d)}</li>`).join('')}</ul>` : '<p class="note">No pages were used.</p>'}
+        <button type="button" class="text-link" data-kb-all>${kbAll ? 'Show only the pages used' : `Show all ${DOCS.length} pages in the index`}</button>
       </details>
       ${auditLog(sessions[active].events)}`;
   }
@@ -329,6 +369,7 @@ const guide = [
   });
   $('#ev-happened').addEventListener('toggle', (e) => { if ((e.target as HTMLElement).matches('details.kb')) kbOpen = (e.target as HTMLDetailsElement).open; }, true);
   $('#ev-happened').addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('[data-kb-all]')) { kbAll = !kbAll; renderEvidence(); $<HTMLButtonElement>('[data-kb-all]').focus(); return; }
     const row = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-compare]');
     if (row) document.querySelector<HTMLButtonElement>(`[data-version="${row.dataset.compare}"]`)!.click();
   });
@@ -337,6 +378,7 @@ const guide = [
   $('#start-over').addEventListener('click', startOver);
 
   const checklist = mountChecklist(document.querySelector('[data-checklist]')!, 'harbour-city', currentEvidence);
+  const evTabs = mountEvidenceTabs($('.panel.evidence'), 'harbour-city');
   $('#ev-list').addEventListener('click', (e) => {
     if ((e.target as HTMLElement).closest('[data-status="found"]') && document.querySelector('#ev-list [data-status="found"][aria-pressed="true"]')) tick('mark');
   });

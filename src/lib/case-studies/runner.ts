@@ -103,6 +103,15 @@ export function runTest<S, Setup>(cs: CaseStudy<S, Setup>, test: TestCase<Setup>
 
 export const failures = (run: TestRun) => run.results.filter((r) => !r.result.pass);
 
+// The checks that apply to a session, and the ones it fails.
+export type Verdict = { applied: number; failed: { label: string; kind: string; detail: string }[] };
+export function verdict<S>(checks: Check<S>[], session: S): Verdict {
+  const applied = checks.map((c) => ({ c, r: c.evaluate(session) })).filter((x) => x.r !== null);
+  return { applied: applied.length, failed: applied.filter((x) => !x.r!.pass).map((x) => ({ label: x.c.label, kind: x.c.kind, detail: x.r!.detail })) };
+}
+// A copy of a session that shows only some of its history, so checks can judge one message on its own.
+export const scoped = <S extends object>(s: S, patch: Partial<S>): S => Object.assign(Object.create(Object.getPrototypeOf(s)), s, patch);
+
 // A starting failure mode for the "Before you start" worksheet.
 export type FailureMode = { mode: string; harmed: string; severity: 1 | 2 | 3 | 4; likelihood: 1 | 2 | 3 | 4 };
 
