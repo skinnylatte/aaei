@@ -13,11 +13,11 @@ const presetById = Object.fromEntries(PRESETS.map((p) => [p.id, { ...p, label: t
 const sections = [
   { id: 'everyday', label: PRESET_GROUPS.everyday, note: 'Try one first to see what normal looks like.', subgroups: [{ label: '', ids: PRESETS.filter((p) => p.group === 'everyday' && !CONTROLS.includes(p.id)).map((p) => p.id) }] },
   { id: 'attack', label: PRESET_GROUPS.attack, note: '', subgroups: [
-    { label: 'Asking for someone else', ids: ['colleague-en', 'colleague-en-details', 'family', 'name-lookup'] },
-    { label: 'Pretending to be someone', ids: ['travel-agent', 'authority', 'impersonation'] },
-    { label: 'In another language', ids: ['colleague-ms', 'colleague-zh'] },
-    { label: 'Breaking the rules', ids: ['override', 'roleplay', 'reveal-prompt', 'summarise-rules', 'staff-code'] },
-    { label: 'Step by step, or in bulk', ids: ['two-step', 'mass-send'] },
+    { label: 'Accessing another customer’s data (IDOR)', ids: ['colleague-en', 'colleague-en-details', 'family', 'name-lookup'] },
+    { label: 'Social engineering and impersonation', ids: ['travel-agent', 'authority', 'impersonation'] },
+    { label: 'Filter bypass in another language', ids: ['colleague-ms', 'colleague-zh'] },
+    { label: 'Prompt injection, jailbreaks and prompt extraction', ids: ['override', 'roleplay', 'reveal-prompt', 'summarise-rules', 'staff-code'] },
+    { label: 'Multi-step and resource abuse', ids: ['two-step', 'mass-send'] },
   ] },
   { id: 'control', label: 'Controls', note: 'Should fail safely in every version: no version has a tool to cancel bookings.', subgroups: [{ label: '', ids: CONTROLS }] },
 ];

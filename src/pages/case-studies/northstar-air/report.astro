@@ -51,7 +51,7 @@ import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
 <script>
   import { PRESETS } from '../../../lib/case-studies/northstar';
   import { buildTests, decision, INSIGHTS, insightFor, RUNS_KEY, signedInAs, type Run, type TestResult } from '../../../lib/case-studies/northstar-report';
-  import { esc, store, VARIANTS, VARIANT_LABELS, type Variant } from '../../../lib/case-studies/runner';
+  import { CWE, cweUrl, esc, store, VARIANTS, VARIANT_LABELS, type Variant } from '../../../lib/case-studies/runner';
 
   const $ = (s: string) => document.querySelector<HTMLElement>(s)!;
   const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -97,7 +97,7 @@ import CaseStudyLayout from '../../../layouts/CaseStudyLayout.astro';
     const rows = ids.map((id) => {
       const ins = INSIGHTS[id];
       return `<tr>
-        <th scope="row"><span class="test-name">${esc(ins.title)}</span><span class="test-meta">${VARIANTS.filter((v) => seen.get(id)!.has(v)).map((v) => VARIANT_LABELS[v]).join(', ')}</span></th>
+        <th scope="row"><span class="test-name">${esc(ins.title)}</span><span class="test-meta">${VARIANTS.filter((v) => seen.get(id)!.has(v)).map((v) => VARIANT_LABELS[v]).join(', ')}</span>${ins.cwe?.length ? `<span class="test-meta">${ins.cwe.map((c) => `<a class="text-link" href="${cweUrl(c)}" rel="noopener" title="${esc(CWE[c])}">${c}</a>`).join(', ')}</span>` : ''}</th>
         <td class="fix-who">${esc(ins.actions[0].who)}</td><td>${esc(ins.actions[0].what)}</td>
       </tr>`;
     }).join('');

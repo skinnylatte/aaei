@@ -48,8 +48,10 @@ import { FACTS } from '../../lib/case-studies/harbour-city';
     { label: 'What it can do', text: 'Answer questions on eligibility, documents and the deadline, and show a signed-in resident the status of their own case.' },
     { label: 'How it answers', text: 'It searches an index of grant pages, then answers from the page it finds, in the language of the question.' },
     { label: 'Data it holds', text: 'Its search index holds the official grant policy in English, Chinese, Malay and Tamil, plus other pages nobody has cleaned up: a Chinese FAQ, last year\'s Malay translation, and a Tamil translation written by community volunteers. Case records for three synthetic applicants sit in the same index.' },
+    { label: 'Why it is a security problem', text: 'A tampered page is an integrity failure: someone changed what the service tells residents. Refusing one language is an availability failure for everyone who uses it. Case records in the public index are missing access control, whatever the prompt says.' },
     { label: "What's at stake", text: 'Missed deadlines, wrong eligibility decisions, answers taken from pages nobody checked, one resident seeing another\'s case, and residents turned away because of the language they use.' },
   ]} />
 
+  <p class="brief-terms">New to AI terms? See <a class="text-link" href="/case-studies/#ai-terms">AI terms for security teams</a>.</p>
   <p class="next-row"><a class="button button-primary" href="/case-studies/harbour-city/before/">Next: before you start <span aria-hidden="true">→</span></a></p>
 </CaseStudyLayout>

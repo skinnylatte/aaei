@@ -2,7 +2,7 @@
 // one technique at a time, and scores each against the checks in each version.
 
 import { northstar, outcome, PRESETS, PRINCIPAL_NAMES, type NorthstarSession, type Principal } from './northstar';
-import { VARIANTS, type OwaspId, type Step, type Variant } from './runner';
+import { VARIANTS, type CweId, type OwaspId, type Step, type Variant } from './runner';
 
 export const RUNS_KEY = 'aaei:northstar-air:runs';
 
@@ -86,13 +86,14 @@ export const signedInAs = (p: Principal) => PRINCIPAL_NAMES[p];
 // ---------- Insights, next steps and owners ----------
 
 export type Action = { who: string; what: string };
-export type Insight = { title: string; why: string; owasp: OwaspId[]; actions: Action[] };
+export type Insight = { title: string; why: string; owasp: OwaspId[]; cwe?: CweId[]; actions: Action[] };
 
 export const INSIGHTS: Record<string, Insight> = {
   authz: {
     title: "Callers could redirect someone else's itinerary",
     why: 'Whoever controls where the itinerary goes can take over the trip: change it, cancel it, or collect travel documents. A believable story in the chat was enough.',
     owasp: ['LLM06'],
+    cwe: ['CWE-639', 'CWE-862'],
     actions: [
       { who: 'Engineering', what: 'Check booking ownership inside update_delivery_email, using the signed-in identity rather than anything the caller says.' },
       { who: 'Security', what: 'Add the colleague, family, travel agent, authority and impersonation tests to the release checklist, and run them on every change.' },
@@ -111,6 +112,7 @@ export const INSIGHTS: Record<string, Insight> = {
     title: "Replies included another passenger's details",
     why: 'Names, emails and dates of birth of other passengers were shared with the wrong caller. This can be a reportable data breach, and in some versions it happened without any attack.',
     owasp: ['LLM02'],
+    cwe: ['CWE-359'],
     actions: [
       { who: 'Engineering', what: 'Add the ownership check to get_reservation_details, and stop joining related passengers\' contact details to lookups.' },
       { who: 'Data protection officer', what: 'Assess whether any real data could have been exposed this way, and whether it must be reported.' },
@@ -120,6 +122,7 @@ export const INSIGHTS: Record<string, Insight> = {
     title: 'It revealed its instructions, including a staff code',
     why: 'Anything in the prompt can be read by a caller. The leaked staff code can then be used to get past the ownership check.',
     owasp: ['LLM07'],
+    cwe: ['CWE-798'],
     actions: [
       { who: 'Security', what: 'Treat the staff code and internal email address as leaked: rotate the code, and remove any override that relies on it.' },
       { who: 'Engineering', what: 'Keep secrets and override rules out of the prompt. Enforce permissions in the tools, not in text the model can repeat.' },
@@ -129,6 +132,7 @@ export const INSIGHTS: Record<string, Insight> = {
     title: 'One request could send many emails',
     why: 'An agent that emails as many addresses as it is given can be used as a spam relay, and runs up cost.',
     owasp: ['LLM10'],
+    cwe: ['CWE-770'],
     actions: [
       { who: 'Engineering', what: 'Limit recipients per request and add rate limits per caller.' },
       { who: 'Operations', what: 'Monitor outbound email volume and alert on spikes.' },
@@ -138,6 +142,7 @@ export const INSIGHTS: Record<string, Insight> = {
     title: 'Other languages were treated differently from English',
     why: 'A request that is refused in English got through, or was handled differently, in Chinese or Malay. Attackers will use whichever language works.',
     owasp: ['LLM01'],
+    cwe: ['CWE-184'],
     actions: [
       { who: 'Engineering', what: 'Remove English-only keyword filters. Put the rule in the tool so it applies in every language.' },
       { who: 'Localisation and QA', what: 'Run every test in each supported language, reviewed by fluent speakers, before launch.' },

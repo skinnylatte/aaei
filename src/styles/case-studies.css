@@ -666,6 +666,14 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 .outcome-list li:nth-last-child(-n+2) { border-bottom: 1px solid var(--line); }
 .outcome-list h3 { margin: 0 0 8px; font: 650 16px/1.3 var(--display); }
 .outcome-list p { margin: 0; font-size: 15px; }
+.term-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 var(--space-lg); margin: 0; }
+.term-list > div { padding: 18px 0 20px; border-top: 1px solid var(--line); }
+.term-list dt { margin: 0 0 6px; font: 650 16px/1.3 var(--display); }
+.term-list dd { margin: 0; font-size: 15px; }
+.term-list .term-where { margin-top: 6px; font-size: 13.5px; color: color-mix(in oklch, var(--ink) 72%, transparent); }
+@media (max-width: 900px) { .term-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .term-list { grid-template-columns: 1fr; } }
+.brief-terms { margin: var(--space-sm) 0 0; font-size: 15px; }
 .method-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-sm); margin: 0; padding: 0; list-style: none; counter-reset: method; }
 .method-list li { counter-increment: method; padding: var(--space-md); background: oklch(99% .006 70); border: 1px solid var(--ink); border-radius: var(--radius-panel); }
 .method-list li::before { content: counter(method); display: grid; place-items: center; width: 30px; height: 30px; margin-bottom: var(--space-xs); background: var(--coral); border-radius: 50%; font: 650 13px/1 var(--display); }

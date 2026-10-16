@@ -60,6 +60,7 @@ export const CWE = {
   'CWE-770': 'Allocation of Resources Without Limits or Throttling',
   'CWE-359': 'Exposure of Private Personal Information to an Unauthorized Actor',
   'CWE-345': 'Insufficient Verification of Data Authenticity',
+  'CWE-204': 'Observable Response Discrepancy',
 } as const;
 export type CweId = keyof typeof CWE;
 export const cweUrl = (id: CweId) => `https://cwe.mitre.org/data/definitions/${id.slice(4)}.html`;

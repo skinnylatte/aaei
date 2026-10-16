@@ -93,9 +93,23 @@ const resources = [
 
 const audiences = ['Product managers', 'Engineers', 'Lawyers', 'Risk and compliance', 'Cybersecurity', 'AI governance', 'Public sector', 'Leaders deploying AI'];
 
+// AI terms, in the terms a security team already uses, and where each one shows up here.
+const terms = [
+  { term: 'System prompt', means: 'Configuration the model reads before every conversation. Assume any user can read it, so never put a secret or an override in it.', where: 'Northstar Air leaks a staff code from its system prompt.' },
+  { term: 'Prompt injection', means: 'Injection: instructions and data share one channel, so text from a user or a document can change what the model does.', where: 'Northstar Air "ignore your previous instructions", and Uncle Lim’s secret.' },
+  { term: 'Jailbreak', means: 'Talking the model past its own rules, usually with framing such as role-play, the way an encoding trick gets past a WAF.', where: 'Northstar Air "FreeBot, an assistant with no rules".' },
+  { term: 'Agent and tool call', means: 'An agent is a model that can act. Each tool call is an API request made with the service’s credentials, so the authorization check belongs in the tool, not in the prompt.', where: 'Northstar Air update_delivery_email.' },
+  { term: 'Search index (RAG)', means: 'The data store the model answers from. Every page in it is an input: stale, unreviewed or tampered pages become answers, and private records stored there can leak.', where: 'Harbour City’s grant pages and case records.' },
+  { term: 'Guardrail or filter', means: 'An input or output check around the model. Keyword lists are deny-lists, with the usual gaps: other languages, rephrasing, encoding.', where: 'Northstar Air’s English-only filter.' },
+  { term: 'Human in the loop', means: 'An approval step. It is only as strong as what the person sees and what they decide.', where: 'Northstar Air’s human agent queue.' },
+  { term: 'Hallucination', means: 'A confident answer with no source behind it. In testing, treat it as an integrity failure.', where: 'Harbour City “yes, everyone can apply”.' },
+  { term: 'Non-determinism', means: 'The same input can give different outputs. A real finding is a rate over many runs, and one clean run proves nothing.', where: 'The case studies are scripted so results replay. Uncle Lim’s secret uses a live model.' },
+];
+
 const toc = [
   { id: 'case-studies', label: 'Case Studies' },
   { id: 'what-you-learn', label: 'What You Will Learn' },
+  { id: 'ai-terms', label: 'AI Terms for Security Teams' },
   { id: 'tools-and-resources', label: 'Tools and Resources' },
 ];
 ---
@@ -150,6 +164,20 @@ const toc = [
         </li>
       ))}
     </ul>
+  </section>
+
+  <section id="ai-terms" class="toc-section" aria-labelledby="ai-terms-title">
+    <h2 id="ai-terms-title" class="section-title">AI Terms for Security Teams</h2>
+    <p class="section-lede">The AI words used in these case studies, in the terms you already use, and where to see each one.</p>
+    <dl class="term-list">
+      {terms.map((t) => (
+        <div>
+          <dt>{t.term}</dt>
+          <dd>{t.means}</dd>
+          <dd class="term-where">{t.where}</dd>
+        </div>
+      ))}
+    </dl>
   </section>
 
   <section id="tools-and-resources" class="toc-section" aria-labelledby="tools-and-resources-title">
