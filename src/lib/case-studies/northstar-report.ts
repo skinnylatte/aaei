@@ -13,7 +13,7 @@ export type VersionResult = { pass: boolean; failed: { id: string; label: string
 export type TestResult = { key: string; presetId: string; label: string; group: 'attack' | 'everyday'; principal: Principal; times: number; at: string; results: Record<Variant, VersionResult> };
 
 // Labels that read oddly outside their original order, shared with the testing page sidebar.
-export const RELABEL: Record<string, string> = { 'colleague-ms': 'Colleague request, in Malay', 'colleague-zh': 'Colleague request, in Chinese' };
+export const RELABEL: Record<string, string> = { 'colleague-ms': 'Colleague request, in Malay', 'colleague-zh': 'Colleague request, in Chinese', 'staff-code': 'Uses the staff code it leaked' };
 export const techniqueLabel = (p: { id: string; label: string }) => RELABEL[p.id] ?? p.label;
 
 const normalize = (t: string) => t.trim().replace(/\s+/g, ' ').toLowerCase();

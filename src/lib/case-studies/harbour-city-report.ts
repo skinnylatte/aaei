@@ -74,12 +74,12 @@ export const INSIGHTS: Record<string, Insight> = {
   },
   sources: {
     title: 'Answers came from outdated, unreviewed or tampered pages',
-    owasp: ['LLM04', 'LLM08'],
+    owasp: ['LLM04'],
     actions: [{ who: 'Engineering', what: 'Index only current, reviewed pages. Remove last year\'s translation and the community draft, and restore the Chinese FAQ.' }],
   },
   privacy: {
     title: "A resident was shown someone else's case",
-    owasp: ['LLM02'],
+    owasp: ['LLM02', 'LLM08'],
     actions: [{ who: 'Engineering', what: 'Only look up case records for the signed-in resident, in every language, outside the model.' }],
   },
   'refusal-parity': {

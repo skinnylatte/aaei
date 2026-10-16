@@ -42,7 +42,8 @@ const guide = [
     <aside class="panel techniques" aria-labelledby="techniques-title">
       <details class="techniques-toggle" open>
         <summary><h2 id="techniques-title">Questions</h2></summary>
-        <p class="panel-note">Pick a language, or <strong>All</strong> for all five, then press Send. Custom questions will not work here.</p>
+        <p class="panel-note">Pick a language, or <strong>All</strong> for all five, then press Send.</p>
+        <p class="panel-note">Every reply is scripted, so only these work, and everyone gets the same result that the report can replay. A real model is not deterministic: you would run each test many times. To attack a live model, play <a class="text-link" href="/hawker/">Uncle Lim’s secret</a>.</p>
         {groups.map((g) => (
           <div class="technique-group" data-group={g.id}>
             <h3>{g.label} <span class="count" data-count>({g.ids.length})</span></h3>

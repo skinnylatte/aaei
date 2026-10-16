@@ -386,6 +386,9 @@ select.ws-cell { border-color: var(--line); background: oklch(98.5% .01 70); cur
 @keyframes arrive { from { box-shadow: 0 0 0 3px var(--coral); } to { box-shadow: 0 0 0 3px transparent; } }
 @media (prefers-reduced-motion: reduce) { .message.typing .dots i, .message.is-new .bubble, #ev-happened.is-new { animation: none; } }
 .technique:focus-visible { outline: 3px solid var(--coral); outline-offset: 1px; }
+.technique:disabled { color: color-mix(in oklch, var(--ink) 55%, transparent); background: transparent; border-style: dashed; cursor: not-allowed; }
+.technique:disabled:hover { border-color: var(--line); }
+.technique-lock { margin: 4px 2px 2px; font-size: 12.5px; line-height: 1.35; color: color-mix(in oklch, var(--ink) 75%, transparent); }
 
 /* Versions as folder tabs across the top of the chat. The selected tab joins the chat surface. */
 .version-tabs { display: flex; background: var(--rice); border-bottom: 1px solid var(--ink); }
