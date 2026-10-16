@@ -23,6 +23,6 @@ const scenarios = expectedBehaviour(harbourCity, SUITE, outcome);
       'Patched should not be deployed either. It trades wrong answers for refusals, so Tamil speakers and residents who mix languages lose the service entirely, and applicants cannot see their own case. A review that only counted wrong answers would have passed it.',
       'Hardened can be deployed with conditions: fluent-speaker review of every language before launch, refusal and error rates monitored separately for each language, and a set gap between languages that triggers a fix.',
     ]}
-    note="The Chinese, Malay and Tamil text in this case study is written in advance and must be reviewed by fluent speakers before each workshop."
+    note="Every reply here is scripted, so a weakness shows up on every run. On a real model the same weakness shows up as a rate, and you would run each test many times. The Chinese, Malay and Tamil text in this case study is written in advance and must be reviewed by fluent speakers before each workshop."
   />
 </CaseStudyLayout>
