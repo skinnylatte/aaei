@@ -1,7 +1,7 @@
 // Northstar Air test report: replays what a tester actually sent on the testing page,
 // one technique at a time, and scores each against the checks in each version.
 
-import { northstar, outcome, PRESETS, PRINCIPAL_NAMES, type NorthstarSession, type Principal } from './northstar';
+import { mirror, northstar, outcome, presetText, PRESETS, PRINCIPAL_NAMES, type NorthstarSession, type Principal } from './northstar';
 import { VARIANTS, type CweId, type OwaspId, type Step, type Variant } from './runner';
 
 export const RUNS_KEY = 'aaei:northstar-air:runs';
@@ -17,7 +17,7 @@ export const RELABEL: Record<string, string> = { 'colleague-ms': 'Colleague requ
 export const techniqueLabel = (p: { id: string; label: string }) => RELABEL[p.id] ?? p.label;
 
 const normalize = (t: string) => t.trim().replace(/\s+/g, ' ').toLowerCase();
-const presetByText = new Map(PRESETS.map((p) => [normalize(p.text), p]));
+const presetByText = new Map((['alex', 'jordan'] as const).flatMap((who) => PRESETS.map((p) => [normalize(presetText(p, who)), p] as const)));
 
 function replay(variant: Variant, principal: Principal, steps: Step[]) {
   const s = northstar.createSession(variant, { principal });
@@ -74,7 +74,7 @@ export function buildTests(runs: Run[]): TestResult[] {
     for (const t of runTests(run)) {
       const key = `${t.presetId}:${run.principal}`;
       const prev = byKey.get(key);
-      byKey.set(key, { ...t, key, principal: run.principal, times: (prev?.times ?? 0) + 1, at: run.at });
+      byKey.set(key, { ...t, label: mirror(t.label, run.principal), key, principal: run.principal, times: (prev?.times ?? 0) + 1, at: run.at });
     }
   }
   const order = new Map(PRESETS.map((p, i) => [p.id, i]));

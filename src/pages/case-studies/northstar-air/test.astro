@@ -107,7 +107,7 @@ const guide = [
 
 <script>
   import { mountChecklist, mountEvidenceTabs } from '../../../lib/case-studies/panels';
-  import { NorthstarSession, PRESETS, PRINCIPAL_NAMES, STAFF_CODE, TECHNIQUE_CLASSIC, TECHNIQUE_LABELS, describeTurn, turnVerdict, type Escalation, type Principal } from '../../../lib/case-studies/northstar';
+  import { mirror, NorthstarSession, presetText, PRESETS, PRINCIPAL_NAMES, STAFF_CODE, TECHNIQUE_CLASSIC, TECHNIQUE_LABELS, describeTurn, turnVerdict, type Escalation, type Principal } from '../../../lib/case-studies/northstar';
   import { auditJson, esc, LANG_LABELS, newId, VARIANTS, VARIANT_LABELS, store, type AuditEntry, type ToolCall, type Variant } from '../../../lib/case-studies/runner';
   import { createChatView } from '../../../lib/case-studies/chat-view';
   import { RUNS_KEY, type Run } from '../../../lib/case-studies/northstar-report';
@@ -115,7 +115,7 @@ const guide = [
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
   const input = $<HTMLTextAreaElement>('#chat-input');
   const normalize = (t: string) => t.trim().replace(/\s+/g, ' ').toLowerCase();
-  const allowed = new Set(PRESETS.map((p) => normalize(p.text)));
+  const allowed = new Set((['alex', 'jordan'] as const).flatMap((who) => PRESETS.map((p) => normalize(presetText(p, who)))));
 
   let principal: Principal = 'alex';
   let sessions = {} as Record<Variant, NorthstarSession>;
@@ -173,7 +173,7 @@ const guide = [
   function send(text: string) {
     if (!text.trim() || pending) return;
     showError();
-    const preset = PRESETS.find((p) => normalize(p.text) === normalize(text));
+    const preset = PRESETS.find((p) => normalize(presetText(p, principal)) === normalize(text));
     let targets = [...VARIANTS];
     // A typed email address only goes to the versions that asked for one.
     if (!preset) targets = targets.filter((v) => sessions[v].awaitingEmail);
@@ -369,19 +369,21 @@ const guide = [
   });
 
   document.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((b) => b.addEventListener('click', () => {
-    input.value = PRESETS.find((p) => p.id === b.dataset.preset)!.text;
+    input.value = presetText(PRESETS.find((p) => p.id === b.dataset.preset)!, principal);
     input.dispatchEvent(new Event('input'));
     selectPreset(b.dataset.preset!);
     $<HTMLButtonElement>('#send-button').focus({ preventScroll: true });
   }));
   input.addEventListener('input', () => {
-    const match = PRESETS.find((p) => normalize(p.text) === normalize(input.value));
+    const match = PRESETS.find((p) => normalize(presetText(p, principal)) === normalize(input.value));
     selectPreset(match ? match.id : null);
   });
   $('#chat-form').addEventListener('submit', (e) => { e.preventDefault(); send(input.value); input.focus(); });
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) $<HTMLFormElement>('#chat-form').requestSubmit(); });
 
-  $<HTMLSelectElement>('#chat-principal').addEventListener('change', (e) => { principal = (e.target as HTMLSelectElement).value as Principal; startOver(); });
+  // Technique names mention the other passenger, so they follow the sign-in.
+  const relabel = () => document.querySelectorAll<HTMLElement>('[data-preset] > span:first-child').forEach((el) => { el.dataset.label ??= el.textContent!; el.textContent = mirror(el.dataset.label, principal); });
+  $<HTMLSelectElement>('#chat-principal').addEventListener('change', (e) => { principal = (e.target as HTMLSelectElement).value as Principal; relabel(); startOver(); });
   $('#start-over').addEventListener('click', startOver);
 
   $('#ev-happened').addEventListener('click', (e) => {
