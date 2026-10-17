@@ -1,5 +1,5 @@
 // Netlify runs this automatically for every verified (non-spam) Netlify Forms submission.
-// It sends the person who requested a workshop a thank-you email through Resend.
+// It sends the person who got in touch through "Work with us" a thank-you email through Resend.
 //
 // Required environment variables (set in Netlify > Site configuration > Environment variables):
 //   RESEND_API_KEY  API key from resend.com
@@ -11,6 +11,30 @@ const FORM_NAME = 'workshop-request';
 
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+
+// The thank-you note for each "Looking for" choice. Keys match the labels in src/pages/index.astro.
+const REPLIES = {
+  'Evaluation & red teaming': {
+    subject: 'Thanks for getting in touch about an evaluation',
+    lines: ['Thank you for getting in touch about evaluating your model or system.', 'We have received your message and will be in touch within a few working days to talk through what you want tested, the languages involved, and any confidentiality requirements.'],
+  },
+  'A workshop': {
+    subject: 'Thanks for your workshop request',
+    lines: ['Thank you for your interest in a Break AI Before Deploying AI workshop for your team.', 'We have received your request and will be in touch within a few working days to talk through your systems, your team, and the format that would work best.'],
+  },
+  'Capacity building & advice': {
+    subject: 'Thanks for getting in touch',
+    lines: ['Thank you for getting in touch about capacity building and advice.', 'We have received your message and will be in touch within a few working days to understand what you are setting up.'],
+  },
+  'Comment or interview': {
+    subject: 'Thanks for your request for comment',
+    lines: ['Thank you for your request for comment.', 'We have received it and will reply as soon as we can, before your deadline where possible.'],
+  },
+};
+const DEFAULT_REPLY = {
+  subject: 'Thanks for getting in touch',
+  lines: ['Thank you for getting in touch.', 'We have received your message and will reply within a few working days.'],
+};
 
 const firstName = (name) => String(name || '').trim().split(/\s+/)[0].slice(0, 40);
 
@@ -30,20 +54,9 @@ export const handler = async (event) => {
   const name = firstName(payload.data.name);
   const greeting = name ? `Hi ${name},` : 'Hello,';
 
-  const text = [
-    greeting,
-    '',
-    'Thank you for your interest in a Break AI Before Deploying AI workshop for your team.',
-    '',
-    'We have received your request and will be in touch within a few working days to talk through your systems, your team, and the format that would work best.',
-    '',
-    'Asian AI Evaluation Institute',
-  ].join('\n');
-
-  const html = `<p>${escapeHtml(greeting)}</p>
-<p>Thank you for your interest in a <strong>Break AI Before Deploying AI</strong> workshop for your team.</p>
-<p>We have received your request and will be in touch within a few working days to talk through your systems, your team, and the format that would work best.</p>
-<p>Asian AI Evaluation Institute</p>`;
+  const reply = REPLIES[payload.data.need] ?? DEFAULT_REPLY;
+  const text = [greeting, '', ...reply.lines.flatMap((line) => [line, '']), 'Asian AI Evaluation Institute'].join('\n');
+  const html = [greeting, ...reply.lines, 'Asian AI Evaluation Institute'].map((line) => `<p>${escapeHtml(line)}</p>`).join('\n');
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -51,7 +64,7 @@ export const handler = async (event) => {
     body: JSON.stringify({
       from: RESEND_FROM,
       to: [to],
-      subject: 'Thanks for your workshop request',
+      subject: reply.subject,
       text,
       html,
       ...(REPLY_TO ? { reply_to: REPLY_TO } : {}),

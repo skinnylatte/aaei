@@ -1,0 +1,42 @@
+---
+// The site header: a strip announcing the next public workshop, then the wordmark, main menu, Login and the request button.
+// `current` marks the section the page belongs to. On pages with the request dialog, the button opens it; elsewhere it links to the contact form.
+interface Props { current?: 'workshops' | 'research' | 'team' | 'news'; requestDialog?: boolean }
+const { current, requestDialog = false } = Astro.props;
+
+// Public workshops, soonest first. The strip shows the next one still to come when the site is built, and hides when there is none.
+const publicWorkshops: { name: string; date: string; city: string; href: string }[] = [
+  { name: 'Break AI Before Deploying AI', date: '2026-09-29', city: 'Singapore', href: 'https://peatix.com/event/5138876' },
+  { name: 'SINCON 2026', date: '2026-10-16', city: 'Singapore', href: 'https://www.infosec-city.com/' },
+];
+const today = new Date().toISOString().slice(0, 10);
+const next = publicWorkshops.find((w) => w.date >= today);
+const nextDate = next && new Date(`${next.date}T00:00:00`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+
+const links = [
+  { id: 'workshops', label: 'Workshops', href: '/' },
+  { id: 'research', label: 'Research', href: '/research/' },
+  { id: 'team', label: 'Team', href: '/team/' },
+  { id: 'news', label: 'News', href: '/news/' },
+];
+---
+
+{next && (
+  <a class="next-strip" href={next.href} target="_blank" rel="noreferrer">
+    <span class="next-tag">Next public workshop</span>
+    <span class="next-what">{next.name} · {nextDate} · {next.city}</span>
+    <span class="next-cta">Get a ticket <span aria-hidden="true">↗</span></span>
+  </a>
+)}
+<header class="site-nav">
+  <a class="wordmark" href="/"><span class="mark" aria-hidden="true">A</span><span>Asian AI<br />Evaluation Institute</span></a>
+  <nav class="site-nav-links" aria-label="Main">
+    {links.map((l) => <a href={l.href} aria-current={l.id === current ? 'page' : undefined}>{l.label}</a>)}
+  </nav>
+  <div class="site-nav-actions">
+    <a class="site-nav-login" href="/case-studies/">Login</a>
+    {requestDialog
+      ? <button class="site-nav-request" type="button" data-open-request aria-haspopup="dialog"><span>Work with us</span><span class="site-nav-arrow" aria-hidden="true">→</span></button>
+      : <a class="site-nav-request" href="/#contact"><span>Work with us</span><span class="site-nav-arrow" aria-hidden="true">→</span></a>}
+  </div>
+</header>
