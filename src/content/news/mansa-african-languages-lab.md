@@ -1,6 +1,6 @@
 ---
 title: "Mansa: a multilingual, multimodal AI built for African languages"
-date: 2026-10-17
+date: 2026-09-15
 type: field
 summary: "African Languages Lab has launched Mansa, covering more than 30 African languages, including dialects and code-switching, built on a decade of community-collected data."
 source: https://multilingual.com/african-languages-lab-launches-mansa-multilingual-multimodal-ai-africa/
