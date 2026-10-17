@@ -6,14 +6,14 @@ const { requestDialog = false } = Astro.props;
 
 const columns = [
   { title: 'Institute', links: [
-    { label: 'Workshops', href: '/' },
+    { label: 'Workshops', href: '/workshops/' },
     { label: 'Research', href: '/research/' },
     { label: 'Team', href: '/team/' },
     { label: 'News', href: '/news/' },
   ] },
   { title: 'Workshops', links: [
-    { label: 'Public workshops', href: '/#workshop-title' },
-    { label: 'Private workshops', href: '/#contact' },
+    { label: 'Public workshops', href: '/workshops/#workshop-title' },
+    { label: 'Private workshops', href: '/workshops/#contact' },
     { label: 'Practice labs', href: '/case-studies/' },
   ] },
 ];
@@ -27,7 +27,7 @@ const columns = [
     </div>
     {requestDialog
       ? <button class="button button-primary" type="button" data-open-request aria-haspopup="dialog">Work with us <span aria-hidden="true">→</span></button>
-      : <a class="button button-primary" href="/#contact">Work with us <span aria-hidden="true">→</span></a>}
+      : <a class="button button-primary" href="/workshops/#contact">Work with us <span aria-hidden="true">→</span></a>}
   </div>
   <nav class="site-footer-links" aria-label="Footer">
     {columns.map((c) => (

@@ -14,7 +14,7 @@ const next = publicWorkshops.find((w) => w.date >= today);
 const nextDate = next && new Date(`${next.date}T00:00:00`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 
 const links = [
-  { id: 'workshops', label: 'Workshops', href: '/' },
+  { id: 'workshops', label: 'Workshops', href: '/workshops/' },
   { id: 'research', label: 'Research', href: '/research/' },
   { id: 'team', label: 'Team', href: '/team/' },
   { id: 'news', label: 'News', href: '/news/' },
@@ -37,6 +37,6 @@ const links = [
     <a class="site-nav-login" href="/case-studies/">Login</a>
     {requestDialog
       ? <button class="site-nav-request" type="button" data-open-request aria-haspopup="dialog"><span>Work with us</span><span class="site-nav-arrow" aria-hidden="true">→</span></button>
-      : <a class="site-nav-request" href="/#contact"><span>Work with us</span><span class="site-nav-arrow" aria-hidden="true">→</span></a>}
+      : <a class="site-nav-request" href="/workshops/#contact"><span>Work with us</span><span class="site-nav-arrow" aria-hidden="true">→</span></a>}
   </div>
 </header>

@@ -79,7 +79,7 @@ const target = (external: boolean) => (external ? { target: '_blank', rel: 'nore
     button.disabled = true;
     try {
       const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>).toString();
-      const res = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+      const res = await fetch('/news/opportunities/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
       if (!res.ok) throw new Error(String(res.status));
       form.hidden = true;
       done.hidden = false;
