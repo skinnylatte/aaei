@@ -32,8 +32,16 @@ export async function newsFront() {
   const open = posts
     .filter((p) => p.data.type === 'opportunity' && (!p.data.deadline || p.data.deadline >= today))
     .sort((a, b) => (a.data.deadline?.valueOf() ?? Infinity) - (b.data.deadline?.valueOf() ?? Infinity));
-  const featured = posts.find((p) => p.data.featured) ?? posts.find((p) => p.data.type === 'report');
-  const shown = new Set([featured, ...upcoming, ...open].filter(Boolean));
+  // Every featured post takes a turn at the top of News, with arrows between them. Posts linked by `next` stay in reading order.
+  const starred = posts.filter((p) => p.data.featured);
+  const featured: Post[] = [];
+  for (const start of starred.filter((p) => !starred.some((q) => q.data.next?.id === p.id))) {
+    for (let p: Post | undefined = start; p && starred.includes(p) && !featured.includes(p); p = starred.find((q) => q.id === p!.data.next?.id)) featured.push(p);
+  }
+  starred.forEach((p) => { if (!featured.includes(p)) featured.push(p); });
+  if (!featured.length) { const report = posts.find((p) => p.data.type === 'report'); if (report) featured.push(report); }
+  const shown = new Set([...featured, ...upcoming, ...open]);
   const latest = posts.filter((p) => !shown.has(p));
-  return { featured, upcoming: upcoming.slice(0, 3), open, latest };
+  // News shows the four soonest-closing opportunities; /news/opportunities/ lists them all.
+  return { featured, upcoming: upcoming.slice(0, 3), open: open.slice(0, 4), allOpen: open, latest };
 }

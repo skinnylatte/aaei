@@ -1,0 +1,94 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import '../../styles/news.css';
+import { newsFront, formatDate, href, isExternal } from '../../lib/news';
+
+const { allOpen } = await newsFront();
+const target = (external: boolean) => (external ? { target: '_blank', rel: 'noreferrer' } : {});
+---
+
+<SiteLayout title="Opportunities" description="Jobs, calls, fellowships and grants we think our community should know about." current="news">
+  <div class="news">
+    <p class="news-opps-back"><a class="text-link" href="/news/"><span aria-hidden="true">←</span> News</a></p>
+    <h1 class="headline">Opportunities</h1>
+    <p class="news-opps-intro">Jobs, calls, fellowships and grants we think our community should know about, soonest deadline first.</p>
+    {allOpen.length ? (
+      <section class="news-opps" aria-label="Open opportunities">
+        <div class="news-opps-grid">
+          {allOpen.map((o) => (
+            <a class="news-opp" href={href(o)} {...target(isExternal(o))}>
+              {o.data.deadline && <span class="news-opp-deadline">Closes {formatDate(o.data.deadline)}</span>}
+              <span class="news-opp-title">{o.data.title}</span>
+              <span>{[o.data.organization, o.data.summary].filter(Boolean).join(' · ')}</span>
+              <span class="news-opp-more">{o.data.linkLabel ?? 'Apply'} <span aria-hidden="true">{isExternal(o) ? '↗' : '→'}</span></span>
+            </a>
+          ))}
+        </div>
+      </section>
+    ) : (
+      <p>Nothing open right now. Check back soon.</p>
+    )}
+
+    <section class="sub" aria-labelledby="sub-title">
+      <div class="sub-intro">
+        <h2 id="sub-title">Want to submit something?</h2>
+        <p>Fill up this form. Tell us about a job, fellowship, grant, call for papers or event that our community should know about. We review every submission before it goes up.</p>
+      </div>
+      <form class="sub-form" name="opportunity-submission" method="POST" action="/news/opportunities/" data-netlify="true" netlify-honeypot="bot-field" novalidate data-sub-form>
+        <input type="hidden" name="form-name" value="opportunity-submission" />
+        <p class="sub-honeypot" aria-hidden="true"><label>Leave this field empty <input name="bot-field" tabindex="-1" autocomplete="off" /></label></p>
+        <div class="sub-row">
+          <div class="sub-field"><label for="sub-title-field">Title</label><input id="sub-title-field" name="title" type="text" required maxlength="200" placeholder="For example, Research Engineer" /></div>
+          <div class="sub-field"><label for="sub-org">Organization</label><input id="sub-org" name="organization" type="text" required maxlength="200" /></div>
+        </div>
+        <div class="sub-row">
+          <div class="sub-field"><label for="sub-kind">Type</label><select id="sub-kind" name="kind" required><option value="">Choose one</option><option>Job</option><option>Fellowship</option><option>Grant</option><option>Call for papers</option><option>Event</option><option>Something else</option></select></div>
+          <div class="sub-field"><label for="sub-deadline">Deadline <span>(optional)</span></label><input id="sub-deadline" name="deadline" type="date" /></div>
+        </div>
+        <div class="sub-field"><label for="sub-link">Link</label><input id="sub-link" name="link" type="url" required maxlength="500" placeholder="https://" /></div>
+        <div class="sub-field"><label for="sub-details">Why should our community know about it? <span>(optional)</span></label><textarea id="sub-details" name="details" rows="4" maxlength="2000"></textarea></div>
+        <div class="sub-row">
+          <div class="sub-field"><label for="sub-name">Your name</label><input id="sub-name" name="name" type="text" autocomplete="name" required maxlength="120" /></div>
+          <div class="sub-field"><label for="sub-email">Your email</label><input id="sub-email" name="email" type="email" autocomplete="email" required maxlength="200" /></div>
+        </div>
+        <p class="sub-error" role="alert" hidden data-sub-error></p>
+        <button class="button button-primary" type="submit">Submit <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="sub-done" role="status" tabindex="-1" hidden data-sub-done>Thank you. We have received your submission and will review it before it goes up.</p>
+    </section>
+  </div>
+</SiteLayout>
+
+<script>
+  // Sends the submission to Netlify Forms without leaving the page.
+  const form = document.querySelector<HTMLFormElement>('[data-sub-form]')!;
+  const error = document.querySelector<HTMLElement>('[data-sub-error]')!;
+  const done = document.querySelector<HTMLElement>('[data-sub-done]')!;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    error.hidden = true;
+    const invalid = [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('input, select, textarea')].find((f) => f.name !== 'bot-field' && !f.checkValidity());
+    if (invalid) {
+      const label = form.querySelector(`label[for="${invalid.id}"]`)?.firstChild?.textContent?.trim();
+      error.textContent = `Please check ${label ? `"${label}"` : 'the form'}.`;
+      error.hidden = false;
+      invalid.focus();
+      return;
+    }
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    button.disabled = true;
+    try {
+      const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>).toString();
+      const res = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+      if (!res.ok) throw new Error(String(res.status));
+      form.hidden = true;
+      done.hidden = false;
+      done.focus();
+    } catch {
+      error.textContent = 'Your submission could not be sent. Please check your connection and try again.';
+      error.hidden = false;
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>

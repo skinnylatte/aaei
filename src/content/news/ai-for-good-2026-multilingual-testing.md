@@ -1,6 +1,6 @@
 ---
 title: "AI for Good 2026: what the standards report says about multilingual testing"
-date: 2026-10-17
+date: 2026-09-22
 type: report
 place: Geneva
 summary: "Test sets built elsewhere miss local harms. What ITU's AI Standards Report 2026 says about testing AI across languages and cultures, including our talk in section 19.4."

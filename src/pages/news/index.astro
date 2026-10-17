@@ -15,14 +15,25 @@ const target = (external: boolean) => (external ? { target: '_blank', rel: 'nore
     <h1 class="headline">News</h1>
 
     <div class="news-top">
-      {featured && (
-        <a class="news-feature" href={href(featured)} {...target(isExternal(featured))}>
-          {featured.data.image && <Image class="news-feature-image" src={featured.data.image} alt="" widths={[640, 1280]} sizes="(max-width: 760px) 100vw, 60vw" />}
-          <span class="news-feature-tag">{TYPE_LABELS[featured.data.type]}{featured.data.place && ` · ${featured.data.place}`}</span>
-          <span class="news-feature-title">{featured.data.title}</span>
-          <span class="news-feature-summary">{featured.data.summary}</span>
-          <span class="news-feature-more">Read more <span aria-hidden="true">→</span></span>
-        </a>
+      {featured.length > 0 && (
+        <section class="news-features" aria-roledescription="carousel" aria-label="Featured stories" data-features>
+          {featured.map((f, i) => (
+            <a class="news-feature" href={href(f)} {...target(isExternal(f))} hidden={i > 0} aria-roledescription="slide" aria-label={`${i + 1} of ${featured.length}`}>
+              {f.data.image && <Image class="news-feature-image" src={f.data.image} alt="" widths={[640, 1280]} sizes="(max-width: 760px) 100vw, 60vw" />}
+              <span class="news-feature-tag">{TYPE_LABELS[f.data.type]}{f.data.place && ` · ${f.data.place}`}</span>
+              <span class="news-feature-title">{f.data.title}</span>
+              <span class="news-feature-summary">{f.data.summary}</span>
+              <span class="news-feature-more">Read more <span aria-hidden="true">→</span></span>
+            </a>
+          ))}
+          {featured.length > 1 && (
+            <div class="news-features-nav" hidden data-features-nav>
+              <button type="button" data-step="-1" aria-label="Previous featured story"><span aria-hidden="true">←</span></button>
+              <span class="news-features-count" aria-live="polite" data-features-count>1 / {featured.length}</span>
+              <button type="button" data-step="1" aria-label="Next featured story"><span aria-hidden="true">→</span></button>
+            </div>
+          )}
+        </section>
       )}
       {upcoming.length > 0 && (
         <aside class="news-coming" aria-labelledby="news-coming-title">
@@ -57,6 +68,7 @@ const target = (external: boolean) => (external ? { target: '_blank', rel: 'nore
             </a>
           ))}
         </div>
+        <a class="news-opps-all" href="/news/opportunities/">View all opportunities <span aria-hidden="true">→</span></a>
       </section>
     )}
 
@@ -77,3 +89,24 @@ const target = (external: boolean) => (external ? { target: '_blank', rel: 'nore
     )}
   </div>
 </SiteLayout>
+
+<script>
+  // Arrows step through the featured stories. Without JavaScript the first story shows on its own.
+  document.querySelectorAll<HTMLElement>('[data-features]').forEach((root) => {
+    const slides = [...root.querySelectorAll<HTMLElement>('.news-feature')];
+    const nav = root.querySelector<HTMLElement>('[data-features-nav]');
+    const count = root.querySelector<HTMLElement>('[data-features-count]');
+    if (!nav || slides.length < 2) return;
+    let current = 0;
+    const show = (i: number) => {
+      current = (i + slides.length) % slides.length;
+      slides.forEach((s, j) => { s.hidden = j !== current; });
+      count!.textContent = `${current + 1} / ${slides.length}`;
+    };
+    nav.hidden = false;
+    nav.addEventListener('click', (e) => {
+      const step = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-step]')?.dataset.step;
+      if (step) show(current + Number(step));
+    });
+  });
+</script>

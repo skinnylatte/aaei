@@ -1,4 +1,4 @@
-import { defineCollection } from 'astro:content';
+import { defineCollection, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
@@ -31,7 +31,9 @@ const news = defineCollection({
     // A picture for the post, as a path from the post's file, for example ../../img/photo.jpeg. imageAlt describes it for screen readers.
     image: image().optional(),
     imageAlt: z.string().optional(),
-    // The big story at the top of News. The newest featured post wins.
+    // A post to read next, by its file name. That post links back here, so the two get arrows to each other.
+    next: reference('news').optional(),
+    // The big story at the top of News. With several, News shows arrows to move between them.
     featured: z.boolean().default(false),
     // Drafts are left out of the site.
     draft: z.boolean().default(false),
