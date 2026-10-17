@@ -1,0 +1,148 @@
+---
+import { getCollection } from 'astro:content';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { TYPE_LABELS, href, isExternal } from '../lib/news';
+
+const latest = (await getCollection('news', (p) => !p.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+const target = (external: boolean) => (external ? { target: '_blank', rel: 'noreferrer' } : {});
+
+// Machine translation errors in Tigrinya medical information, as Maria Ressa described them at the UN Global Dialogue on AI Governance.
+const mistranslations = [
+  { meant: 'smallpox', got: 'syphilis' },
+  { meant: 'gonorrhea', got: 'diabetes' },
+  { meant: 'intravenous antibiotics', got: 'intravenous insecticides' },
+];
+
+const steps = [
+  { title: 'Speakers, not translators', text: 'People who live in the language test the system on real tasks: health questions, government services, money.' },
+  { title: 'Red teaming in context', text: 'We look for harms that only show up locally: wrong advice, cultural misreads, safety filters that fail outside English.' },
+  { title: 'Evidence in plain language', text: 'A report decision-makers can act on: what failed, how badly, for whom, and who should fix it.' },
+];
+
+const audiences = [
+  { label: 'AI labs: evaluation and red teaming', href: '/workshops/#contact' },
+  { label: 'Governments: capacity building', href: '/workshops/#contact' },
+  { label: 'Organizations: workshops', href: '/workshops/' },
+  { label: 'Journalists: comment', href: '/workshops/#contact' },
+];
+---
+
+<SiteLayout title="Multilingual AI evaluation and red teaming" description="We test AI systems with people who speak the language, on the things they actually need, across Asia and the Global South.">
+  <section class="home-hero">
+    <div class="home-hero-inner">
+      <div class="home-hero-copy">
+        <p class="home-label">Asian AI Evaluation Institute</p>
+        <h1 class="headline">No English benchmark would catch this.</h1>
+        <p class="home-hero-lede">We do. We test AI systems with people who speak the language, on the things they actually need, across Asia and the Global South.</p>
+        <a class="button button-primary" href="/workshops/#contact">Test your system with us <span aria-hidden="true">→</span></a>
+      </div>
+
+      <figure class="specimen">
+        <p class="specimen-tag"><span>Machine translation · Tigrinya</span><span>Medical information</span></p>
+        <table>
+          <caption class="sr-only">Medical terms and what machine translation turned them into</caption>
+          <thead><tr><th scope="col">Meant</th><th><span class="sr-only">became</span></th><th scope="col">Came out as</th></tr></thead>
+          <tbody>
+            {mistranslations.map((m) => (
+              <tr><td>{m.meant}</td><td class="specimen-arrow" aria-hidden="true">→</td><td class="specimen-got">{m.got}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <figcaption>“That’s not a footnote. That can be life-threatening.” <a href="/news/un-global-dialogue-ai-governance-languages/">Maria Ressa, co-chair of the UN Independent International Scientific Panel on AI, at the UN Global Dialogue on AI Governance, Geneva, July 2026.</a></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="home-why" aria-labelledby="why-title">
+    <h2 id="why-title">Translating an English test set isn’t enough.</h2>
+    <div>
+      <p><a href="/news/ai-for-good-2026-multilingual-testing/">ITU’s AI Standards Report 2026</a> says it plainly: “test sentences that are grammatically correct may still be socially unrealistic in local languages.” Bias is local too. It shows up differently from place to place.</p>
+      <p>So we build tests the way people really speak, including the code-switching that is normal across Asia, and we run them with the people a system will serve.</p>
+    </div>
+  </section>
+
+  <section class="home-how" aria-labelledby="how-title">
+    <h2 id="how-title" class="home-label">How we find it</h2>
+    <ol>
+      {steps.map((s, i) => (
+        <li><span class="home-how-num">{String(i + 1).padStart(2, '0')}</span><span class="home-how-title">{s.title}</span>{s.text}</li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="home-who" aria-labelledby="who-title">
+    <div class="home-who-inner">
+      <div>
+        <h2 id="who-title">Who we work with</h2>
+        <div class="home-chips">{audiences.map((a) => <a href={a.href}>{a.label}</a>)}</div>
+      </div>
+      <p>Led by <a href="/team/">Adrianna Tan</a>, who designed and led the Singapore AI Safety Red Teaming Challenge and spoke on multilingual testing at the UN’s AI for Good Global Summit 2026.</p>
+    </div>
+  </section>
+
+  <section class="home-news" aria-labelledby="home-news-title">
+    <div class="home-news-head"><h2 id="home-news-title">What we’re following</h2><a class="text-link" href="/news/">All news <span aria-hidden="true">→</span></a></div>
+    <ul>
+      {latest.map((p) => (
+        <li><a href={href(p)} {...target(isExternal(p))}><span class="home-news-type">{TYPE_LABELS[p.data.type]}</span><span class="home-news-title">{p.data.title}</span></a></li>
+      ))}
+    </ul>
+  </section>
+</SiteLayout>
+
+<style>
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .home-label { margin: 0; color: var(--green); font: 700 13px/1.3 var(--display); letter-spacing: .1em; text-transform: uppercase; }
+
+  .home-hero { color: var(--paper); background: var(--ink); }
+  .home-hero-inner { display: flex; flex-wrap: wrap; gap: var(--space-lg); align-items: center; width: var(--page); margin: 0 auto; padding-block: var(--space-xl); }
+  .home-hero-copy { flex: 1 1 520px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+  .home-hero-copy .home-label { margin-bottom: var(--space-md); color: var(--coral-light); }
+  .home-hero-lede { max-width: 40ch; margin: var(--space-md) 0 var(--space-lg); color: var(--rice); font-size: 21px; line-height: 1.5; }
+
+  .specimen { flex: 1 1 520px; min-width: 0; margin: 0; padding: clamp(24px, 3vw, 40px); color: var(--ink); background: var(--paper); border-radius: var(--radius-panel); }
+  .specimen-tag { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 0 0 28px; color: var(--green); font: 700 12px/1.3 var(--display); letter-spacing: .1em; text-transform: uppercase; }
+  .specimen table { width: 100%; border-collapse: collapse; }
+  .specimen th { padding: 0 0 14px; color: color-mix(in oklch, var(--ink) 70%, var(--paper)); font: 600 13px/1 var(--display); letter-spacing: .08em; text-align: left; text-transform: uppercase; }
+  .specimen td { padding: 18px 0; border-top: 1px solid var(--line); font: 700 clamp(19px, 2.2vw, 30px)/1.15 var(--display); letter-spacing: -.02em; vertical-align: middle; }
+  .specimen tr:last-child td { border-bottom: 1px solid var(--line); }
+  .specimen .specimen-arrow { width: 1%; padding-inline: 16px; color: oklch(55% .16 43); }
+  .specimen-got { color: oklch(40% .15 30); }
+  .specimen figcaption { margin-top: 28px; font-size: 15px; line-height: 1.5; }
+  .specimen figcaption a { color: var(--green); text-underline-offset: 3px; }
+
+  .home-why { display: flex; flex-wrap: wrap; gap: var(--space-lg) clamp(40px, 7vw, 96px); width: var(--page); margin: 0 auto; padding-block: var(--space-xl); }
+  .home-why h2 { flex: 1 1 380px; margin: 0; font: 650 clamp(2.25rem, 4.5vw, 4rem)/1 var(--display); letter-spacing: -.04em; text-wrap: balance; }
+  .home-why > div { flex: 1.3 1 480px; min-width: 0; }
+  .home-why p { margin: 0 0 var(--space-md); font-size: 20px; line-height: 1.55; }
+  .home-why a { font-weight: 600; text-underline-offset: 3px; }
+
+  .home-how { width: var(--page); margin: 0 auto; padding-bottom: var(--space-xl); }
+  .home-how .home-label { margin-bottom: 32px; }
+  .home-how ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 0 32px; margin: 0; padding: 0; list-style: none; }
+  .home-how li { padding: 28px 0; border-top: 1.5px solid var(--ink); }
+  .home-how-num { display: block; margin-bottom: 16px; color: var(--green); font: 800 44px/1 var(--display); }
+  .home-how-title { display: block; margin-bottom: 8px; font: 700 22px/1.2 var(--display); }
+
+  .home-who { background: var(--coral); }
+  .home-who-inner { display: flex; flex-wrap: wrap; gap: var(--space-lg); align-items: flex-end; justify-content: space-between; width: var(--page); margin: 0 auto; padding-block: var(--space-xl); }
+  .home-who-inner > div { flex: 1 1 520px; min-width: 0; }
+  .home-who h2 { margin: 0 0 28px; font: 650 clamp(2rem, 4vw, 3.5rem)/1 var(--display); letter-spacing: -.04em; }
+  .home-chips { display: flex; flex-wrap: wrap; gap: 12px; }
+  .home-chips a { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border: 1.5px solid var(--ink); border-radius: 999px; font: 700 16px/1.2 var(--display); text-decoration: none; transition: background-color 180ms ease; }
+  .home-chips a:hover { background: var(--coral-light); }
+  .home-who-inner > p { flex: 0 1 420px; margin: 0; }
+  .home-who-inner > p a { font-weight: 600; text-underline-offset: 3px; }
+
+  .home-news { width: var(--page); margin: 0 auto; padding-block: var(--space-xl) var(--space-section); }
+  .home-news-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-sm); margin-bottom: 24px; }
+  .home-news-head h2 { margin: 0; font: 650 clamp(2rem, 3.5vw, 3rem)/1 var(--display); letter-spacing: -.04em; }
+  .home-news ul { margin: 0; padding: 0; list-style: none; border-top: 1.5px solid var(--ink); }
+  .home-news li { border-bottom: 1px solid var(--line); }
+  .home-news li a { display: flex; flex-wrap: wrap; gap: 8px 32px; padding: 22px 0; text-decoration: none; }
+  .home-news-type { flex: 0 0 160px; color: var(--green); font: 700 13px/1.6 var(--display); letter-spacing: .08em; text-transform: uppercase; }
+  .home-news-title { flex: 1 1 400px; font: 700 21px/1.3 var(--display); }
+  .home-news li a:hover .home-news-title { text-decoration: underline; text-underline-offset: 3px; }
+</style>
