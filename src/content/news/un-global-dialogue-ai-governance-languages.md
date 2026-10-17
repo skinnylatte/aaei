@@ -10,6 +10,8 @@ next: ai-for-good-2026-multilingual-testing
 featured: true
 ---
 
+*Updated in September 2026 with the Dialogue's co-chairs' summary.*
+
 The first UN Global Dialogue on Artificial Intelligence Governance met in Geneva on 6 and 7 July 2026, opening the week of the AI for Good Global Summit. It brought together more than 3,000 participants, including delegations from 163 countries. At its centre was the first report of the UN's new [Independent International Scientific Panel on AI](https://www.un.org/independent-international-scientific-panel-ai/sites/default/files/2026-07/en_executive_summary.pdf): 40 experts, co-chaired by Yoshua Bengio and Maria Ressa.
 
 Language came up again and again. These are the parts that matter most for anyone testing AI outside English.
