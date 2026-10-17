@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import '../../styles/news.css';
 import { TYPE_LABELS, formatDate } from '../../lib/news';
@@ -16,12 +17,12 @@ const d = post.data;
 
 <SiteLayout title={d.title} description={d.summary} current="news">
   <article class="news-post">
-    <p class="news-kicker">{TYPE_LABELS[d.type]}{d.place && ` · ${d.place}`} · <time datetime={d.date.toISOString().slice(0, 10)}>{formatDate(d.date)}</time></p>
+    <p class="news-kicker">{TYPE_LABELS[d.type]}{d.place && ` · ${d.place}`} · Posted on <time datetime={d.date.toISOString().slice(0, 10)}>{formatDate(d.date)}</time></p>
     <h1>{d.title}</h1>
     <p class="news-post-summary">{d.summary}</p>
-    {(d.starts || d.deadline || d.link || d.source) && (
+    {d.image && <Image class="news-post-image" src={d.image} alt={d.imageAlt ?? ''} widths={[720, 1440]} sizes="(max-width: 760px) 100vw, 72ch" />}
+    {(d.organization || d.deadline || d.link || d.source) && (
       <dl class="news-post-facts">
-        {d.starts && <div><dt>When</dt><dd>{formatDate(d.starts)}{d.ends && ` to ${formatDate(d.ends)}`}</dd></div>}
         {d.organization && <div><dt>Run by</dt><dd>{d.organization}</dd></div>}
         {d.deadline && <div><dt>Closes</dt><dd>{formatDate(d.deadline)}</dd></div>}
         {d.source && <div><dt>Source</dt><dd><a href={d.source} target="_blank" rel="noreferrer">{d.sourceLabel ?? 'Read the original'} <span aria-hidden="true">↗</span></a></dd></div>}

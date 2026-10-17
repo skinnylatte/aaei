@@ -45,8 +45,9 @@
 /* A single post */
 .news-post { width: min(72ch, calc(100vw - 2 * var(--gutter))); margin: 0 auto; padding-block: var(--space-xl) var(--space-section); }
 .news-post h1 { margin: 12px 0 var(--space-sm); font: 650 clamp(2.25rem, 5vw, 3.75rem)/1 var(--display); letter-spacing: -.045em; text-wrap: balance; }
+.news-post-image { display: block; width: 100%; height: auto; margin: 0 0 var(--space-lg); border-radius: 4px; }
 .news-post-summary { margin: 0 0 var(--space-lg); font-size: 19px; line-height: 1.55; }
-.news-post-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-sm); margin: 0 0 var(--space-lg); padding: var(--space-sm) 0; border-block: 1px solid var(--line); }
+.news-post-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-sm); margin: 0 0 var(--space-lg); }
 .news-post-facts dt { font: 700 12px/1.3 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--green); }
 .news-post-facts dd { margin: 4px 0 0; font-weight: 600; }
 .news-post-body { font-size: 17px; line-height: 1.7; }

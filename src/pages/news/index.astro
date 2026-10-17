@@ -64,7 +64,7 @@ const target = (external: boolean) => (external ? { target: '_blank', rel: 'nore
         <div class="news-grid">
           {latest.map((p) => (
             <a class="news-card" href={href(p)} {...target(isExternal(p))}>
-              <span class="news-kicker">{TYPE_LABELS[p.data.type]} · <time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time></span>
+              <span class="news-kicker">{TYPE_LABELS[p.data.type]} · Posted on <time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time></span>
               <span class="news-card-title">{p.data.title}{isExternal(p) && <span aria-hidden="true"> ↗</span>}</span>
               <span>{p.data.summary}</span>
             </a>

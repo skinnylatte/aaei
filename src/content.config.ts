@@ -5,7 +5,8 @@ import { z } from 'astro/zod';
 // News posts: one Markdown file each in src/content/news/. The file name becomes the address, /news/<file-name>/.
 const news = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/news' }),
-  schema: z.object({
+  // `image` is a file in src/img/, which Astro resizes and optimises at build time.
+  schema: ({ image }) => z.object({
     title: z.string(),
     // The date the post goes up. Events and opportunities have their own dates below.
     date: z.coerce.date(),
@@ -26,6 +27,9 @@ const news = defineCollection({
     // The work a post is about, for example a paper or a study. Shown on the post's page, and cited.
     source: z.string().url().optional(),
     sourceLabel: z.string().optional(),
+    // A picture for the post, as a path from the post's file, for example ../../img/photo.jpeg. imageAlt describes it for screen readers.
+    image: image().optional(),
+    imageAlt: z.string().optional(),
     // The big story at the top of News. The newest featured post wins.
     featured: z.boolean().default(false),
     // Drafts are left out of the site.
