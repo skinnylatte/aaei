@@ -29,14 +29,14 @@ const audiences = [
 ];
 ---
 
-<SiteLayout title="Multilingual AI evaluation and red teaming" description="We test AI systems with people who speak the language, on the things they actually need, across Asia and the Global South.">
+<SiteLayout title="Multilingual AI evaluation and red teaming" description="We test AI systems with people who speak the language, on the things they actually need, across Asia and the Global South." requestDialog>
   <section class="home-hero">
     <div class="home-hero-inner">
       <div class="home-hero-copy">
         <p class="home-label">Asian AI Evaluation Institute</p>
         <h1 class="headline">No English benchmark would catch this.</h1>
         <p class="home-hero-lede">We do. We test AI systems with people who speak the language, on the things they actually need, across Asia and the Global South.</p>
-        <a class="button button-primary" href="/workshops/#contact">Test your system with us <span aria-hidden="true">→</span></a>
+        <button class="button button-primary" type="button" data-open-request="lab:evals" aria-haspopup="dialog">Test your system with us <span aria-hidden="true">→</span></button>
       </div>
 
       <figure class="specimen">

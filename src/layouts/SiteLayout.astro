@@ -1,11 +1,12 @@
 ---
-// The public site's pages (other than the homepage): head, navbar, page, footer.
+// The public site's pages: head, navbar, page, footer, and optionally the "Work with us" dialog.
 import '../styles/site.css';
 import SiteNav from '../components/SiteNav.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import RequestDialog from '../components/RequestDialog.astro';
 
-interface Props { title: string; description: string; current?: 'workshops' | 'research' | 'team' | 'news' }
-const { title, description, current } = Astro.props;
+interface Props { title: string; description: string; current?: 'workshops' | 'research' | 'team' | 'news'; requestDialog?: boolean }
+const { title, description, current, requestDialog = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -24,8 +25,9 @@ const { title, description, current } = Astro.props;
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <SiteNav current={current} />
+    <SiteNav current={current} requestDialog={requestDialog} />
     <main id="main"><slot /></main>
-    <SiteFooter />
+    <SiteFooter requestDialog={requestDialog} />
+    {requestDialog && <RequestDialog />}
   </body>
 </html>
