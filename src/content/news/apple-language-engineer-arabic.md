@@ -1,6 +1,6 @@
 ---
 title: "Language Engineer (Arabic), Global Siri"
-date: 2026-10-17
+date: 2026-09-18
 type: opportunity
 place: Barcelona
 organization: Apple
