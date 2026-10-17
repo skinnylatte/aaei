@@ -1,0 +1,44 @@
+---
+// The site footer: wordmark and call to action, then the site's sections, then the copyright line.
+// On pages with the request dialog, "Work with us" opens it; elsewhere it links to the contact form.
+interface Props { requestDialog?: boolean }
+const { requestDialog = false } = Astro.props;
+
+const columns = [
+  { title: 'Institute', links: [
+    { label: 'Workshops', href: '/workshops/' },
+    { label: 'Research', href: '/research/' },
+    { label: 'Team', href: '/team/' },
+    { label: 'News', href: '/news/' },
+  ] },
+  { title: 'Workshops', links: [
+    { label: 'Public workshops', href: '/workshops/#workshop-title' },
+    { label: 'Private workshops', href: '/workshops/#contact' },
+    { label: 'Practice labs', href: '/case-studies/' },
+  ] },
+];
+---
+
+<footer class="site-footer">
+  <div class="site-footer-top">
+    <div class="site-footer-intro">
+      <p class="wordmark"><span class="mark" aria-hidden="true">A</span><span>Asian AI<br />Evaluation Institute</span></p>
+      <p>Practical AI evaluation for the environments where systems meet people.</p>
+    </div>
+    {requestDialog
+      ? <button class="button button-primary" type="button" data-open-request aria-haspopup="dialog">Work with us <span aria-hidden="true">→</span></button>
+      : <a class="button button-primary" href="/workshops/#contact">Work with us <span aria-hidden="true">→</span></a>}
+  </div>
+  <nav class="site-footer-links" aria-label="Footer">
+    {columns.map((c) => (
+      <div>
+        <h2>{c.title}</h2>
+        <ul>{c.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+      </div>
+    ))}
+  </nav>
+  <div class="site-footer-bottom">
+    <small>© {new Date().getFullYear()} Asian AI Evaluation Institute</small>
+    <a href="/case-studies/">Login</a>
+  </div>
+</footer>

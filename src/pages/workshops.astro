@@ -1,0 +1,146 @@
+---
+import '../styles/site.css';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import RequestDialog from '../components/RequestDialog.astro';
+
+const workshopTopics = [
+  'Identify consequential failure modes',
+  'Run structured adversarial tests',
+  'Test tools, permissions, and oversight',
+  'Turn findings into repeatable evaluations',
+  'Evaluate mitigations and regressions',
+  'Build evidence for deployment decisions',
+];
+
+const audiences = ['Public sector', 'Product & engineering', 'Legal & policy', 'Risk & compliance', 'Cybersecurity', 'Executive leadership'];
+
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Practical, multilingual AI evaluation and red-teaming workshops for public institutions and organizations across Asia." />
+    <meta name="theme-color" content="#591c2d" />
+    <meta property="og:title" content="Asian AI Evaluation Institute" />
+    <meta property="og:description" content="Test AI in context, before people depend on it." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <title>Asian AI Evaluation Institute | Test AI in context</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteNav current="workshops" requestDialog />
+
+    <main id="main">
+      <section class="workshop" aria-labelledby="workshop-title">
+        <div class="workshop-ticket reveal">
+          <h1 id="workshop-title">Break AI<br />Before Deploying AI</h1>
+          <p class="workshop-lede">A hands-on introduction to evaluating and red teaming generative and agentic AI systems before deployment.</p>
+          <div class="workshop-body">
+            <div><h2>Participants learn to</h2><ul class="check-list">{workshopTopics.map((topic) => <li>{topic}</li>)}</ul></div>
+            <div><h2>Designed for</h2><div class="audience-list">{audiences.map((audience) => <span>{audience}</span>)}</div><p class="access-note">No advanced coding experience required. Participants work in interdisciplinary groups because effective evaluation needs technical, policy, legal, and operational expertise.</p></div>
+          </div>
+          <div class="ticket-bottom"><p>Public workshop, <strong>29 September 2026</strong>, Singapore</p><a class="button button-primary" href="https://peatix.com/event/5138876" target="_blank" rel="noreferrer">Find the event <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <div class="corporate-callout reveal">
+          <h2>Bring the workshop to your team.</h2>
+          <div><p>We adapt the material to your systems, responsibilities, and deployment environment. Formats can support public agencies, regulated organizations, cross-functional product teams, and leadership groups.</p><button class="text-link" type="button" data-open-request="org:workshop" aria-haspopup="dialog">Plan a private workshop <span aria-hidden="true">→</span></button></div>
+        </div>
+      </section>
+
+      <section class="rerun" aria-labelledby="sincon-title">
+        <div class="rerun-heading reveal"><h2 class="headline" id="sincon-title">Catch it at SINCON 2026.</h2><p>A two-hour edition of Break AI Before Deploying AI, in the Workshop Track at Infosec In the City’s SINCON conference.</p></div>
+        <div class="rerun-card reveal">
+          <p class="rerun-date"><span>Fri</span><strong>16</strong><span>Oct 2026</span></p>
+          <dl class="rerun-details">
+            <div><dt>Time</dt><dd>13:30–15:30 SGT</dd></div>
+            <div><dt>Room</dt><dd>Workshop Room, Level 5</dd></div>
+            <div><dt>Venue</dt><dd>voco Orchard Singapore, 581 Orchard Rd</dd></div>
+          </dl>
+          <a class="button button-primary" href="https://www.infosec-city.com/" target="_blank" rel="noreferrer">Get SINCON tickets <span aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+
+
+      <section class="contact" id="contact" aria-labelledby="contact-title">
+        <div class="contact-grid" aria-hidden="true"></div>
+        <div class="contact-copy reveal"><h2 class="headline" id="contact-title">What does your team need to learn before deploying AI?</h2><p>Tell us about your organization, the systems you are considering, and the decisions your team is responsible for. We can shape a private workshop around that context.</p><button class="button button-primary" type="button" data-open-request="org:workshop" aria-haspopup="dialog">Request a workshop <span aria-hidden="true">→</span></button></div>
+        <div class="contact-note reveal"><h3>Suitable for</h3><ul><li>Public agencies and statutory bodies</li><li>Regulated and high-stakes organizations</li><li>Cross-functional product and governance teams</li><li>Leadership and procurement groups</li></ul></div>
+      </section>
+    </main>
+
+    <SiteFooter requestDialog />
+
+    <RequestDialog />
+
+    <script>
+      const observer = new IntersectionObserver((entries) => { entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } }); }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  /* Workshop */
+  .workshop { width: var(--page); margin: 0 auto; }
+  .workshop-ticket { padding: var(--panel-pad); color: var(--paper); background: var(--green); border-radius: var(--radius-panel); }
+  .workshop-ticket h1 { margin: 0 0 var(--space-md); color: var(--coral); font: 700 clamp(3.5rem, 9vw, 9rem)/.88 var(--display); letter-spacing: -.065em; }
+  .workshop-lede { max-width: 34ch; margin: 0; font-size: clamp(1.2rem, 2vw, 1.75rem); line-height: 1.45; }
+  .workshop-body { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg) clamp(40px, 8vw, 128px); margin: var(--space-xl) 0 var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--line-light); }
+  .workshop-body h2 { margin: 0 0 var(--space-sm); color: var(--coral); font: 650 16px/1.2 var(--display); }
+  .check-list { list-style: none; margin: 0; padding: 0; } .check-list li { position: relative; padding: 12px 0 12px 28px; border-bottom: 1px solid var(--line-light); font-weight: 500; } .check-list li::before { content: '×'; position: absolute; left: 2px; top: 11px; color: var(--coral); font: 700 17px/1 var(--display); }
+  .audience-list { display: flex; flex-wrap: wrap; gap: var(--space-xs); padding-top: 4px; } .audience-list span { padding: 8px 12px; border: 1px solid color-mix(in oklch, var(--paper) 60%, transparent); border-radius: 999px; font: 600 13px/1 var(--display); }
+  .access-note { max-width: 52ch; margin: var(--space-md) 0 0; color: color-mix(in oklch, var(--paper) 85%, transparent); font-size: 15px; }
+  .ticket-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--line-light); } .ticket-bottom p { margin: 0; font: 500 17px/1.3 var(--display); } .ticket-bottom strong { font-weight: 700; }
+  .corporate-callout { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md) clamp(40px, 8vw, 128px); margin-top: var(--space-sm); padding: var(--panel-pad); color: var(--ink); background: var(--coral); border-radius: var(--radius-panel); }
+  .corporate-callout h2 { margin: 0; font: 650 clamp(2.1rem, 4vw, 4rem)/.97 var(--display); letter-spacing: -.05em; text-wrap: balance; }
+  .corporate-callout p { max-width: 52ch; margin: 0 0 var(--space-sm); font-size: 17px; }
+
+  /* SINCON */
+  .rerun { display: grid; grid-template-columns: .9fr 1.1fr; gap: var(--space-lg) clamp(40px, 7vw, 112px); align-items: center; width: var(--page); margin: 0 auto; padding-block: var(--space-section); }
+  .rerun-heading p { max-width: 40ch; margin: var(--space-md) 0 0; font-size: 18px; }
+  .rerun-card { display: grid; grid-template-columns: auto 1fr; overflow: hidden; border: 1px solid var(--ink); border-radius: var(--radius-panel); background: var(--rice); }
+  .rerun-date { grid-row: span 2; display: grid; align-content: center; justify-items: center; margin: 0; padding: var(--space-lg) clamp(24px, 3vw, 44px); background: var(--coral); border-right: 1px solid var(--ink); font: 650 13px/1.2 var(--display); }
+  .rerun-date strong { margin: 4px 0; font: 700 clamp(4rem, 7vw, 6.5rem)/.9 var(--display); letter-spacing: -.06em; }
+  .rerun-details { margin: 0; padding: var(--space-md) clamp(20px, 2.5vw, 36px) 0; } .rerun-details div { display: grid; grid-template-columns: 72px 1fr; gap: var(--space-sm); padding: 12px 0; border-bottom: 1px solid var(--line); } .rerun-details dt { color: color-mix(in oklch, var(--ink) 65%, transparent); font: 600 14px/1.5 var(--display); } .rerun-details dd { margin: 0; font-weight: 500; }
+  .rerun-card .button { grid-column: 2; justify-self: start; margin: var(--space-md) clamp(20px, 2.5vw, 36px) clamp(24px, 3vw, 36px); } .rerun-card .button-primary:hover { background: var(--paper); border-color: var(--ink); }
+
+  /* Instructor */
+
+  /* Contact */
+  .contact { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.3fr .7fr; align-items: end; gap: var(--space-xl) clamp(40px, 8vw, 128px); padding: var(--space-section) var(--inset); color: var(--paper); background: var(--green-dark); }
+  .contact-grid { position: absolute; inset: 0; opacity: .1; pointer-events: none; background-image: linear-gradient(to right, transparent calc(100% - 1px), var(--paper) 1px), linear-gradient(to bottom, transparent calc(100% - 1px), var(--paper) 1px); background-size: 10vw 10vw; mask-image: linear-gradient(to bottom, black, transparent 88%); }
+  .contact::after { content: ''; position: absolute; width: 520px; height: 520px; right: -150px; top: -220px; border: 1px solid color-mix(in oklch, var(--paper) 26%, transparent); border-radius: 50%; box-shadow: 0 0 0 70px color-mix(in oklch, var(--paper) 3%, transparent), 0 0 0 140px color-mix(in oklch, var(--paper) 2%, transparent); }
+  .contact-copy, .contact-note { position: relative; z-index: 2; }
+  .contact h2 { max-width: 16ch; color: var(--coral); }
+  .contact-copy p { max-width: 52ch; margin: var(--space-md) 0 var(--space-lg); font-size: 18px; line-height: 1.65; }
+  .contact-note { padding-block: var(--space-md); border-block: 1px solid var(--line-light); }
+  .contact-note h3 { margin: 0 0 var(--space-sm); font: 650 16px/1.2 var(--display); }
+  .contact-note ul { margin: 0; padding-left: 20px; font-size: 15px; line-height: 1.75; }
+
+
+  /* Motion */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 600ms cubic-bezier(.16,1,.3,1), transform 600ms cubic-bezier(.16,1,.3,1); } .reveal.is-visible { opacity: 1; transform: none; }
+
+  @media (max-width: 1000px) {
+    .workshop-body, .corporate-callout, .rerun, .contact { grid-template-columns: 1fr; }
+    .rerun { align-items: start; }
+  }
+  @media (max-width: 760px) {
+    .workshop-ticket h1 { font-size: clamp(3.2rem, 16vw, 5.5rem); }
+    .headline { font-size: clamp(2.5rem, 11vw, 4rem); }
+    .ticket-bottom { flex-direction: column; align-items: flex-start; }
+    .rerun-card { grid-template-columns: 1fr; }
+    .rerun-date { grid-row: auto; grid-auto-flow: column; align-items: baseline; justify-content: start; gap: 12px; padding: var(--space-sm) 20px; border-right: 0; border-bottom: 1px solid var(--ink); }
+    .rerun-date strong { margin: 0; font-size: 3.2rem; }
+    .rerun-details div { grid-template-columns: 60px 1fr; }
+    .rerun-card .button { grid-column: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } .reveal { opacity: 1; transform: none; } }
+</style>

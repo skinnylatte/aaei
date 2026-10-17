@@ -1,0 +1,194 @@
+---
+// The "Work with us" dialog. Any button with data-open-request opens it.
+// Who is asking, and what they need. Choosing who picks their likely need, which they can change.
+// The labels are the values submitted, so they read well in the Netlify notification. The thank-you email matches on them.
+const askers = [
+  { id: 'lab', label: 'AI lab or model builder', likely: 'evals' },
+  { id: 'gov', label: 'Government or regulator', likely: 'advisory' },
+  { id: 'org', label: 'Organization using AI', likely: 'workshop' },
+  { id: 'press', label: 'Journalist looking for comment', likely: 'comment' },
+  { id: 'other', label: 'Something else', likely: 'unsure' },
+];
+const needs = [
+  { id: 'evals', label: 'Evaluation & red teaming', hint: 'We test your model or system, in the languages your users speak.', message: 'What should we test, and what worries you most?' },
+  { id: 'workshop', label: 'A workshop', hint: 'Your team learns to test AI systems.', message: 'What should the workshop focus on?' },
+  { id: 'advisory', label: 'Capacity building & advice', hint: 'Testing programmes, evaluator training, standards and policy.', message: 'What are you trying to set up?' },
+  { id: 'comment', label: 'Comment or interview', hint: 'Expert comment on AI testing, safety and multilingual AI.', message: 'What is the story, and what would you like us to comment on?' },
+  { id: 'unsure', label: 'Not sure yet', hint: 'Describe the problem and we will suggest a fit.', message: 'What are you trying to solve?' },
+];
+---
+
+<dialog class="request-dialog" id="request-dialog" aria-labelledby="request-title">
+  <div class="request-panel">
+    <button class="dialog-close" type="button" data-close-request aria-label="Close">×</button>
+    <div data-request-form-view>
+      <h2 id="request-title">Work with us</h2>
+      <p class="request-intro">Two quick choices so your message reaches the right person. We reply within a few working days.</p>
+      <form name="workshop-request" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+        <input type="hidden" name="form-name" value="workshop-request" />
+        <p class="honeypot" aria-hidden="true"><label>Leave this field empty <input name="bot-field" tabindex="-1" autocomplete="off" /></label></p>
+        <fieldset class="chips" aria-describedby="req-who-error">
+          <legend>I am</legend>
+          <div class="chip-row">{askers.map((a) => <label class="chip"><input type="radio" name="who" value={a.label} data-id={a.id} data-likely={a.likely} required />{a.label}</label>)}</div>
+          <p class="field-error" id="req-who-error"></p>
+        </fieldset>
+        <fieldset class="chips" aria-describedby="req-need-hint req-need-error">
+          <legend>Looking for</legend>
+          <div class="chip-row">{needs.map((n) => <label class="chip"><input type="radio" name="need" value={n.label} data-id={n.id} data-hint={n.hint} data-message={n.message} required />{n.label}</label>)}</div>
+          <p class="chip-hint" id="req-need-hint" data-need-hint></p>
+          <p class="field-error" id="req-need-error"></p>
+        </fieldset>
+        <div class="field-row">
+          <div class="field"><label for="req-name">Name</label><input id="req-name" name="name" type="text" autocomplete="name" required maxlength="120" aria-describedby="req-name-error" /><p class="field-error" id="req-name-error"></p></div>
+          <div class="field"><label for="req-email">Work email</label><input id="req-email" name="email" type="email" autocomplete="email" required maxlength="200" aria-describedby="req-email-error" /><p class="field-error" id="req-email-error"></p></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="req-org" data-org-label>Organization</label><input id="req-org" name="organization" type="text" autocomplete="organization" required maxlength="200" aria-describedby="req-org-error" /><p class="field-error" id="req-org-error"></p></div>
+          <div class="field" data-when="evals"><label for="req-languages">Languages to test <span>(optional)</span></label><input id="req-languages" name="languages" type="text" maxlength="200" placeholder="For example, Malay, Tamil, Singlish" /></div>
+          <div class="field" data-when="workshop"><label for="req-size">Group size <span>(optional)</span></label><select id="req-size" name="group-size"><option value="">Choose one</option><option>Under 15 people</option><option>15 to 30 people</option><option>More than 30 people</option><option>Not sure yet</option></select></div>
+          <div class="field" data-when="comment"><label for="req-deadline">Deadline <span>(optional)</span></label><input id="req-deadline" name="deadline" type="text" maxlength="120" placeholder="For example, Friday 5pm SGT" /></div>
+          <div class="field" data-when="advisory unsure"><label for="req-role">Role <span>(optional)</span></label><input id="req-role" name="role" type="text" autocomplete="organization-title" maxlength="120" /></div>
+        </div>
+        <label class="check-field" data-when="evals"><input type="checkbox" name="nda" value="Yes" /> We need an NDA before sharing model details</label>
+        <div class="field"><label for="req-message" data-message-label>What can we help with?</label><textarea id="req-message" name="message" rows="5" required maxlength="4000" aria-describedby="req-message-error"></textarea><p class="field-error" id="req-message-error"></p></div>
+        <p class="form-error" role="alert" hidden>Your message could not be sent. Please check your connection and try again.</p>
+        <button class="button button-primary" type="submit">Send <span aria-hidden="true">→</span></button>
+      </form>
+    </div>
+    <div class="request-success" data-request-success hidden>
+      <h2 tabindex="-1">Thank you.</h2>
+      <p>Your message has been sent. We have emailed a copy of your message to <strong data-success-email></strong> and will be in touch within a few working days.</p>
+      <button class="button button-primary" type="button" data-close-request>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const dialog = document.querySelector<HTMLDialogElement>('#request-dialog')!;
+const form = dialog.querySelector('form')!;
+const formView = dialog.querySelector<HTMLElement>('[data-request-form-view]')!;
+const successView = dialog.querySelector<HTMLElement>('[data-request-success]')!;
+const formError = form.querySelector<HTMLElement>('.form-error')!;
+const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+const fields = [...form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[required]:not([type="radio"]), textarea[required]')];
+const messages: Record<string, string> = { name: 'Please enter your name.', email: 'Please enter a valid email address.', organization: 'Please enter your organization.', message: 'Please tell us a little about what you need.' };
+const groups: Record<string, string> = { who: 'Please choose who you are.', need: 'Please choose what you are looking for.' };
+const radios = (name: string) => [...form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)];
+const chosen = (name: string) => radios(name).find((r) => r.checked);
+let attempted = false;
+
+// Show the fields that fit the chosen need. Hidden fields are disabled so they are not sent.
+const apply = () => {
+  const who = chosen('who')?.dataset.id;
+  const need = chosen('need');
+  form.querySelectorAll<HTMLElement>('[data-when]').forEach((el) => {
+    const on = !!need && el.dataset.when!.split(' ').includes(need.dataset.id!);
+    el.hidden = !on;
+    el.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select').forEach((input) => { input.disabled = !on; });
+  });
+  form.querySelector('[data-need-hint]')!.textContent = need?.dataset.hint ?? '';
+  form.querySelector('[data-message-label]')!.textContent = need?.dataset.message ?? 'What can we help with?';
+  form.querySelector('[data-org-label]')!.textContent = who === 'press' ? 'Publication or outlet' : 'Organization';
+  messages.organization = who === 'press' ? 'Please enter your publication or outlet.' : 'Please enter your organization.';
+};
+const pick = (name: string, id: string | undefined) => { const r = radios(name).find((x) => x.dataset.id === id); if (r) r.checked = true; };
+
+const showGroupError = (name: string, show: boolean) => { document.getElementById(`req-${name}-error`)!.textContent = show ? groups[name] : ''; };
+const resetDialog = () => { form.reset(); attempted = false; fields.forEach((field) => showFieldError(field, false)); Object.keys(groups).forEach((g) => showGroupError(g, false)); formError.hidden = true; formView.hidden = false; successView.hidden = true; apply(); };
+const showFieldError = (field: HTMLInputElement | HTMLTextAreaElement, show: boolean) => {
+  const error = document.getElementById(`${field.id}-error`);
+  field.setAttribute('aria-invalid', String(show));
+  if (error) error.textContent = show ? messages[field.name] : '';
+};
+const validate = () => {
+  let firstInvalid: HTMLElement | null = null;
+  Object.keys(groups).forEach((g) => { const bad = !chosen(g); showGroupError(g, bad); if (bad && !firstInvalid) firstInvalid = radios(g)[0]; });
+  fields.forEach((field) => { const bad = !field.checkValidity() || !field.value.trim(); showFieldError(field, bad); if (bad && !firstInvalid) firstInvalid = field; });
+  return firstInvalid;
+};
+
+// A button can preset the answers, as "who:need", for example data-open-request="org:workshop".
+document.querySelectorAll<HTMLElement>('[data-open-request]').forEach((button) => button.addEventListener('click', () => {
+  if (!successView.hidden) resetDialog();
+  const [who, need] = (button.dataset.openRequest ?? '').split(':');
+  if (who) pick('who', who);
+  if (need) pick('need', need);
+  apply();
+  dialog.showModal();
+}));
+dialog.querySelectorAll('[data-close-request]').forEach((button) => button.addEventListener('click', () => dialog.close()));
+dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+fields.forEach((field) => field.addEventListener('input', () => { if (attempted) showFieldError(field, !field.checkValidity() || !field.value.trim()); }));
+// Choosing who you are also chooses your likely need, which you can change.
+radios('who').forEach((r) => r.addEventListener('change', () => { pick('need', r.dataset.likely); apply(); if (attempted) { showGroupError('who', false); showGroupError('need', false); } }));
+radios('need').forEach((r) => r.addEventListener('change', () => { apply(); if (attempted) showGroupError('need', false); }));
+apply();
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  attempted = true;
+  formError.hidden = true;
+  const firstInvalid = validate();
+  if (firstInvalid) { (firstInvalid as HTMLElement).focus(); return; }
+  submit.disabled = true;
+  submit.setAttribute('aria-busy', 'true');
+  submit.firstChild!.textContent = 'Sending… ';
+  try {
+    const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>).toString();
+    const response = await fetch('/workshops/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    dialog.querySelector('[data-success-email]')!.textContent = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
+    formView.hidden = true;
+    successView.hidden = false;
+    successView.querySelector<HTMLElement>('h2')!.focus();
+  } catch {
+    formError.hidden = false;
+  } finally {
+    submit.disabled = false;
+    submit.removeAttribute('aria-busy');
+    submit.firstChild!.textContent = 'Send ';
+  }
+});
+</script>
+
+<style is:global>
+  /* Request dialog */
+  html:has(.request-dialog[open]) { overflow: hidden; }
+  .request-dialog { width: min(680px, calc(100vw - 2 * var(--gutter))); max-height: calc(100dvh - 32px); padding: 0; color: var(--ink); background: var(--paper); border: 0; border-radius: var(--radius-panel); overflow: auto; opacity: 0; transform: translateY(16px); transition: opacity 300ms var(--ease), transform 300ms var(--ease), overlay 300ms allow-discrete, display 300ms allow-discrete; }
+  .request-dialog[open] { opacity: 1; transform: none; }
+  @starting-style { .request-dialog[open] { opacity: 0; transform: translateY(16px); } }
+  .request-dialog::backdrop { background: color-mix(in oklch, var(--green-dark) 75%, transparent); }
+  .request-panel { position: relative; padding: clamp(28px, 5vw, 52px); }
+  .request-panel h2 { margin: 0 48px var(--space-sm) 0; font: 650 clamp(2rem, 4vw, 2.75rem)/1 var(--display); letter-spacing: -.045em; } .request-panel h2:focus { outline: none; }
+  .request-intro, .request-success p { max-width: 54ch; margin: 0 0 var(--space-md); font-size: 16px; }
+  .dialog-close { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 50%; font: 400 24px/1 var(--display); cursor: pointer; transition: background-color 180ms ease; } .dialog-close:hover { background: var(--rice); }
+  .request-dialog form { display: grid; gap: var(--space-sm); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); }
+  .field { display: grid; gap: 6px; align-content: start; }
+  .field label { font: 600 14px/1.3 var(--display); } .field label span { font-weight: 500; opacity: .6; }
+  .field input, .field select, .field textarea { width: 100%; min-height: 48px; padding: 12px 14px; color: var(--ink); background: oklch(98.5% .01 70); border: 1px solid color-mix(in oklch, var(--ink) 45%, transparent); border-radius: var(--radius-control); font: 400 16px/1.4 var(--body); transition: border-color 180ms ease; }
+  .field textarea { resize: vertical; min-height: 128px; }
+  .field input:hover, .field select:hover, .field textarea:hover { border-color: var(--ink); }
+  .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible { outline: 3px solid var(--coral); outline-offset: 1px; border-color: var(--ink); }
+  .field [aria-invalid="true"] { border-color: oklch(50% .18 28); border-width: 2px; padding: 11px 13px; }
+  .field-error { min-height: 0; margin: 0; color: oklch(45% .17 28); font-size: 14px; font-weight: 500; } .field-error:empty { display: none; }
+  .form-error { margin: 0; padding: 12px 14px; color: oklch(40% .15 28); background: oklch(94% .04 28); border-radius: var(--radius-control); font-size: 15px; }
+  .request-dialog .button-primary { justify-self: start; margin-top: var(--space-xs); } .request-dialog .button-primary:hover { border-color: var(--ink); }
+  .request-dialog .button[disabled] { cursor: progress; opacity: .7; transform: none; }
+  .honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  /* Who and what: radio buttons drawn as chips */
+  .chips { display: grid; gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
+  .chips legend { margin-bottom: 10px; padding: 0; color: var(--green); font: 700 12px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; background: oklch(98.5% .01 70); border: 1px solid color-mix(in oklch, var(--ink) 35%, transparent); border-radius: 999px; font: 600 14px/1.2 var(--display); cursor: pointer; transition: background-color 180ms ease, border-color 180ms ease; }
+  .chip:hover { border-color: var(--ink); }
+  .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .chip:has(input:checked) { background: var(--coral); border-color: var(--coral); }
+  .chip:has(input:focus-visible) { outline: 3px solid var(--coral); outline-offset: 2px; border-color: var(--ink); }
+  .chip-hint { min-height: 1.5em; margin: 0; font-size: 14px; color: color-mix(in oklch, var(--ink) 78%, transparent); }
+  .chip-hint:empty { display: none; }
+  .check-field { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; cursor: pointer; }
+  .check-field input { width: 20px; height: 20px; accent-color: var(--green); }
+  .request-dialog form > [hidden], .field-row > [hidden] { display: none; }
+  @media (max-width: 760px) { .field-row { grid-template-columns: 1fr; } }
+</style>
