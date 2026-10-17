@@ -7,6 +7,7 @@
 .news-top { display: flex; flex-wrap: wrap; gap: var(--space-md); }
 .news-feature { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 18px; min-height: 440px; padding: var(--panel-pad); color: var(--paper); background: var(--green); border-radius: var(--radius-panel); transition: background-color 180ms ease; }
 .news-feature:hover { background: var(--green-dark); }
+.news-feature-image { display: block; width: 100%; height: auto; max-height: 320px; margin-bottom: auto; object-fit: cover; border-radius: 4px; }
 .news-feature-tag { align-self: flex-start; padding: 6px 10px; color: var(--green); background: var(--paper); border-radius: var(--radius-control); font: 700 11px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; }
 .news-feature-title { max-width: 22ch; font: 650 clamp(2rem, 4vw, 3.5rem)/1 var(--display); letter-spacing: -.04em; text-wrap: balance; }
 .news-feature-summary { max-width: 58ch; font-size: 17px; line-height: 1.55; }
@@ -39,6 +40,8 @@
 .news-latest h2 { padding-bottom: 14px; border-bottom: 3px solid var(--ink); }
 .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg) var(--space-md); }
 .news-card { display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.5; }
+/* A post's image, when it has one. Decorative here: the title says what the card is. */
+.news-card-image { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; }
 .news-card-title { font: 700 22px/1.2 var(--display); letter-spacing: -.02em; text-wrap: balance; }
 .news-card:hover .news-card-title { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 

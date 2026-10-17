@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import '../../styles/news.css';
 import { newsFront, TYPE_LABELS, formatDate, shortMonth, href, isExternal } from '../../lib/news';
@@ -16,6 +17,7 @@ const target = (external: boolean) => (external ? { target: '_blank', rel: 'nore
     <div class="news-top">
       {featured && (
         <a class="news-feature" href={href(featured)} {...target(isExternal(featured))}>
+          {featured.data.image && <Image class="news-feature-image" src={featured.data.image} alt="" widths={[640, 1280]} sizes="(max-width: 760px) 100vw, 60vw" />}
           <span class="news-feature-tag">{TYPE_LABELS[featured.data.type]}{featured.data.place && ` · ${featured.data.place}`}</span>
           <span class="news-feature-title">{featured.data.title}</span>
           <span class="news-feature-summary">{featured.data.summary}</span>
@@ -64,6 +66,7 @@ const target = (external: boolean) => (external ? { target: '_blank', rel: 'nore
         <div class="news-grid">
           {latest.map((p) => (
             <a class="news-card" href={href(p)} {...target(isExternal(p))}>
+              {p.data.image && <Image class="news-card-image" src={p.data.image} alt="" widths={[400, 800]} sizes="(max-width: 760px) 100vw, 33vw" />}
               <span class="news-kicker">{TYPE_LABELS[p.data.type]} · Posted on <time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time></span>
               <span class="news-card-title">{p.data.title}{isExternal(p) && <span aria-hidden="true"> ↗</span>}</span>
               <span>{p.data.summary}</span>
