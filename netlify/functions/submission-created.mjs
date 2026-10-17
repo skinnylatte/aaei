@@ -1,5 +1,6 @@
 // Netlify runs this automatically for every verified (non-spam) Netlify Forms submission.
-// It sends the person who got in touch through "Work with us" a thank-you email through Resend.
+// It sends the person who got in touch through "Work with us" a thank-you email through Resend,
+// with a copy of what they sent.
 //
 // Required environment variables (set in Netlify > Site configuration > Environment variables):
 //   RESEND_API_KEY  API key from resend.com
@@ -38,6 +39,24 @@ const DEFAULT_REPLY = {
 
 const firstName = (name) => String(name || '').trim().split(/\s+/)[0].slice(0, 40);
 
+// The copy of what they sent, in form order. Fields left empty, or hidden for their choice, are skipped.
+const COPY_FIELDS = [
+  ['who', 'I am'],
+  ['need', 'Looking for'],
+  ['name', 'Name'],
+  ['organization', 'Organization'],
+  ['role', 'Role'],
+  ['languages', 'Languages to test'],
+  ['group-size', 'Group size'],
+  ['deadline', 'Deadline'],
+  ['nda', 'NDA needed'],
+  ['message', 'Message'],
+];
+// Long messages are cut short, so the email cannot be used to send someone a long text in our name.
+const MAX_COPY = 1500;
+const clip = (value) => { const s = String(value).trim(); return s.length > MAX_COPY ? `${s.slice(0, MAX_COPY)}…` : s; };
+const submissionCopy = (data) => COPY_FIELDS.filter(([key]) => String(data[key] ?? '').trim()).map(([key, label]) => [label, clip(data[key])]);
+
 export const handler = async (event) => {
   const { payload } = JSON.parse(event.body);
   if (payload.form_name !== FORM_NAME) return { statusCode: 200, body: 'Ignored' };
@@ -55,8 +74,20 @@ export const handler = async (event) => {
   const greeting = name ? `Hi ${name},` : 'Hello,';
 
   const reply = REPLIES[payload.data.need] ?? DEFAULT_REPLY;
-  const text = [greeting, '', ...reply.lines.flatMap((line) => [line, '']), 'Asian AI Evaluation Institute'].join('\n');
-  const html = [greeting, ...reply.lines, 'Asian AI Evaluation Institute'].map((line) => `<p>${escapeHtml(line)}</p>`).join('\n');
+  const copy = submissionCopy(payload.data);
+  const text = [
+    greeting, '',
+    ...reply.lines.flatMap((line) => [line, '']),
+    'Asian AI Evaluation Institute', '',
+    '---', 'What you sent us:', '',
+    ...copy.map(([label, value]) => `${label}: ${value}`),
+  ].join('\n');
+  const html = `${[greeting, ...reply.lines, 'Asian AI Evaluation Institute'].map((line) => `<p>${escapeHtml(line)}</p>`).join('\n')}
+<hr>
+<p><strong>What you sent us</strong></p>
+<table cellpadding="4" style="border-collapse: collapse">
+${copy.map(([label, value]) => `<tr><td valign="top" style="color: #666; white-space: nowrap">${escapeHtml(label)}</td><td style="white-space: pre-wrap">${escapeHtml(value)}</td></tr>`).join('\n')}
+</table>`;
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
