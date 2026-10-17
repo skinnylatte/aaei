@@ -9,8 +9,8 @@ const news = defineCollection({
     title: z.string(),
     // The date the post goes up. Events and opportunities have their own dates below.
     date: z.coerce.date(),
-    // review: our take on someone else's research.
-    type: z.enum(['event', 'did', 'announcement', 'opportunity', 'report', 'review']),
+    // review: our take on someone else's research. field: news from elsewhere, such as a launch.
+    type: z.enum(['event', 'did', 'announcement', 'opportunity', 'report', 'review', 'field']),
     summary: z.string(),
     // Where it happened or happens, for example "Geneva".
     place: z.string().optional(),

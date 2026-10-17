@@ -10,6 +10,7 @@ export const TYPE_LABELS: Record<Post['data']['type'], string> = {
   opportunity: 'Opportunity',
   report: 'Conference report',
   review: 'Research review',
+  field: 'From the field',
 };
 
 // "29 Sep 2026". Written out by hand because en-GB abbreviates September as "Sept".
