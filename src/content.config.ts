@@ -1,0 +1,36 @@
+import { defineCollection } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
+
+// News posts: one Markdown file each in src/content/news/. The file name becomes the address, /news/<file-name>/.
+const news = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/news' }),
+  schema: z.object({
+    title: z.string(),
+    // The date the post goes up. Events and opportunities have their own dates below.
+    date: z.coerce.date(),
+    // review: our take on someone else's research.
+    type: z.enum(['event', 'did', 'announcement', 'opportunity', 'report', 'review']),
+    summary: z.string(),
+    // Where it happened or happens, for example "Geneva".
+    place: z.string().optional(),
+    // Events: when it starts (and ends). Upcoming events appear under Coming up.
+    starts: z.coerce.date().optional(),
+    ends: z.coerce.date().optional(),
+    // Opportunities: who runs it and when applications close. Open ones appear in the Opportunities band.
+    organization: z.string().optional(),
+    deadline: z.coerce.date().optional(),
+    // A link to another site. When set, the post's card goes there instead of to the post's own page.
+    link: z.string().url().optional(),
+    linkLabel: z.string().optional(),
+    // The work a post is about, for example a paper or a study. Shown on the post's page, and cited.
+    source: z.string().url().optional(),
+    sourceLabel: z.string().optional(),
+    // The big story at the top of News. The newest featured post wins.
+    featured: z.boolean().default(false),
+    // Drafts are left out of the site.
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { news };

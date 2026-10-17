@@ -1,0 +1,76 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import '../../styles/news.css';
+import { newsFront, TYPE_LABELS, formatDate, shortMonth, href, isExternal } from '../../lib/news';
+
+const { featured, upcoming, open, latest } = await newsFront();
+const day = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', timeZone: 'Asia/Singapore' });
+const month = shortMonth;
+const target = (external: boolean) => (external ? { target: '_blank', rel: 'noreferrer' } : {});
+---
+
+<SiteLayout title="News" description="Events, what we have been doing, announcements, opportunities, and reports from the conferences we attend." current="news">
+  <div class="news">
+    <h1 class="headline">News</h1>
+
+    <div class="news-top">
+      {featured && (
+        <a class="news-feature" href={href(featured)} {...target(isExternal(featured))}>
+          <span class="news-feature-tag">{TYPE_LABELS[featured.data.type]}{featured.data.place && ` · ${featured.data.place}`}</span>
+          <span class="news-feature-title">{featured.data.title}</span>
+          <span class="news-feature-summary">{featured.data.summary}</span>
+          <span class="news-feature-more">Read more <span aria-hidden="true">→</span></span>
+        </a>
+      )}
+      <aside class="news-coming" aria-labelledby="news-coming-title">
+        <h2 id="news-coming-title" class="news-kicker">Coming up</h2>
+        {upcoming.length ? upcoming.map((e) => (
+          <a class="news-event" href={href(e)} {...target(isExternal(e))}>
+            <span class="news-event-date"><span>{month(e.data.starts!)}</span><strong>{day(e.data.starts!)}</strong></span>
+            <span class="news-event-body">
+              <span class="news-event-title">{e.data.title}</span>
+              {e.data.place && <span>{e.data.place}</span>}
+              <span class="news-event-more">{e.data.linkLabel ?? 'Details'} <span aria-hidden="true">{isExternal(e) ? '↗' : '→'}</span></span>
+            </span>
+          </a>
+        )) : (
+          <p class="news-empty">Nothing scheduled right now. Want us at your event? <a href="/#contact">Work with us</a>.</p>
+        )}
+      </aside>
+    </div>
+
+    {open.length > 0 && (
+      <section class="news-opps" aria-labelledby="news-opps-title">
+        <div class="news-opps-head">
+          <h2 id="news-opps-title">Opportunities</h2>
+          <p>Calls, fellowships and grants we think our community should know about.</p>
+        </div>
+        <div class="news-opps-grid">
+          {open.map((o) => (
+            <a class="news-opp" href={href(o)} {...target(isExternal(o))}>
+              {o.data.deadline && <span class="news-opp-deadline">Closes {formatDate(o.data.deadline)}</span>}
+              <span class="news-opp-title">{o.data.title}</span>
+              <span>{[o.data.organization, o.data.summary].filter(Boolean).join(' · ')}</span>
+              <span class="news-opp-more">{o.data.linkLabel ?? 'Apply'} <span aria-hidden="true">{isExternal(o) ? '↗' : '→'}</span></span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {latest.length > 0 && (
+      <section class="news-latest" aria-labelledby="news-latest-title">
+        <h2 id="news-latest-title">Latest</h2>
+        <div class="news-grid">
+          {latest.map((p) => (
+            <a class="news-card" href={href(p)} {...target(isExternal(p))}>
+              <span class="news-kicker">{TYPE_LABELS[p.data.type]} · <time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time></span>
+              <span class="news-card-title">{p.data.title}{isExternal(p) && <span aria-hidden="true"> ↗</span>}</span>
+              <span>{p.data.summary}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</SiteLayout>

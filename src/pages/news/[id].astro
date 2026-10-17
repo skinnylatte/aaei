@@ -1,0 +1,34 @@
+---
+import { getCollection, render } from 'astro:content';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import '../../styles/news.css';
+import { TYPE_LABELS, formatDate } from '../../lib/news';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('news', (p) => !p.data.draft);
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const d = post.data;
+---
+
+<SiteLayout title={d.title} description={d.summary} current="news">
+  <article class="news-post">
+    <p class="news-kicker">{TYPE_LABELS[d.type]}{d.place && ` · ${d.place}`} · <time datetime={d.date.toISOString().slice(0, 10)}>{formatDate(d.date)}</time></p>
+    <h1>{d.title}</h1>
+    <p class="news-post-summary">{d.summary}</p>
+    {(d.starts || d.deadline || d.link || d.source) && (
+      <dl class="news-post-facts">
+        {d.starts && <div><dt>When</dt><dd>{formatDate(d.starts)}{d.ends && ` to ${formatDate(d.ends)}`}</dd></div>}
+        {d.organization && <div><dt>Run by</dt><dd>{d.organization}</dd></div>}
+        {d.deadline && <div><dt>Closes</dt><dd>{formatDate(d.deadline)}</dd></div>}
+        {d.source && <div><dt>Source</dt><dd><a href={d.source} target="_blank" rel="noreferrer">{d.sourceLabel ?? 'Read the original'} <span aria-hidden="true">↗</span></a></dd></div>}
+        {d.link && <div><dt>Link</dt><dd><a href={d.link} target="_blank" rel="noreferrer">{d.linkLabel ?? 'Details'} <span aria-hidden="true">↗</span></a></dd></div>}
+      </dl>
+    )}
+    <div class="news-post-body"><Content /></div>
+    <p class="news-post-back"><a class="text-link" href="/news/"><span aria-hidden="true">←</span> All news</a></p>
+  </article>
+</SiteLayout>

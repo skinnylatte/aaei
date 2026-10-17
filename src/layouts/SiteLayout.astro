@@ -1,0 +1,31 @@
+---
+// The public site's pages (other than the homepage): head, navbar, page, footer.
+import '../styles/site.css';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props { title: string; description: string; current?: 'workshops' | 'research' | 'team' | 'news' }
+const { title, description, current } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#591c2d" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <title>{title} | Asian AI Evaluation Institute</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteNav current={current} />
+    <main id="main"><slot /></main>
+    <SiteFooter />
+  </body>
+</html>
