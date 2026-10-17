@@ -83,10 +83,6 @@ const needs = [
         </div>
       </section>
 
-      <section class="instructor" aria-labelledby="instructor-title">
-        <div class="instructor-heading reveal"><h2 class="headline" id="instructor-title">Adrianna Tan</h2><p>AI safety and evaluation practitioner working on how organizations test AI systems before deploying them in the real world.</p></div>
-        <div class="instructor-details reveal"><p>Adrianna has led AI red-teaming and evaluation work for the U.S. Department of Defense, Singapore’s IMDA, Fortune 500 companies, healthcare organizations, and governments. In 2026, she spoke on AI testing and evaluation at the United Nations’ AI for Good Global Summit.</p><p>Previously, she spent five years as a Director of Product for the City and County of San Francisco. Her work now focuses on practical AI evaluation, agentic AI, multilingual and multicultural testing, and credible evidence for high-stakes deployment.</p><a class="text-link" href="https://futureethics.ai/about/" target="_blank" rel="noreferrer">More about Adrianna <span aria-hidden="true">↗</span></a></div>
-      </section>
 
       <section class="contact" id="contact" aria-labelledby="contact-title">
         <div class="contact-grid" aria-hidden="true"></div>
@@ -261,9 +257,6 @@ const needs = [
   .rerun-card .button { grid-column: 2; justify-self: start; margin: var(--space-md) clamp(20px, 2.5vw, 36px) clamp(24px, 3vw, 36px); } .rerun-card .button-primary:hover { background: var(--paper); border-color: var(--ink); }
 
   /* Instructor */
-  .instructor { display: grid; grid-template-columns: .9fr 1.1fr; gap: var(--space-lg) clamp(40px, 7vw, 112px); width: var(--page); margin: 0 auto; padding-block: var(--space-section); border-top: 1px solid var(--line); }
-  .instructor-heading p { max-width: 36ch; margin: var(--space-md) 0 0; font-size: 18px; }
-  .instructor-details p { max-width: 64ch; margin: 0 0 var(--space-md); font-size: 17px; } .instructor-details p:first-child { margin-top: 6px; }
 
   /* Contact */
   .contact { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.3fr .7fr; align-items: end; gap: var(--space-xl) clamp(40px, 8vw, 128px); padding: var(--space-section) var(--inset); color: var(--paper); background: var(--green-dark); }
@@ -320,7 +313,7 @@ const needs = [
   .reveal { opacity: 0; transform: translateY(20px); transition: opacity 600ms cubic-bezier(.16,1,.3,1), transform 600ms cubic-bezier(.16,1,.3,1); } .reveal.is-visible { opacity: 1; transform: none; }
 
   @media (max-width: 1000px) {
-    .workshop-body, .corporate-callout, .rerun, .instructor, .contact { grid-template-columns: 1fr; }
+    .workshop-body, .corporate-callout, .rerun, .contact { grid-template-columns: 1fr; }
     .rerun { align-items: start; }
   }
   @media (max-width: 760px) {
