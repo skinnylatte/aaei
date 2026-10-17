@@ -24,21 +24,21 @@ const target = (external: boolean) => (external ? { target: '_blank', rel: 'nore
           <span class="news-feature-more">Read more <span aria-hidden="true">→</span></span>
         </a>
       )}
-      <aside class="news-coming" aria-labelledby="news-coming-title">
-        <h2 id="news-coming-title" class="news-kicker">Coming up</h2>
-        {upcoming.length ? upcoming.map((e) => (
-          <a class="news-event" href={href(e)} {...target(isExternal(e))}>
-            <span class="news-event-date"><span>{month(e.data.starts!)}</span><strong>{day(e.data.starts!)}</strong></span>
-            <span class="news-event-body">
-              <span class="news-event-title">{e.data.title}</span>
-              {e.data.place && <span>{e.data.place}</span>}
-              <span class="news-event-more">{e.data.linkLabel ?? 'Details'} <span aria-hidden="true">{isExternal(e) ? '↗' : '→'}</span></span>
-            </span>
-          </a>
-        )) : (
-          <p class="news-empty">Nothing scheduled right now. Want us at your event? <a href="/#contact">Work with us</a>.</p>
-        )}
-      </aside>
+      {upcoming.length > 0 && (
+        <aside class="news-coming" aria-labelledby="news-coming-title">
+          <h2 id="news-coming-title" class="news-kicker">Coming up</h2>
+          {upcoming.map((e) => (
+            <a class="news-event" href={href(e)} {...target(isExternal(e))}>
+              <span class="news-event-date"><span>{month(e.data.starts!)}</span><strong>{day(e.data.starts!)}</strong></span>
+              <span class="news-event-body">
+                <span class="news-event-title">{e.data.title}</span>
+                {e.data.place && <span>{e.data.place}</span>}
+                <span class="news-event-more">{e.data.linkLabel ?? 'Details'} <span aria-hidden="true">{isExternal(e) ? '↗' : '→'}</span></span>
+              </span>
+            </a>
+          ))}
+        </aside>
+      )}
     </div>
 
     {open.length > 0 && (

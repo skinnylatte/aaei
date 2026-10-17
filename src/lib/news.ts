@@ -27,7 +27,7 @@ export async function newsFront() {
   const today = new Date(new Date().toISOString().slice(0, 10));
   const posts = (await getCollection('news', (p) => !p.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
   const upcoming = posts
-    .filter((p) => p.data.type === 'event' && p.data.starts && (p.data.ends ?? p.data.starts) >= today)
+    .filter((p) => p.data.type === 'event' && p.data.workshop && p.data.starts && (p.data.ends ?? p.data.starts) >= today)
     .sort((a, b) => a.data.starts!.valueOf() - b.data.starts!.valueOf());
   const open = posts
     .filter((p) => p.data.type === 'opportunity' && (!p.data.deadline || p.data.deadline >= today))

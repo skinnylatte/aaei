@@ -15,9 +15,10 @@ const news = defineCollection({
     summary: z.string(),
     // Where it happened or happens, for example "Geneva".
     place: z.string().optional(),
-    // Events: when it starts (and ends). Upcoming events appear under Coming up.
+    // Events: when it starts (and ends). Set workshop: true for one of our own workshops; upcoming ones appear under Coming up.
     starts: z.coerce.date().optional(),
     ends: z.coerce.date().optional(),
+    workshop: z.boolean().default(false),
     // Opportunities: who runs it and when applications close. Open ones appear in the Opportunities band.
     organization: z.string().optional(),
     deadline: z.coerce.date().optional(),

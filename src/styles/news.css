@@ -20,8 +20,6 @@
 .news-event-body { display: flex; flex-direction: column; gap: 6px; padding: var(--space-sm); background: oklch(99% .006 70); font-size: 14px; }
 .news-event-title { font: 700 17px/1.25 var(--display); }
 .news-event-more, .news-opp-more { color: var(--green); font: 700 13px/1 var(--display); }
-.news-empty { margin: 0; padding: var(--space-md); border: 1px dashed color-mix(in oklch, var(--ink) 40%, transparent); border-radius: 4px; font-size: 15px; }
-.news-empty a { font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 
 /* Opportunities band */
 .news-opps { display: flex; flex-direction: column; gap: 20px; padding: clamp(24px, 3vw, 40px); background: var(--ochre); border-radius: var(--radius-panel); }
