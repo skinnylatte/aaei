@@ -36,6 +36,12 @@ Every adversarial prompt is also paired with a harmless one, to measure over-ref
 
 **The caution has a cost.** Even counting only the cases where models answered, 12 of 14 gave less harmful answers in Korean, so some of the gain is real. But models also refused far more harmless Korean requests, in some cases about twice as often. Refusing more is not the same as telling a real threat from an innocent question.
 
+## The view from the Korea AI Safety Institute
+
+A member of the project at the Korea AI Safety Institute [summarised the work on LinkedIn](https://www.linkedin.com/feed/update/urn:li:share:7506896092530200576/), with links to the blog post in [Korean](https://lnkd.in/gNKD-Cdn) and [English](https://lnkd.in/gsh48FwF). Their headline takeaway: "multilingual AI safety is not simply a translation problem."
+
+They also set out where the Institute is heading. It is running safety research and evaluations across politics, youth and healthcare, built around linguistic and socio-cultural context, and aims to find the safety issues that matter most in Korea and connect them to the wider global discussion.
+
 ## Why it matters
 
 Three lessons carry beyond Korean.
@@ -48,4 +54,4 @@ This fits what ITU's [AI Standards Report 2026](/news/ai-for-good-2026-multiling
 
 The authors say further testing is needed to see whether the same patterns hold elsewhere. For the languages we work in, including Chinese, Malay, Tamil and Singlish, that is the work to do: test prompts written for the local context, not translated into it, alongside plain requests and harmless ones.
 
-A public subset of the dataset is on Hugging Face, and the paper is available as a preprint on arXiv.
+A public subset of the dataset is on [Hugging Face](https://scale.com/blog/rok-fortress-multilingual-ai-safety#:~:text=Hugging%20Face), and the paper is available as a [preprint on arXiv](https://arxiv.org/abs/2605.14152).
