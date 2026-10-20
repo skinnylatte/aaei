@@ -8,65 +8,127 @@ const latest = (await getCollection('news', (p) => !p.data.draft))
   .slice(0, 3);
 const target = (external: boolean) => (external ? { target: '_blank', rel: 'noreferrer' } : {});
 
-// Machine translation errors in Tigrinya medical information, as Maria Ressa described them at the UN Global Dialogue on AI Governance.
+const languages = [
+  { native: 'ខ្មែរ', name: 'Khmer' },
+  { native: 'தமிழ்', name: 'Tamil' },
+  { native: 'Tagalog', name: 'Tagalog' },
+  { native: 'မြန်မာ', name: 'Burmese' },
+  { native: 'ଓଡ଼ିଆ', name: 'Odia' },
+  { native: 'Bahasa Indonesia', name: 'Indonesian' },
+  { native: 'ไทย', name: 'Thai' },
+  { native: 'বাংলা', name: 'Bengali' },
+  { native: 'Tiếng Việt', name: 'Vietnamese' },
+  { native: 'සිංහල', name: 'Sinhala' },
+  { native: 'ລາວ', name: 'Lao' },
+  { native: 'नेपाली', name: 'Nepali' },
+  { native: 'فارسی', name: 'Farsi' },
+  { native: 'العربية', name: 'Arabic' },
+  { native: 'Basa Jawa', name: 'Javanese' },
+];
+
+// The Tigrinya mistranslations from the UN scientific panel's report, as Maria Ressa presented them.
 const mistranslations = [
-  { meant: 'smallpox', got: 'syphilis' },
-  { meant: 'gonorrhea', got: 'diabetes' },
-  { meant: 'intravenous antibiotics', got: 'intravenous insecticides' },
+  { prefix: 'You have been given intravenous ', meant: 'antibiotics', got: 'insecticides' },
+  { prefix: '', meant: 'smallpox', got: 'syphilis' },
+  { prefix: '', meant: 'gonorrhea', got: 'diabetes' },
 ];
+const longest = mistranslations[0];
 
-const steps = [
-  { title: 'Speakers, not translators', text: 'People who live in the language test the system on real tasks: health questions, government services, money.' },
-  { title: 'Red teaming in context', text: 'We look for harms that only show up locally: wrong advice, cultural misreads, safety filters that fail outside English.' },
-  { title: 'Evidence in plain language', text: 'A report decision-makers can act on: what failed, how badly, for whom, and who should fix it.' },
-];
+const services = [
+  { title: 'AI labs', text: 'Test your model before it goes live, with people who speak the languages you say it supports. You get results that meet multilingual benchmark requirements, and the failures no benchmark would catch.' },
+  { title: 'Organizations deploying AI', text: 'A bank’s assistant might serve customers in Tamil, Malay, Mandarin and English. We check that every one of them gets the same correct answer about fees, loans and fraud, not just the English speakers.' },
+  { title: 'Governments', text: 'If a public-service chatbot gives worse answers in Bengali than in English, some citizens are served less well because of their language. That is unequal treatment, and it can raise legal questions about discrimination. We help you find the gap before the public does.' },
+]
 
-const audiences = [
-  { label: 'AI labs: evaluation and red teaming', href: '/workshops/#contact' },
-  { label: 'Governments: capacity building', href: '/workshops/#contact' },
-  { label: 'Organizations: workshops', href: '/workshops/' },
-  { label: 'Journalists: comment', href: '/workshops/#contact' },
-];
+// Each opens the request dialog with its answers preset, as "who:need".
+const routes = [
+  { label: 'Book a model evaluation', preset: 'lab:evals' },
+  { label: 'Test a deployed system', preset: 'org:evals' },
+  { label: 'Build government capacity', preset: 'gov:advisory' },
+  { label: 'Run a workshop', preset: 'org:workshop' },
+  { label: 'Press enquiries', preset: 'press:comment' },
+]
 ---
 
 <SiteLayout title="Multilingual AI evaluation and red teaming" description="We test AI systems with people who speak the language, on the things they actually need, across Asia and the Global South." requestDialog>
   <section class="home-hero">
     <div class="home-hero-inner">
       <div class="home-hero-copy">
-        <p class="home-label">Asian AI Evaluation Institute</p>
-        <h1 class="headline">No English benchmark would catch this.</h1>
-        <p class="home-hero-lede">We do. We test AI systems with people who speak the language, on the things they actually need, across Asia and the Global South.</p>
+        <h1 class="headline">
+          <span class="sr-only">Was your AI tested in Khmer, Tamil, Burmese, or the other languages people in Asia speak?</span>
+          <span aria-hidden="true">Was your AI tested in <span class="rotor">{languages.map((l, i) => <span class:list={['rotor-word', { 'is-on': i === 0 }]}><bdi>{l.native}</bdi>?</span>)}</span></span>
+        </h1>
+        <p class="rotor-gloss" aria-hidden="true" data-rotor-gloss>{languages[0].name}</p>
+        <p class="home-hero-lede">Most AI is tested in English. In Asia’s other languages, the people using it are often the first to find out what breaks. We test AI systems with people who speak the language, on the things they actually need.</p>
         <button class="button button-primary" type="button" data-open-request="lab:evals" aria-haspopup="dialog">Test your system with us <span aria-hidden="true">→</span></button>
       </div>
 
-      <figure class="specimen">
-        <p class="specimen-tag"><span>Machine translation · Tigrinya</span><span>Medical information</span></p>
-        <table>
-          <caption class="sr-only">Medical terms and what machine translation turned them into</caption>
-          <thead><tr><th scope="col">Meant</th><th><span class="sr-only">became</span></th><th scope="col">Came out as</th></tr></thead>
-          <tbody>
-            {mistranslations.map((m) => (
-              <tr><td>{m.meant}</td><td class="specimen-arrow" aria-hidden="true">→</td><td class="specimen-got">{m.got}</td></tr>
-            ))}
-          </tbody>
-        </table>
-        <figcaption>“That’s not a footnote. That can be life-threatening.” <a href="/news/un-global-dialogue-ai-governance-languages/">Maria Ressa, co-chair of the UN Independent International Scientific Panel on AI, at the UN Global Dialogue on AI Governance, Geneva, July 2026.</a></figcaption>
-      </figure>
+      <div class="lang-panel">
+        <ul class="lang-wall" aria-hidden="true">
+          {languages.map((l, i) => (
+            <li class={i === 0 ? 'is-on' : undefined}><bdi class="lang-native">{l.native}</bdi><span class="lang-name">{l.name}</span></li>
+          ))}
+        </ul>
+        <button class="lang-open" type="button" data-open-request="" aria-haspopup="dialog"><span class="lang-native">Your language?</span><span class="lang-name">Tell us <span aria-hidden="true">→</span></span></button>
+        <p class="lang-caption">A few of the languages people already use AI in.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-stakes" aria-labelledby="stakes-title">
+    <div class="home-stakes-inner">
+      <div class="home-stakes-copy">
+        <h2 id="stakes-title">What’s at stake</h2>
+        <p>At the first UN Global Dialogue on AI Governance, the UN’s Independent International Scientific Panel presented its first report in July 2026. The panel of 40 experts co-chaired by Yoshua Bengio and Maria Ressa found:</p>
+        <blockquote>“We have over 7,000 human languages in the world, but current AI reflects <em>only a handful of them</em>, mostly the majority languages of the Global North.”</blockquote>
+        <a class="text-link" href="/news/un-global-dialogue-ai-governance-languages/">Read what the Dialogue said about languages <span aria-hidden="true">→</span></a>
+      </div>
+
+      <article class="home-stakes-card">
+        <ul class="sr-only">
+          {mistranslations.map((m) => <li>The Tigrinya translation turned “{m.prefix}{m.meant}” into “{m.prefix}{m.got}”.</li>)}
+        </ul>
+        <div class="home-stakes-notice" aria-hidden="true" data-typewriter={JSON.stringify(mistranslations)}>
+          <p><span>The original</span><span class="type"><span class="type-sizer">{longest.prefix}<mark>{longest.meant}</mark></span><span class="type-live" data-type="meant">{longest.prefix}<mark>{longest.meant}</mark></span></span></p>
+          <p class="is-wrong"><span>What the Tigrinya translation said</span><span class="type"><span class="type-sizer">{longest.prefix}<mark>{longest.got}</mark></span><span class="type-live" data-type="got">{longest.prefix}<mark>{longest.got}</mark></span></span></p>
+        </div>
+        <figure class="home-stakes-quote">
+          <blockquote><p>“That’s not a footnote.</p><p>That can be life-threatening.”</p></blockquote>
+          <figcaption><b>Maria Ressa</b>, co-chair of the UN panel, on these mistranslations</figcaption>
+        </figure>
+      </article>
     </div>
   </section>
 
   <section class="home-why" aria-labelledby="why-title">
     <h2 id="why-title">Translating an English test set isn’t enough.</h2>
     <div>
-      <p><a href="/news/ai-for-good-2026-multilingual-testing/">ITU’s AI Standards Report 2026</a> says it plainly: “test sentences that are grammatically correct may still be socially unrealistic in local languages.” Bias is local too. It shows up differently from place to place.</p>
-      <p>So we build tests the way people really speak, including the code-switching that is normal across Asia, and we run them with the people a system will serve.</p>
+      <ul class="home-why-gaps">
+        <li>
+          <strong>Correct isn’t the same as real.</strong>
+          <p>“Test sentences that are grammatically correct may still be socially unrealistic in local languages.”</p>
+          <a href="/news/ai-for-good-2026-multilingual-testing/">ITU, AI Standards Report 2026</a>
+        </li>
+        <li>
+          <strong>Some languages have no test at all.</strong>
+          <p>Pnar, spoken in Meghalaya, got its first translation benchmark in 2026.</p>
+          <a href="/news/pnar-english-machine-translation/">MWire Labs, ICNLSP 2026</a>
+        </li>
+        <li>
+          <strong>People don’t write one language at a time.</strong>
+          <p>They mix languages in one sentence, or type Hindi and Tamil in the Latin alphabet. The newest Indian-language evaluation suite still lists code-mixing and transliteration as future work.</p>
+          <a href="/news/indic-llm-eval-suite/">AI4Bharat and NVIDIA, October 2026</a>
+        </li>
+      </ul>
+      <p class="home-why-answer">So we test the way people really talk: in their language, in their script.</p>
+      <p class="home-why-answer">Real results, real people, real language evaluation of AI systems before they go live.</p>
     </div>
   </section>
 
   <section class="home-how" aria-labelledby="how-title">
-    <h2 id="how-title" class="home-label">How we find it</h2>
+    <h2 id="how-title" class="home-label">What we do</h2>
     <ol>
-      {steps.map((s, i) => (
+      {services.map((s, i) => (
         <li><span class="home-how-num">{String(i + 1).padStart(2, '0')}</span><span class="home-how-title">{s.title}</span>{s.text}</li>
       ))}
     </ol>
@@ -74,11 +136,16 @@ const audiences = [
 
   <section class="home-who" aria-labelledby="who-title">
     <div class="home-who-inner">
-      <div>
-        <h2 id="who-title">Who we work with</h2>
-        <div class="home-chips">{audiences.map((a) => <a href={a.href}>{a.label}</a>)}</div>
+      <div class="home-who-about">
+        <h2 id="who-title">Who we are</h2>
+        <p>We’re led by Adrianna Tan, who designed and led the Singapore AI Safety Red Teaming Challenge. She co-created its harm taxonomies, analysed the data and wrote the report that later work cites.</p>
+        <p>She has led AI red-teaming and evaluation work for the U.S. Department of Defense, Singapore’s IMDA, Fortune 500 companies, healthcare organizations and governments, and spoke on AI testing at the UN’s AI for Good Global Summit 2026.</p>
+        <a class="text-link" href="/team/">Meet the team <span aria-hidden="true">→</span></a>
       </div>
-      <p>Led by <a href="/team/">Adrianna Tan</a>, who designed and led the Singapore AI Safety Red Teaming Challenge and spoke on multilingual testing at the UN’s AI for Good Global Summit 2026.</p>
+      <div class="home-who-start">
+        <h3>Start a conversation</h3>
+        <div class="home-chips">{routes.map((r) => <button type="button" data-open-request={r.preset} aria-haspopup="dialog">{r.label}</button>)}</div>
+      </div>
     </div>
   </section>
 
@@ -92,6 +159,54 @@ const audiences = [
   </section>
 </SiteLayout>
 
+<script>
+  const groups = ['.rotor-word', '.lang-wall li'].map((sel) => [...document.querySelectorAll<HTMLElement>(sel)]);
+  const gloss = document.querySelector<HTMLElement>('[data-rotor-gloss]');
+  const names = groups[1].map((li) => li.querySelector('.lang-name')!.textContent);
+  if (gloss && names.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let i = 0;
+    setInterval(() => {
+      groups.forEach((g) => g[i].classList.remove('is-on'));
+      i = (i + 1) % names.length;
+      groups.forEach((g) => g[i].classList.add('is-on'));
+      gloss.textContent = names[i];
+    }, 2200);
+  }
+
+  // Type out each mistranslation in turn: the original, then what the translation said.
+  const notice = document.querySelector<HTMLElement>('[data-typewriter]');
+  if (notice && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const examples: { prefix: string; meant: string; got: string }[] = JSON.parse(notice.dataset.typewriter!);
+    const rows = { meant: notice.querySelector<HTMLElement>('[data-type="meant"]')!, got: notice.querySelector<HTMLElement>('[data-type="got"]')! };
+    const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+    const type = async (row: HTMLElement, prefix: string, word: string) => {
+      row.classList.add('is-typing');
+      const text = prefix + word;
+      for (let n = 1; n <= text.length; n++) {
+        const typedWord = Math.max(0, n - prefix.length);
+        row.replaceChildren(prefix.slice(0, n));
+        if (typedWord) { const mark = document.createElement('mark'); mark.textContent = word.slice(0, typedWord); row.append(mark); }
+        await wait(45);
+      }
+      row.classList.remove('is-typing');
+    };
+    (async () => {
+      let i = 0;
+      await wait(3000);
+      for (;;) {
+        i = (i + 1) % examples.length;
+        const { prefix, meant, got } = examples[i];
+        rows.meant.replaceChildren(); rows.got.replaceChildren();
+        await wait(300);
+        await type(rows.meant, prefix, meant);
+        await wait(700);
+        await type(rows.got, prefix, got);
+        await wait(3000);
+      }
+    })();
+  }
+</script>
+
 <style>
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .home-label { margin: 0; color: var(--green); font: 700 13px/1.3 var(--display); letter-spacing: .1em; text-transform: uppercase; }
@@ -99,25 +214,71 @@ const audiences = [
   .home-hero { color: var(--paper); background: var(--ink); }
   .home-hero-inner { display: flex; flex-wrap: wrap; gap: var(--space-lg); align-items: center; width: var(--page); margin: 0 auto; padding-block: var(--space-xl); }
   .home-hero-copy { flex: 1 1 520px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
-  .home-hero-copy .home-label { margin-bottom: var(--space-md); color: var(--coral-light); }
   .home-hero-lede { max-width: 40ch; margin: var(--space-md) 0 var(--space-lg); color: var(--rice); font-size: 21px; line-height: 1.5; }
 
-  .specimen { flex: 1 1 520px; min-width: 0; margin: 0; padding: clamp(24px, 3vw, 40px); color: var(--ink); background: var(--paper); border-radius: var(--radius-panel); }
-  .specimen-tag { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 0 0 28px; color: var(--green); font: 700 12px/1.3 var(--display); letter-spacing: .1em; text-transform: uppercase; }
-  .specimen table { width: 100%; border-collapse: collapse; }
-  .specimen th { padding: 0 0 14px; color: color-mix(in oklch, var(--ink) 70%, var(--paper)); font: 600 13px/1 var(--display); letter-spacing: .08em; text-align: left; text-transform: uppercase; }
-  .specimen td { padding: 18px 0; border-top: 1px solid var(--line); font: 700 clamp(19px, 2.2vw, 30px)/1.15 var(--display); letter-spacing: -.02em; vertical-align: middle; }
-  .specimen tr:last-child td { border-bottom: 1px solid var(--line); }
-  .specimen .specimen-arrow { width: 1%; padding-inline: 16px; color: oklch(55% .16 43); }
-  .specimen-got { color: oklch(40% .15 30); }
-  .specimen figcaption { margin-top: 28px; font-size: 15px; line-height: 1.5; }
-  .specimen figcaption a { color: var(--green); text-underline-offset: 3px; }
+  /* Every language sits in the same cell, so the headline keeps the height of the longest one. */
+  /* Khmer, Burmese, Odia and Sinhala stack marks above and below the line, so the language needs more room than the headline's tight leading gives it. */
+  .rotor { display: inline-grid; max-width: 100%; padding-block: .12em .18em; color: var(--coral-light); line-height: 1.35; }
+  .rotor-word { grid-area: 1 / 1; visibility: hidden; }
+  .rotor-word.is-on { visibility: visible; animation: rotor-in 420ms ease both; }
+  @keyframes rotor-in { from { opacity: 0; transform: translateY(.25em); } to { opacity: 1; transform: none; } }
+  .rotor-gloss { margin: 24px 0 0; color: var(--coral-light); font: 700 13px/1.3 var(--display); letter-spacing: .1em; text-transform: uppercase; }
+  .lang-panel { flex: 1 1 420px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  /* The last rows fade out, so the wall reads as part of a longer list. */
+  .lang-wall { display: grid; mask-image: linear-gradient(to bottom, #000 55%, rgb(0 0 0 / .25)); grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .lang-wall li { display: flex; flex-direction: column; gap: 6px; justify-content: space-between; min-width: 0; padding: 16px; border: 1px solid color-mix(in oklch, var(--paper) 22%, transparent); border-radius: 10px; color: color-mix(in oklch, var(--paper) 45%, transparent); transition: background-color 300ms ease, color 300ms ease; }
+  .lang-wall li.is-on { color: var(--ink); background: var(--coral-light); border-color: var(--coral-light); }
+  .lang-native { font: 700 clamp(18px, 1.8vw, 24px)/1.2 var(--display); overflow-wrap: anywhere; text-wrap: balance; }
+  .lang-name { font: 600 11px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; }
+  .lang-open { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; padding: 16px; color: var(--paper); background: none; border: 1.5px dashed var(--coral-light); border-radius: 10px; text-align: left; cursor: pointer; transition: background-color 180ms ease, color 180ms ease; }
+  .lang-open .lang-name { color: var(--coral-light); }
+  .lang-open:hover { color: var(--ink); background: var(--coral-light); }
+  .lang-open:hover .lang-name { color: var(--ink); }
+  .lang-caption { margin: 4px 0 0; color: var(--rice); font-size: 15px; line-height: 1.45; }
+  @media (max-width: 520px) { .lang-wall { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+
+  .home-stakes { background: var(--rice); }
+  .home-stakes-inner { display: flex; flex-wrap: wrap; gap: var(--space-lg) clamp(40px, 6vw, 88px); align-items: flex-start; width: var(--page); margin: 0 auto; padding-block: var(--space-xl); }
+  .home-stakes-copy { flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-md); }
+  .home-stakes h2 { margin: 0; font: 650 clamp(2.25rem, 4.5vw, 4rem)/1 var(--display); letter-spacing: -.04em; text-wrap: balance; }
+  .home-stakes-copy p { max-width: 52ch; margin: 0; font-size: 19px; line-height: 1.55; }
+  .home-stakes-copy blockquote { max-width: 24ch; margin: 0; font: 700 clamp(1.6rem, 2.8vw, 2.5rem)/1.15 var(--display); letter-spacing: -.03em; text-wrap: balance; }
+  .home-stakes-copy em { font-style: normal; color: oklch(40% .15 30); }
+
+  .home-stakes-card { flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: clamp(24px, 3vw, 40px); background: var(--paper); border-radius: var(--radius-panel); }
+  .home-stakes-card > p { margin: 0; font-size: 17px; line-height: 1.5; }
+  .home-stakes-card b { font-weight: 600; }
+  .home-stakes-quote { display: grid; gap: 14px; margin: 8px 0 0; }
+  .home-stakes-quote blockquote { margin: 0; font: 700 clamp(1.5rem, 2.4vw, 2.1rem)/1.12 var(--display); letter-spacing: -.03em; text-indent: -.4em; }
+  .home-stakes-quote blockquote p { margin: 0; }
+  .home-stakes-quote blockquote p + p { color: oklch(40% .15 30); text-indent: 0; }
+  .home-stakes-quote figcaption { text-wrap: balance; color: color-mix(in oklch, var(--ink) 75%, var(--paper)); font-size: 15px; line-height: 1.5; }
+  .home-stakes-quote figcaption b { color: var(--ink); font-weight: 600; }
+
+  .home-stakes-notice { border: 1.5px solid var(--ink); border-radius: 4px; }
+  .home-stakes-notice p { display: grid; gap: 6px; margin: 0; padding: 18px 20px; font: 700 clamp(1.25rem, 2vw, 1.75rem)/1.25 var(--display); letter-spacing: -.02em; }
+  .home-stakes-notice p + p { border-top: 1px dashed var(--line); }
+  .home-stakes-notice p > span:first-child { color: var(--green); font: 700 12px/1.3 var(--display); letter-spacing: .1em; text-transform: uppercase; }
+  .home-stakes-notice mark { padding: 0 .12em; color: inherit; background: color-mix(in oklch, var(--green) 16%, var(--paper)); border-radius: 3px; }
+  .home-stakes-notice .is-wrong > span:first-child { color: oklch(40% .15 30); }
+  /* Each row keeps the height of the longest example while the text types out. */
+  .home-stakes-notice .type { display: grid; }
+  .home-stakes-notice .type > span { grid-area: 1 / 1; }
+  .home-stakes-notice .type-sizer { visibility: hidden; }
+  .home-stakes-notice .is-typing::after { content: ''; display: inline-block; width: .08em; height: 1em; margin-left: .06em; vertical-align: -.12em; background: currentColor; animation: caret 700ms steps(1) infinite; }
+  @keyframes caret { 50% { opacity: 0; } }
+  .home-stakes-notice .is-wrong mark { background: color-mix(in oklch, var(--coral) 45%, var(--paper)); }
 
   .home-why { display: flex; flex-wrap: wrap; gap: var(--space-lg) clamp(40px, 7vw, 96px); width: var(--page); margin: 0 auto; padding-block: var(--space-xl); }
   .home-why h2 { flex: 1 1 380px; margin: 0; font: 650 clamp(2.25rem, 4.5vw, 4rem)/1 var(--display); letter-spacing: -.04em; text-wrap: balance; }
   .home-why > div { flex: 1.3 1 480px; min-width: 0; }
-  .home-why p { margin: 0 0 var(--space-md); font-size: 20px; line-height: 1.55; }
-  .home-why a { font-weight: 600; text-underline-offset: 3px; }
+  .home-why-gaps { margin: 0 0 var(--space-lg); padding: 0; list-style: none; border-top: 1.5px solid var(--ink); }
+  .home-why-gaps li { display: grid; gap: 6px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .home-why-gaps strong { font: 700 clamp(1.25rem, 1.8vw, 1.5rem)/1.2 var(--display); letter-spacing: -.02em; }
+  .home-why-gaps p { max-width: 58ch; margin: 0; font-size: 18px; line-height: 1.5; }
+  .home-why-gaps a { justify-self: start; color: var(--green); font: 600 14px/1.4 var(--display); text-underline-offset: 3px; }
+  .home-why-answer { max-width: 40ch; margin: 0 0 12px; font: 700 clamp(1.3rem, 2vw, 1.7rem)/1.3 var(--display); letter-spacing: -.02em; }
 
   .home-how { width: var(--page); margin: 0 auto; padding-bottom: var(--space-xl); }
   .home-how .home-label { margin-bottom: 32px; }
@@ -127,14 +288,15 @@ const audiences = [
   .home-how-title { display: block; margin-bottom: 8px; font: 700 22px/1.2 var(--display); }
 
   .home-who { background: var(--coral); }
-  .home-who-inner { display: flex; flex-wrap: wrap; gap: var(--space-lg); align-items: flex-end; justify-content: space-between; width: var(--page); margin: 0 auto; padding-block: var(--space-xl); }
-  .home-who-inner > div { flex: 1 1 520px; min-width: 0; }
-  .home-who h2 { margin: 0 0 28px; font: 650 clamp(2rem, 4vw, 3.5rem)/1 var(--display); letter-spacing: -.04em; }
+  .home-who-inner { display: flex; flex-wrap: wrap; gap: var(--space-lg) clamp(40px, 6vw, 88px); align-items: flex-start; width: var(--page); margin: 0 auto; padding-block: var(--space-xl); }
+  .home-who-about { flex: 1.2 1 520px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-sm); }
+  .home-who h2 { margin: 0 0 8px; font: 650 clamp(2rem, 4vw, 3.5rem)/1 var(--display); letter-spacing: -.04em; }
+  .home-who-about p { max-width: 56ch; margin: 0; font-size: 18px; line-height: 1.55; }
+  .home-who-start { flex: 1 1 360px; min-width: 0; }
+  .home-who h3 { margin: 0 0 20px; font: 700 13px/1.3 var(--display); letter-spacing: .1em; text-transform: uppercase; }
   .home-chips { display: flex; flex-wrap: wrap; gap: 12px; }
-  .home-chips a { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border: 1.5px solid var(--ink); border-radius: 999px; font: 700 16px/1.2 var(--display); text-decoration: none; transition: background-color 180ms ease; }
-  .home-chips a:hover { background: var(--coral-light); }
-  .home-who-inner > p { flex: 0 1 420px; margin: 0; }
-  .home-who-inner > p a { font-weight: 600; text-underline-offset: 3px; }
+  .home-chips button { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; color: var(--ink); background: none; border: 1.5px solid var(--ink); border-radius: 999px; font: 700 16px/1.2 var(--display); cursor: pointer; transition: background-color 180ms ease; }
+  .home-chips button:hover { background: var(--coral-light); }
 
   .home-news { width: var(--page); margin: 0 auto; padding-block: var(--space-xl) var(--space-section); }
   .home-news-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-sm); margin-bottom: 24px; }
