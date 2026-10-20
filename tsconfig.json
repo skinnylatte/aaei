@@ -8,5 +8,13 @@
   "exclude": [
     "dist",
     "archive"
-  ]
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@img/*": [
+        "src/img/*"
+      ]
+    }
+  }
 }

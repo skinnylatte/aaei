@@ -1,0 +1,33 @@
+---
+// The public site's pages: head, navbar, page, footer, and optionally the "Work with us" dialog.
+import '../styles/site.css';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import RequestDialog from '../components/RequestDialog.astro';
+
+interface Props { title: string; description: string; current?: 'workshops' | 'research' | 'team' | 'news'; requestDialog?: boolean }
+const { title, description, current, requestDialog = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#591c2d" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <title>{title} | Asian AI Evaluation Institute</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteNav current={current} requestDialog={requestDialog} />
+    <main id="main"><slot /></main>
+    <SiteFooter requestDialog={requestDialog} />
+    {requestDialog && <RequestDialog />}
+  </body>
+</html>

@@ -1,0 +1,23 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+---
+
+<SiteLayout title="Team" description="The people behind the Asian AI Evaluation Institute." current="team">
+  <div class="team">
+    <h1 class="headline">Team</h1>
+
+    <section class="person" aria-labelledby="adrianna-tan">
+      <div class="person-heading"><h2 id="adrianna-tan">Adrianna Tan</h2><p>AI safety and evaluation practitioner working on how organizations test AI systems before deploying them in the real world.</p></div>
+      <div class="person-details"><p>Adrianna has led AI red-teaming and evaluation work for the U.S. Department of Defense, Singapore’s IMDA, Fortune 500 companies, healthcare organizations, and governments. In 2026, she spoke on AI testing and evaluation at the United Nations’ AI for Good Global Summit.</p><p>Previously, she spent five years as a Director of Product for the City and County of San Francisco. Her work now focuses on practical AI evaluation, agentic AI, multilingual and multicultural testing, and credible evidence for high-stakes deployment.</p><a class="text-link" href="https://futureethics.ai/about/" target="_blank" rel="noreferrer">More about Adrianna <span aria-hidden="true">↗</span></a></div>
+    </section>
+  </div>
+</SiteLayout>
+
+<style>
+  .team { width: var(--page); margin: 0 auto; padding-block: var(--space-lg) var(--space-section); }
+  .person { display: grid; grid-template-columns: .9fr 1.1fr; gap: var(--space-lg) clamp(40px, 7vw, 112px); margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--line); }
+  .person-heading h2 { margin: 0; font: 650 clamp(2rem, 4vw, 3.5rem)/1 var(--display); letter-spacing: -.04em; }
+  .person-heading p { max-width: 36ch; margin: var(--space-md) 0 0; font-size: 18px; }
+  .person-details p { max-width: 64ch; margin: 0 0 var(--space-md); font-size: 17px; } .person-details p:first-child { margin-top: 6px; }
+  @media (max-width: 760px) { .person { grid-template-columns: 1fr; } }
+</style>
